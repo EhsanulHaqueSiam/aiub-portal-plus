@@ -114,6 +114,19 @@
   async function getAllCourses() {
     const table = document.querySelector('table.footable');
     let courses = [];
+    // Ask FooTable how many rows it thinks exist so we can verify our parse
+    // didn't silently miss paginated rows.
+    let expectedTotal = null;
+    try {
+      if (typeof FooTable !== 'undefined' && FooTable.get) {
+        const ft0 = FooTable.get(table);
+        if (ft0 && ft0.rows && ft0.rows.all) expectedTotal = ft0.rows.all.length;
+      }
+    } catch (_) { /* ignore */ }
+    if (expectedTotal != null) {
+      console.log('[AIUB Filter] FooTable reports ' + expectedTotal + ' total rows');
+    }
+    const isComplete = (n) => expectedTotal == null ? n > 10 : n >= Math.floor(expectedTotal * 0.99);
 
     if (typeof FooTable !== 'undefined' && FooTable.get) {
       try {
@@ -129,8 +142,9 @@
           });
           courses = parseRowElements(table.querySelectorAll('tbody > tr'));
           hidden.forEach(function (el) { el.style.display = 'none'; });
-          console.log('[AIUB Filter] rows.all: ' + courses.length + ' courses');
-          if (courses.length > 10) return courses;
+          console.log('[AIUB Filter] rows.all → parsed ' + courses.length + '/' + (expectedTotal ?? '?'));
+          if (isComplete(courses.length)) return courses;
+          console.warn('[AIUB Filter] rows.all parse incomplete, falling back to paging expand');
         }
       } catch (e) {
         console.warn('[AIUB Filter] rows.all failed:', e);
@@ -145,11 +159,12 @@
           paging.size = 99999;
           await whenDrawDone(ft.draw());
           courses = parseRowElements(table.querySelectorAll('tbody > tr'));
-          console.log('[AIUB Filter] After expand: ' + courses.length + ' courses');
+          console.log('[AIUB Filter] After expand → parsed ' + courses.length + '/' + (expectedTotal ?? '?'));
           paging.size = origSize;
           paging.current = origCurrent;
           ft.draw();
-          if (courses.length > origSize) return courses;
+          if (isComplete(courses.length)) return courses;
+          console.warn('[AIUB Filter] Paging-expand still short — using whatever we have');
         }
       } catch (e) {
         console.warn('[AIUB Filter] expand failed:', e);
@@ -157,7 +172,7 @@
     }
 
     courses = parseRowElements(table.querySelectorAll('tbody > tr'));
-    console.log('[AIUB Filter] DOM fallback: ' + courses.length + ' courses');
+    console.log('[AIUB Filter] DOM fallback → parsed ' + courses.length);
     return courses;
   }
 
