@@ -146,8 +146,7 @@ function Hero({ model }: { model: Model | null }) {
           Grade Report data, right here in your browser.
         </p>
       </div>
-      <div className="self-center justify-self-end text-right min-w-[200px] p-4 border border-white/20 rounded-xl backdrop-blur-sm"
-           style={{ background: 'rgba(255,255,255,0.10)' }}>
+      <div className="self-center justify-self-end text-right min-w-[200px] p-4 border border-white/15 rounded-xl bg-white/5">
         <span className="block text-[11px] font-bold uppercase tracking-[0.14em] text-white/70 mb-1.5">
           Current CGPA
         </span>
@@ -164,7 +163,8 @@ function Hero({ model }: { model: Model | null }) {
 
 function EmptyState() {
   return (
-    <section className="rounded-xl border-l-4 border-gold-500 bg-gold-400/15 p-5 mb-6">
+    <section className="relative rounded-xl border border-gold-500/50 bg-gold-400/15 pl-11 pr-5 py-5 mb-6">
+      <span aria-hidden="true" className="absolute left-4 top-[24px] w-2 h-2 rounded-full bg-gold-500" />
       <h2 className="m-0 mb-1.5 text-base text-amber-900 font-bold">No grade data synced yet</h2>
       <p className="m-0 text-[13px] leading-relaxed text-amber-900">
         Open your Grade Report pages once —{' '}
@@ -328,7 +328,7 @@ function Snapshot({ model }: { model: Model }) {
 
 function SnapCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <article className="flex flex-col gap-2 p-4 bg-white rounded-xl border border-line shadow-[0_1px_2px_rgba(11,30,91,.04),0_8px_22px_-14px_rgba(11,30,91,.18)]">
+    <article className="flex flex-col gap-2 p-4 bg-white rounded-xl border border-line shadow-card">
       <span className="text-[11px] font-bold tracking-[0.12em] uppercase text-muted">{title}</span>
       {children}
     </article>
@@ -362,11 +362,11 @@ function Pill({ tone, children }: { tone: 'ok' | 'warn' | 'err' | 'muted'; child
 // ---------- block wrapper ----------
 function Block({ index, title, subtitle, children }: { index: string; title: string; subtitle: string; children: React.ReactNode }) {
   return (
-    <section className="bg-white rounded-xl border border-line mb-4 p-5 md:p-6 shadow-[0_1px_2px_rgba(11,30,91,.04),0_8px_22px_-14px_rgba(11,30,91,.18)] grid gap-5 md:gap-6 md:grid-cols-[220px_minmax(0,1fr)] items-start">
+    <section className="bg-white rounded-xl border border-line mb-4 p-5 md:p-6 shadow-card grid gap-5 md:gap-6 md:grid-cols-[220px_minmax(0,1fr)] items-start">
       <header>
         <span className="block mb-2 font-mono text-[10px] tracking-[0.2em] text-muted-2">{index}</span>
         <h2 className="m-0 mb-1.5 font-display text-[26px] leading-tight">
-          <em className="italic text-gradient-royal">{title}.</em>
+          <em className="italic text-royal-600">{title}.</em>
         </h2>
         <p className="m-0 text-[13px] leading-relaxed text-muted max-w-[22ch]">{subtitle}</p>
       </header>
@@ -413,7 +413,7 @@ function TargetSetter({ value, onChange, model, creditsInPlay, req, feas }: {
             {presets.map((p) => (
               <button key={p} type="button"
                       onClick={() => onChange(p)}
-                      className={`px-3 py-1.5 text-[12px] font-semibold font-mono rounded-full border cursor-pointer transition-colors ${
+                      className={`inline-flex items-center px-4 min-h-[44px] text-[12px] font-semibold font-mono rounded-full border cursor-pointer transition-colors ${
                         fmt(value) === fmt(p)
                           ? 'text-white border-transparent bg-[linear-gradient(135deg,var(--color-royal-600)_0%,var(--color-royal-500)_100%)]'
                           : 'bg-white text-ink-2 border-line hover:bg-royal-50 hover:text-royal-600 hover:border-royal-100'
@@ -462,7 +462,8 @@ function OngoingMatrix({ model, picks, onToggle, pickedCgpa, pickedDelta, picked
   return (
     <div className="flex flex-col gap-4">
       <div className="overflow-x-auto rounded-xl border border-line bg-paper-soft">
-        <table className="w-full border-collapse text-[12.5px] tabular-nums">
+        <table className="w-full border-collapse text-[12.5px] tabular-nums"
+               aria-label="Projected CGPA at each possible grade for each ongoing course. Click a cell to pick that grade for the course.">
           <thead>
             <tr>
               <th className="text-left min-w-[220px] bg-white px-2.5 py-2.5 text-[11px] font-bold uppercase tracking-wider text-muted border-b border-line">Course</th>
@@ -485,41 +486,55 @@ function OngoingMatrix({ model, picks, onToggle, pickedCgpa, pickedDelta, picked
             </tr>
           </thead>
           <tbody>
-            {model.ongoing.map((c) => (
-              <tr key={c.key} className="border-b border-line-soft last:border-b-0">
-                <td className="text-left font-semibold text-ink px-2.5 py-2.5">
-                  <strong className="block">{c.name}</strong>
-                  {c.classId && (
-                    <small className="block font-mono font-medium text-[10.5px] text-muted mt-0.5">
-                      {c.classId}{c.label && ` · ${c.label}`}
-                    </small>
-                  )}
-                </td>
-                <td className="px-2.5 py-2.5 text-center">{fmt(c.credit, 0)}</td>
-                {GRADE_ORDER.map((grade) => {
-                  const proj = projectCgpa(model.currentPoints, model.completedCr, GRADE_POINTS[grade] * c.credit, c.credit);
-                  const active = picks.get(c.key) === grade;
-                  return (
-                    <td key={grade}
-                        onClick={() => onToggle(c.key, grade)}
-                        title={`If this course ends at ${grade} your CGPA would be ${fmt(proj)}`}
-                        className={`cursor-pointer text-center font-mono text-[12px] select-none px-2 py-2.5 transition-colors ${
-                          active
-                            ? 'text-white font-extrabold bg-[linear-gradient(135deg,var(--color-royal-600)_0%,var(--color-royal-500)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,.2)]'
-                            : 'text-ink-3 hover:bg-royal-50 hover:text-royal-600'
-                        }`}>
-                      {fmt(proj)}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
+            {model.ongoing.map((c) => {
+              const rowLabelId = `matrix-row-${c.key}`;
+              return (
+                <tr key={c.key} className="border-b border-line-soft last:border-b-0"
+                    role="radiogroup" aria-labelledby={rowLabelId}>
+                  <td className="text-left font-semibold text-ink px-2.5 py-2.5" id={rowLabelId}>
+                    <strong className="block">{c.name}</strong>
+                    {c.classId && (
+                      <small className="block font-mono font-medium text-[10.5px] text-muted mt-0.5">
+                        {c.classId}{c.label && ` · ${c.label}`}
+                      </small>
+                    )}
+                  </td>
+                  <td className="px-2.5 py-2.5 text-center">{fmt(c.credit, 0)}</td>
+                  {GRADE_ORDER.map((grade) => {
+                    const proj = projectCgpa(model.currentPoints, model.completedCr, GRADE_POINTS[grade] * c.credit, c.credit);
+                    const active = picks.get(c.key) === grade;
+                    return (
+                      <td key={grade}
+                          role="radio"
+                          aria-checked={active}
+                          aria-label={`${c.name}: ${grade} projects CGPA to ${fmt(proj)}`}
+                          tabIndex={active || (!picks.get(c.key) && grade === GRADE_ORDER[0]) ? 0 : -1}
+                          onClick={() => onToggle(c.key, grade)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              onToggle(c.key, grade);
+                            }
+                          }}
+                          title={`If this course ends at ${grade} your CGPA would be ${fmt(proj)}`}
+                          className={`cursor-pointer text-center font-mono text-[12px] select-none px-2 py-2.5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-royal-400 focus-visible:ring-inset ${
+                            active
+                              ? 'text-white font-extrabold bg-[linear-gradient(135deg,var(--color-royal-600)_0%,var(--color-royal-500)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,.2)]'
+                              : 'text-ink-3 hover:bg-royal-50 hover:text-royal-600'
+                          }`}>
+                        {fmt(proj)}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
 
       <div className="flex flex-wrap gap-4 items-center justify-between p-3.5 rounded-xl border border-royal-100 bg-royal-50">
-        <div className="flex items-baseline gap-3.5 flex-wrap">
+        <div className="flex items-baseline gap-3.5 flex-wrap" aria-live="polite" aria-atomic="true">
           <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">With your current picks</span>
           <span className="text-[26px] font-extrabold tabular-nums text-royal-600">{fmt(pickedCgpa)}</span>
           <span className="text-[12px] text-muted tabular-nums">
@@ -528,10 +543,10 @@ function OngoingMatrix({ model, picks, onToggle, pickedCgpa, pickedDelta, picked
               : `${pickedDelta >= 0 ? '+' : ''}${fmt(pickedDelta)} vs. current · ${fmt(pickedCredits, 0)} of ${fmt(model.ongoingCr, 0)} ongoing credits picked`}
           </span>
         </div>
-        <div className="flex gap-1.5 flex-wrap">
+        <div className="flex gap-1.5 flex-wrap" role="group" aria-label="Bulk-pick grade for all ongoing courses">
           {(['A+', 'A', 'B+', 'clear'] as const).map((g) => (
             <button key={g} type="button" onClick={() => onBulk(g)}
-                    className="px-3 py-1.5 text-[11.5px] font-semibold text-ink-3 bg-white border border-line rounded-lg cursor-pointer transition-colors hover:bg-royal-600 hover:text-white hover:border-royal-600">
+                    className="inline-flex items-center px-4 min-h-[44px] text-[11.5px] font-semibold text-ink-3 bg-white border border-line rounded-lg cursor-pointer transition-colors hover:bg-royal-600 hover:text-white hover:border-royal-600">
               {g === 'clear' ? 'Clear' : `All ${g}`}
             </button>
           ))}
@@ -561,14 +576,20 @@ function RemainingCard({ avg, setAvg, creditsInPlay, projection, target }: {
           <input id="remainingSlider" type="range"
                  min={0} max={4} step={0.05} value={avg}
                  onChange={(e) => setAvg(toNum(e.target.value))}
+                 aria-label="Average GPA you assume for remaining credits"
+                 aria-valuenow={avg}
+                 aria-valuemin={0}
+                 aria-valuemax={4}
+                 aria-valuetext={`${fmt(avg)} GPA`}
                  className="flex-1 h-1.5 rounded-full appearance-none outline-none cursor-pointer"
                  style={{ background: 'linear-gradient(90deg, #991b1b, #b45309, #15803d)' }} />
-          <output className="text-xl font-extrabold tabular-nums text-royal-600 min-w-[60px] text-right">
+          <output htmlFor="remainingSlider" className="text-xl font-extrabold tabular-nums text-royal-600 min-w-[60px] text-right">
             {fmt(avg)}
           </output>
         </div>
       </div>
-      <div className="grid gap-3.5 p-4 rounded-xl border border-line bg-paper-soft grid-cols-[repeat(auto-fit,minmax(180px,1fr))]">
+      <div className="grid gap-3.5 p-4 rounded-xl border border-line bg-paper-soft grid-cols-[repeat(auto-fit,minmax(180px,1fr))]"
+           aria-live="polite" aria-atomic="true">
         <Stat k="Projected graduation CGPA" v={fmt(projection)} />
         <Stat k="Credits in play" v={`${fmt(creditsInPlay, 0)} cr`} />
         <Stat k="Gap vs. target"
@@ -597,7 +618,7 @@ function InsightsGrid({ model, target, creditsInPlay, req }: { model: Model; tar
   return (
     <div className="grid gap-3.5 grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
       {cards.map((c, i) => (
-        <article key={i} className="bg-white border border-line rounded-xl p-4 shadow-[0_1px_2px_rgba(11,30,91,.04),0_8px_22px_-14px_rgba(11,30,91,.18)] flex flex-col gap-1.5">
+        <article key={i} className="bg-white border border-line rounded-xl p-4 shadow-card flex flex-col gap-1.5">
           <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg text-sm mb-1 ${toneBg(c.tone)}`}>
             {c.icon}
           </span>
@@ -756,6 +777,10 @@ function TrajectoryChart({ model, target }: { model: Model; target: number }) {
         datasets.push({ label: `Target ${fmt(target)}`, data: allLabels.map(() => target), borderColor: '#059669', borderDash: [2, 4], fill: false, tension: 0, pointRadius: 0, borderWidth: 1.5 });
       }
 
+      const reduceMotion = typeof window !== 'undefined'
+        && typeof window.matchMedia === 'function'
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
       chart = new Chart(canvas, {
         type: 'line',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -763,6 +788,7 @@ function TrajectoryChart({ model, target }: { model: Model; target: number }) {
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: reduceMotion ? false : undefined,
           interaction: { mode: 'index', intersect: false },
           plugins: {
             legend: { position: 'top', labels: { boxWidth: 10, font: { size: 12 } } },
@@ -788,9 +814,10 @@ function TrajectoryChart({ model, target }: { model: Model; target: number }) {
   }, [model, target]);
 
   return (
-    <article className="bg-white border border-line rounded-xl p-4 md:p-5 shadow-[0_1px_2px_rgba(11,30,91,.04),0_8px_22px_-14px_rgba(11,30,91,.18)]">
+    <article className="bg-white border border-line rounded-xl p-4 md:p-5 shadow-card">
       <div className="relative h-[340px]">
-        <canvas ref={canvasRef} />
+        <canvas ref={canvasRef} role="img"
+          aria-label={`Line chart of your actual CGPA across completed semesters and the projected path needed to reach the target CGPA of ${fmt(target)}.`} />
       </div>
     </article>
   );

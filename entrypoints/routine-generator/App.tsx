@@ -7,6 +7,7 @@ import {
   type Filters, type Selection, type Routine,
 } from '@/lib/routine';
 import { buildCompletedLookup, computeEligibleCourses, namesMatch } from '@/lib/eligibility';
+import { POLICY_BULLETS } from '@/utils/disclosure';
 import { useRoutineData } from './useRoutineData';
 import { triggerSync, writeHighlights, type SyncProgress } from './sync';
 
@@ -49,7 +50,7 @@ export function App() {
 
 function PageStrip() {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-royal-100 bg-gradient-to-b from-royal-50 to-white px-7 pt-6 pb-7 mb-5 shadow-[0_1px_2px_rgba(11,30,91,.04),0_8px_22px_-14px_rgba(11,30,91,.18)]">
+    <div className="relative overflow-hidden rounded-2xl border border-royal-100 bg-gradient-to-b from-royal-50 to-white px-7 pt-6 pb-7 mb-5 shadow-card">
       <div className="absolute -top-px left-6 right-6 h-0.5 pointer-events-none"
            style={{ background: 'linear-gradient(90deg, transparent, var(--color-royal-600) 30%, var(--color-gold-400) 65%, transparent)' }} />
       <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">
@@ -60,7 +61,7 @@ function PageStrip() {
         <span className="text-royal-600">Routine Generator</span>
       </div>
       <h1 className="mt-3 font-display text-[44px] leading-none tracking-tight">
-        Routine <em className="italic text-gradient-royal">Generator</em>
+        Routine <em className="italic text-royal-600">Generator</em>
       </h1>
       <p className="mt-3 max-w-[65ch] text-[14px] leading-relaxed text-ink-3">
         Pick courses, tune filters, and we assemble every clash-free timetable from your Offered Courses — inside your
@@ -86,16 +87,8 @@ function Notice() {
       </div>
       {open && (
         <ol className="mt-4 space-y-2 list-none counter-[policy]">
-          {[
-            ['AIUB policy:', 'never use your AIUB Portal username and password on any third-party application other than official AIUB platforms.'],
-            ['This extension does not sync in real time.', 'Syncing is user-initiated — data is only read from the Offered Courses page when you visit it in your own browser.'],
-            ['If you sync for fresh data,', 'you log in to the official AIUB Portal at your own discretion.'],
-            ['Your username and password are never seen, handled, or stored', 'by this extension. Sync happens inside your authenticated session on portal.aiub.edu.'],
-            ['This extension is not affiliated with AIUB', 'and is not endorsed by AIUB.'],
-            ['Provided exclusively for educational purposes.', 'Users are expected to act responsibly and comply with all applicable laws, regulations, and institutional policies.'],
-            ['Under the hood, when you click "Sync now":', 'a portal tab briefly opens in the background and a content script programmatically expands curriculum panels to read prerequisite data from pages you already have access to. No data is submitted, modified, or transmitted outside your browser.'],
-          ].map(([strong, rest], i) => (
-            <li key={String(strong)} className="pl-9 relative text-[13px] leading-relaxed">
+          {POLICY_BULLETS.map(([strong, rest], i) => (
+            <li key={strong} className="pl-9 relative text-[13px] leading-relaxed">
               <span className="absolute left-0 top-[3px] font-mono text-[10px] tracking-[0.08em] text-gold-500 font-bold" aria-hidden>
                 {String(i + 1).padStart(2, '0')}
               </span>
@@ -221,7 +214,7 @@ function DataCard({ data, selectionCount }: { data: ReturnType<typeof useRoutine
 
   return (
     <Block index="00" title="Data" subtitle="What we know about your Offered Courses.">
-      <article className="flex flex-col gap-4 rounded-xl border border-line bg-white p-4 md:p-5 shadow-[0_1px_2px_rgba(11,30,91,.04),0_8px_22px_-14px_rgba(11,30,91,.18)]">
+      <article className="flex flex-col gap-4 rounded-xl border border-line bg-white p-4 md:p-5 shadow-card">
         {showRegBanner && (
           <div className="flex items-center gap-3 rounded-lg border border-gold-500/40 bg-gold-400/10 px-3 py-2.5">
             <span className="w-2 h-2 rounded-full bg-gold-500 animate-pulse" />
@@ -230,7 +223,7 @@ function DataCard({ data, selectionCount }: { data: ReturnType<typeof useRoutine
               Seat counts and section statuses change minute-to-minute right now — re-sync just before you generate.
             </div>
             <button type="button" onClick={() => doSync({ offeredOnly: true })} disabled={busy}
-                    className="rounded-lg bg-royal-600 px-3 py-1.5 text-[12px] font-bold text-white hover:bg-royal-500 disabled:opacity-60">
+                    className="inline-flex items-center rounded-lg bg-royal-600 px-4 py-2 min-h-[44px] text-[12px] font-bold text-white hover:bg-royal-500 disabled:opacity-60">
               Re-sync offered
             </button>
           </div>
@@ -245,17 +238,17 @@ function DataCard({ data, selectionCount }: { data: ReturnType<typeof useRoutine
 
         <div className="flex flex-wrap items-center gap-2.5">
           <button type="button" onClick={() => doSync()} disabled={busy}
-                  className="inline-flex items-center gap-2 rounded-lg bg-royal-600 px-4 py-2 text-[13px] font-bold text-white hover:bg-royal-500 disabled:opacity-60 shadow-[0_1px_2px_rgba(11,30,91,.04),0_8px_22px_-14px_rgba(11,30,91,.28)]">
+                  className="inline-flex items-center gap-2 rounded-lg bg-royal-600 px-4 py-2 min-h-[44px] text-[13px] font-bold text-white hover:bg-royal-500 disabled:opacity-60 shadow-[0_1px_2px_rgba(11,30,91,.04),0_8px_22px_-14px_rgba(11,30,91,.28)]">
             <span aria-hidden>↻</span>
             {busy && progress ? `Syncing ${progress.step}/${progress.total}…` : 'Sync now'}
           </button>
           <button type="button" onClick={() => doSync({ forceCurriculum: true })} disabled={busy}
                   title="Re-scrape My Curriculum (prerequisites). Only needed when your curriculum changes."
-                  className="rounded-lg border border-line bg-white px-3.5 py-2 text-[12.5px] font-semibold text-ink-2 hover:bg-royal-50 hover:text-royal-600 disabled:opacity-60">
+                  className="inline-flex items-center rounded-lg border border-line bg-white px-3.5 py-2 min-h-[44px] text-[12.5px] font-semibold text-ink-2 hover:bg-royal-50 hover:text-royal-600 disabled:opacity-60">
             Refresh curriculum
           </button>
           <a href="https://portal.aiub.edu/Student/Section/Offered"
-             className="rounded-lg border border-line bg-white px-3.5 py-2 text-[12.5px] font-semibold text-ink-2 hover:bg-royal-50 hover:text-royal-600 no-underline!">
+             className="inline-flex items-center rounded-lg border border-line bg-white px-3.5 py-2 min-h-[44px] text-[12.5px] font-semibold text-ink-2 hover:bg-royal-50 hover:text-royal-600 no-underline!">
             Open Offered Courses ↗
           </a>
         </div>
@@ -587,7 +580,7 @@ function FiltersBlock({ onGenerate, onClear, resultCount, hasSelections }: {
         <button type="button"
                 onClick={() => onGenerate({ earliest, latest, maxSeats, statuses, allowedDays, sortBy })}
                 disabled={!hasSelections}
-                className="inline-flex items-center gap-2 rounded-lg bg-gold-400 px-5 py-2.5 text-[14px] font-extrabold text-navy-900 hover:brightness-105 disabled:opacity-50 disabled:cursor-not-allowed">
+                className="inline-flex items-center gap-2 rounded-lg bg-gold-400 px-5 py-2.5 min-h-[44px] text-[14px] font-extrabold text-navy-900 hover:brightness-105 disabled:opacity-50 disabled:cursor-not-allowed">
           Generate routines <span aria-hidden>→</span>
         </button>
         <button type="button" onClick={onClear}
@@ -659,7 +652,8 @@ function ResultsBlock({ result, onShowMore, viewedIdx, onView, highlightsEnabled
   if (result.missing.length) {
     return (
       <Block index="03" title="Routines" subtitle="Ranked by your sort preference.">
-        <div className="rounded-xl border-l-4 border-red-500 bg-red-50 p-4 text-[13px] text-red-800">
+        <div className="relative rounded-xl border border-red-300 bg-red-50 pl-11 pr-5 py-4 text-[13px] text-red-800">
+          <span aria-hidden="true" className="absolute left-4 top-[22px] w-2 h-2 rounded-full bg-red-500" />
           <strong className="font-bold">Cannot generate:</strong> no sections match your filters for:
           <ul className="mt-1.5 list-disc ml-5">{result.missing.map((m) => <li key={m}>{m}</li>)}</ul>
         </div>
@@ -694,7 +688,7 @@ function ResultsBlock({ result, onShowMore, viewedIdx, onView, highlightsEnabled
 
         {result.shownCount < result.routines.length && (
           <button type="button" onClick={onShowMore}
-                  className="self-center rounded-lg bg-royal-600 px-4 py-2 text-[12.5px] font-bold text-white hover:bg-royal-500">
+                  className="self-center inline-flex items-center rounded-lg bg-royal-600 px-4 py-2 min-h-[44px] text-[12.5px] font-bold text-white hover:bg-royal-500">
             Load {Math.min(RESULTS_PAGE, result.routines.length - result.shownCount)} more
           </button>
         )}
@@ -712,7 +706,7 @@ function ResultsBlock({ result, onShowMore, viewedIdx, onView, highlightsEnabled
 function RoutineCard({ routine, idx, active, onView }: { routine: Routine; idx: number; active: boolean; onView: () => void }) {
   const gapHours = (routine.totalGap / 60).toFixed(1);
   return (
-    <article className={`rounded-xl border bg-white shadow-[0_1px_2px_rgba(11,30,91,.04),0_8px_22px_-14px_rgba(11,30,91,.18)] overflow-hidden transition-shadow ${active ? 'border-royal-600 shadow-[0_0_0_3px_rgba(37,99,235,.18),0_8px_22px_-14px_rgba(11,30,91,.18)]' : 'border-line'}`}>
+    <article className={`rounded-xl border bg-white shadow-card overflow-hidden transition-shadow ${active ? 'border-royal-600 shadow-[0_0_0_3px_rgba(37,99,235,.18),0_8px_22px_-14px_rgba(11,30,91,.18)]' : 'border-line'}`}>
       <header className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-line-soft bg-paper-soft">
         <span className="rounded-md bg-navy-900 px-2.5 py-1 text-[11px] font-bold text-gold-400 font-mono">#{String(idx + 1).padStart(2, '0')}</span>
         <strong className="text-[13px] font-bold text-ink">Routine</strong>
@@ -720,7 +714,7 @@ function RoutineCard({ routine, idx, active, onView }: { routine: Routine; idx: 
           {routine.offDays} off-day{routine.offDays === 1 ? '' : 's'} · {gapHours}h total gap · starts {fmtClockTime(routine.earliestStart)}
         </span>
         <button type="button" onClick={onView}
-                className={`ml-auto rounded-md px-3 py-1.5 text-[11.5px] font-semibold ${active ? 'bg-royal-600 text-white' : 'bg-white border border-line text-ink-2 hover:bg-royal-50'}`}>
+                className={`ml-auto inline-flex items-center rounded-md px-3 py-1.5 min-h-[44px] text-[11.5px] font-semibold ${active ? 'bg-royal-600 text-white' : 'bg-white border border-line text-ink-2 hover:bg-royal-50'}`}>
           {active ? 'Hide grid' : 'View grid'}
         </button>
       </header>
@@ -800,11 +794,11 @@ function WeeklyGrid({ sections }: { sections: Section[] }) {
 // ------- shared block -------
 function Block({ index, title, subtitle, children }: { index: string; title: string; subtitle: string; children: React.ReactNode }) {
   return (
-    <section className="bg-white rounded-xl border border-line mb-4 p-5 md:p-6 shadow-[0_1px_2px_rgba(11,30,91,.04),0_8px_22px_-14px_rgba(11,30,91,.18)] grid gap-5 md:gap-6 md:grid-cols-[220px_minmax(0,1fr)] items-start">
+    <section className="bg-white rounded-xl border border-line mb-4 p-5 md:p-6 shadow-card grid gap-5 md:gap-6 md:grid-cols-[220px_minmax(0,1fr)] items-start">
       <header>
         <span className="block mb-2 font-mono text-[10px] tracking-[0.2em] text-muted-2">{index}</span>
         <h2 className="m-0 mb-1.5 font-display text-[26px] leading-tight">
-          <em className="italic text-gradient-royal">{title}.</em>
+          <em className="italic text-royal-600">{title}.</em>
         </h2>
         <p className="m-0 text-[13px] leading-relaxed text-muted max-w-[22ch]">{subtitle}</p>
       </header>

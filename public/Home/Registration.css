@@ -37,7 +37,10 @@
 .reghome-section-head span { color: var(--p-royal-700); font-weight: 700; }
 
 /* -------------------------------------------------------------------------
-   Semester dropdown (right-aligned filter)
+   Panel shell — the native Bootstrap panel-heading is fully replaced by
+   the section-head above. The semester dropdown is hoisted out of it by
+   homeReg.content.ts into the section-head as the right-aligned term
+   control, so the native heading can be hidden wholesale.
    ------------------------------------------------------------------------- */
 .reghome-reg-panel {
   border: none !important;
@@ -45,42 +48,52 @@
   background: transparent !important;
   margin-bottom: var(--p-s-5) !important;
 }
-.reghome-reg-panel > .panel-heading {
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-  margin-bottom: var(--p-s-3) !important;
-}
-.reghome-reg-panel > .panel-heading .row {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  flex-wrap: wrap !important;
-  gap: var(--p-s-2) !important;
-  margin: 0 !important;
-}
-.reghome-reg-panel > .panel-heading .col-md-9,
-.reghome-reg-panel > .panel-heading .col-md-3 {
-  width: auto !important;
-  float: none !important;
-  padding: 0 !important;
-}
+.reghome-reg-panel > .panel-heading { display: none !important; }
 .reghome-reg-panel > .panel-body { padding: 0 !important; }
 
-.reghome-reg-panel #SemesterDropDown {
+/* Term dropdown lives inside .reghome-section-head. Override Bootstrap's
+   .form-control width:100% so it stays compact on the right of the header
+   row instead of stretching to fill the section-head's full width. */
+.reghome-section-head .reghome-term-select {
+  margin-left: auto;
+  flex: 0 0 auto;
+  width: auto !important;
+  max-width: 240px;
   font: 600 var(--p-fs-sm)/1 var(--p-font-body);
   color: var(--p-text);
   border: 1px solid var(--p-line) !important;
   border-radius: var(--p-r-sm) !important;
-  padding: 8px 12px !important;
+  padding: 8px 32px 8px 12px !important;
   background: var(--p-surface) !important;
   cursor: pointer;
   outline: none;
+  box-shadow: none !important;
+  height: auto !important;
   transition: border-color var(--p-dur-1) var(--p-ease), box-shadow var(--p-dur-1) var(--p-ease);
 }
-.reghome-reg-panel #SemesterDropDown:focus {
+.reghome-section-head .reghome-term-select:focus {
   border-color: var(--p-royal-500) !important;
   box-shadow: var(--p-sh-glow) !important;
+}
+
+/* -------------------------------------------------------------------------
+   Course grid — Bootstrap 3 ships .row > .col-md-4 floats which leave
+   ragged gaps whenever a card title wraps to two lines. Replace the row
+   with a CSS grid that auto-fills uniform columns and stretches every
+   card in a row to the tallest sibling — no gaps, no holes.
+   ------------------------------------------------------------------------- */
+.StudentCourseList .row {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+  gap: var(--p-s-2) !important;
+  margin: 0 !important;
+}
+.StudentCourseList .row > [class*="col-"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  float: none !important;
+  padding: 0 !important;
+  display: flex !important;
 }
 
 /* -------------------------------------------------------------------------
@@ -94,11 +107,16 @@
   overflow: hidden !important;
   box-shadow: var(--p-sh-1) !important;
   background: var(--p-surface);
-  margin-bottom: var(--p-s-2) !important;
+  margin: 0 !important;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
   transition: border-color var(--p-dur-2) var(--p-ease),
               box-shadow var(--p-dur-2) var(--p-ease),
               transform var(--p-dur-1) var(--p-ease);
 }
+.StudentCourseList .panel.panel-primary > .panel-body { flex: 1 1 auto; }
 .StudentCourseList .panel.panel-primary:hover {
   border-color: var(--p-royal-200) !important;
   box-shadow: var(--p-sh-2) !important;
@@ -189,9 +207,13 @@
    Responsive
    ------------------------------------------------------------------------- */
 @media (max-width: 768px) {
-  .reghome-reg-panel > .panel-heading .row {
-    flex-direction: column !important;
-    align-items: stretch !important;
+  .reghome-section-head {
+    align-items: stretch;
+  }
+  .reghome-section-head .reghome-term-select {
+    margin-left: 0;
+    max-width: none;
+    width: 100% !important;
   }
   .StudentCourseList .panel-primary > .panel-body {
     flex-direction: column !important;

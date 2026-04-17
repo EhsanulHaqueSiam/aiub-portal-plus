@@ -53,6 +53,13 @@ function enhance() {
         const span = document.createElement('span');
         span.textContent = 'Registration';
         head.appendChild(span);
+
+        const dropdown = panel.querySelector<HTMLSelectElement>('#SemesterDropDown');
+        if (dropdown) {
+          dropdown.classList.add('reghome-term-select');
+          head.appendChild(dropdown);
+        }
+
         panel.parentElement?.insertBefore(head, panel);
       }
     }

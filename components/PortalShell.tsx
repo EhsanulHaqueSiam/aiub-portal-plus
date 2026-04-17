@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { runtimeURL } from '@/lib/runtime';
 import type { AiubStudent } from '@/lib/graphData';
+import { UNOFFICIAL_TAG, NO_CREDENTIALS_REMINDER } from '@/utils/disclosure';
 
 export type ToolId = 'graphs' | 'cgpa-planner' | 'routine-generator';
 
@@ -104,9 +105,9 @@ export function PortalShell({ active, student, children }: Props) {
 
           <footer className="mt-auto p-3.5 text-[11px] leading-relaxed rounded-xl border border-royal-100 bg-royal-50 text-muted">
             <span className="inline-block font-mono text-[9.5px] tracking-[0.2em] uppercase font-bold text-royal-600 px-2 py-0.5 bg-white border border-royal-100 rounded-full">
-              Unofficial extension
+              {UNOFFICIAL_TAG}
             </span>
-            <p className="mt-1.5">No credentials handled. Verify every action on the official AIUB Portal before relying on it.</p>
+            <p className="mt-1.5">{NO_CREDENTIALS_REMINDER}</p>
           </footer>
         </aside>
 
@@ -120,7 +121,7 @@ export function PortalShell({ active, student, children }: Props) {
 
 function SidebarGroup({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-col rounded-xl border border-line overflow-hidden bg-white shadow-[0_1px_2px_rgba(11,30,91,.04),0_8px_22px_-14px_rgba(11,30,91,.18)]">
+    <div className="flex flex-col rounded-xl border border-line overflow-hidden bg-white shadow-card">
       {children}
     </div>
   );

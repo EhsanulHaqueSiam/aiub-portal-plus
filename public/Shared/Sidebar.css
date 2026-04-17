@@ -11,7 +11,11 @@
 #navigation-bar {
   width: 260px !important;
   max-width: 260px !important;
-  padding: 4px 12px 0 0 !important;
+  /* Symmetric 12px horizontal padding so the profile card + panel group
+     breathe equally on both sides. Previous value (4px 12px 0 0) left a
+     gap on the right but flushed content to the left edge. */
+  padding: 4px 12px 0 12px !important;
+  box-sizing: border-box !important;
   font-family: var(--p-font-body) !important;
 }
 

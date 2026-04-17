@@ -58,8 +58,7 @@ function Hero({ updatedAt }: { updatedAt?: string }) {
           {' '}Grade Report pages to sync. Elective credits are excluded from curriculum metrics.
         </p>
       </div>
-      <div className="self-center justify-self-end text-right min-w-[200px] p-4 border border-white/20 rounded-xl backdrop-blur-sm"
-           style={{ background: 'rgba(255,255,255,0.10)' }}>
+      <div className="self-center justify-self-end text-right min-w-[200px] p-4 border border-white/15 rounded-xl bg-white/5">
         <span className="block text-[11px] font-bold uppercase tracking-[0.14em] text-white/70 mb-1.5">
           Data freshness
         </span>
@@ -76,7 +75,8 @@ function Hero({ updatedAt }: { updatedAt?: string }) {
 
 function EmptyState() {
   return (
-    <section className="rounded-xl border-l-4 border-gold-500 bg-gold-400/15 p-5 mb-6">
+    <section className="relative rounded-xl border border-gold-500/50 bg-gold-400/15 pl-11 pr-5 py-5 mb-6">
+      <span aria-hidden="true" className="absolute left-4 top-[24px] w-2 h-2 rounded-full bg-gold-500" />
       <h2 className="m-0 mb-1.5 text-base text-amber-900 font-bold">No graph data synced yet</h2>
       <p className="m-0 text-[13px] leading-relaxed text-amber-900">
         Visit your{' '}
@@ -111,41 +111,57 @@ function Dashboard({ data }: { data: AiubGraphData }) {
 
       <section className="grid gap-4 grid-cols-1 lg:grid-cols-2">
         <ChartCard title="Grade Distribution by Credits" subtitle="Credit totals grouped by final grade and ongoing courses.">
-          <BarOrEmpty key="grades" series={gradeBars} fallback="No curriculum grade distribution available yet." />
+          <BarOrEmpty key="grades" series={gradeBars}
+            fallback="No curriculum grade distribution available yet."
+            ariaLabel="Bar chart of credit totals grouped by final grade, including ongoing courses." />
         </ChartCard>
 
         <ChartCard title="Status Split by Credits" subtitle="Completed, ongoing, withdrawn, and not-attempted credit totals.">
-          <BarOrEmpty key="status" series={statusBars} fallback="No credit status distribution available yet." />
+          <BarOrEmpty key="status" series={statusBars}
+            fallback="No credit status distribution available yet."
+            ariaLabel="Bar chart of credit totals grouped by status: completed, ongoing, withdrawn, and not attempted." />
         </ChartCard>
 
         <ChartCard title="Prerequisite Unlock Ratio" subtitle="How many not-attempted courses are currently unlocked.">
-          <DonutOrEmpty parts={prereqParts} fallback="Visit Curriculum Grade Report to capture prerequisite lock data." />
+          <DonutOrEmpty parts={prereqParts}
+            fallback="Visit Curriculum Grade Report to capture prerequisite lock data."
+            ariaLabel="Donut chart showing the proportion of not-attempted courses that are currently unlocked by prerequisites versus still locked." />
         </ChartCard>
 
         <ChartCard title="CGPA Trend" subtitle="Cumulative GPA movement across completed semesters.">
           <LineOrEmpty points={cgpaPoints} fallback="Visit Semester Grade Report to capture CGPA trend data."
-            label="CGPA" stroke={COLORS.CGPA} />
+            label="CGPA" stroke={COLORS.CGPA}
+            ariaLabel="Line chart of cumulative GPA across each completed semester." />
         </ChartCard>
 
         <ChartCard wide title="Semester GPA Trend" subtitle="Semester GPA over time based on your semester report.">
           <LineOrEmpty points={gpaPoints} fallback="Visit Semester Grade Report to capture GPA trend data."
-            label="Semester GPA" stroke={COLORS.GPA} />
+            label="Semester GPA" stroke={COLORS.GPA}
+            ariaLabel="Line chart of per-semester GPA over time." />
         </ChartCard>
 
         <ChartCard wide title="Semester Credit Completion" subtitle="Attempted and completed credits by curriculum semester block.">
-          <GroupedBarsOrEmpty groups={progressGroups} fallback="Visit Curriculum Grade Report to capture semester progression." />
+          <GroupedBarsOrEmpty groups={progressGroups}
+            fallback="Visit Curriculum Grade Report to capture semester progression."
+            ariaLabel="Grouped bar chart showing attempted credits versus completed credits for each curriculum semester block." />
         </ChartCard>
 
         <ChartCard wide title="Semester Attempt Rate" subtitle="Attempted and completed percentages against total listed credits.">
-          <AttemptRateOrEmpty rows={attemptRows} fallback="Visit Curriculum Grade Report to capture attempt rate data." />
+          <AttemptRateOrEmpty rows={attemptRows}
+            fallback="Visit Curriculum Grade Report to capture attempt rate data."
+            ariaLabel="Stacked horizontal bar chart of completed, attempted-not-completed, and unattempted percentages per semester." />
         </ChartCard>
 
         <ChartCard wide title="GPA vs Credits Correlation" subtitle="Relation between semester credit load and GPA.">
-          <ScatterOrEmpty points={scatterPoints} fallback="Need both credits and GPA per semester — visit both Grade Report pages." />
+          <ScatterOrEmpty points={scatterPoints}
+            fallback="Need both credits and GPA per semester — visit both Grade Report pages."
+            ariaLabel="Scatter plot of semester GPA on the vertical axis against credits earned on the horizontal axis, one point per semester." />
         </ChartCard>
 
         <ChartCard wide title="Credits Earned by Semester" subtitle="Credits earned trend from semester summaries.">
-          <BarOrEmpty key="credits" series={creditsPoints} fallback="Visit Semester Grade Report to capture credit summaries." />
+          <BarOrEmpty key="credits" series={creditsPoints}
+            fallback="Visit Semester Grade Report to capture credit summaries."
+            ariaLabel="Bar chart of credits earned each semester." />
         </ChartCard>
       </section>
     </>
@@ -176,7 +192,7 @@ function KpiGrid({ curriculum, semester }: { curriculum: Curriculum | null; seme
   return (
     <section className="grid gap-3.5 mb-4 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
       {cards.map((c) => (
-        <article key={c.label} className="bg-white border border-line rounded-xl p-4 shadow-[0_1px_2px_rgba(11,30,91,.04),0_8px_22px_-14px_rgba(11,30,91,.18)]">
+        <article key={c.label} className="bg-white border border-line rounded-xl p-4 shadow-card">
           <span className="block text-[11px] font-bold tracking-[0.12em] uppercase text-muted">{c.label}</span>
           <span className="block text-[22px] font-extrabold tabular-nums leading-tight text-ink mt-1.5 mb-1">{c.value}</span>
           <span className="block text-[12px] text-muted">{c.note}</span>
@@ -238,7 +254,7 @@ function ChartCard({ title, subtitle, wide, children }: {
   title: string; subtitle: string; wide?: boolean; children: React.ReactNode;
 }) {
   return (
-    <article className={`bg-white border border-line rounded-xl p-4 md:p-5 shadow-[0_1px_2px_rgba(11,30,91,.04),0_8px_22px_-14px_rgba(11,30,91,.18)] ${wide ? 'lg:col-span-2' : ''}`}>
+    <article className={`bg-white border border-line rounded-xl p-4 md:p-5 shadow-card ${wide ? 'lg:col-span-2' : ''}`}>
       <div className="mb-3">
         <h3 className="m-0 text-[14px] font-bold text-ink-2">{title}</h3>
         <p className="m-0 mt-0.5 text-[12px] text-muted leading-relaxed">{subtitle}</p>
@@ -277,7 +293,7 @@ function basePlugins() {
 
 // ---------- bar chart ----------
 type BarSeries = { label: string; value: number; color?: string };
-function BarOrEmpty({ series, fallback }: { series: BarSeries[]; fallback: string }) {
+function BarOrEmpty({ series, fallback, ariaLabel }: { series: BarSeries[]; fallback: string; ariaLabel: string }) {
   const config = useMemo<ChartConfiguration | null>(() => {
     if (!series.length) return null;
     return {
@@ -305,11 +321,11 @@ function BarOrEmpty({ series, fallback }: { series: BarSeries[]; fallback: strin
   }, [series]);
 
   if (!config) return <EmptyChart text={fallback} />;
-  return <ChartCanvas config={config} height={300} />;
+  return <ChartCanvas config={config} height={300} ariaLabel={ariaLabel} />;
 }
 
 // ---------- donut ----------
-function DonutOrEmpty({ parts, fallback }: { parts: BarSeries[]; fallback: string }) {
+function DonutOrEmpty({ parts, fallback, ariaLabel }: { parts: BarSeries[]; fallback: string; ariaLabel: string }) {
   const config = useMemo<ChartConfiguration | null>(() => {
     if (!parts.length) return null;
     const total = parts.reduce((sum, p) => sum + toNum(p.value), 0);
@@ -335,12 +351,12 @@ function DonutOrEmpty({ parts, fallback }: { parts: BarSeries[]; fallback: strin
   }, [parts]);
 
   if (!config) return <EmptyChart text={fallback} />;
-  return <ChartCanvas config={config} height={300} />;
+  return <ChartCanvas config={config} height={300} ariaLabel={ariaLabel} />;
 }
 
 // ---------- line ----------
 type LinePoint = { label: string; value: number };
-function LineOrEmpty({ points, fallback, label, stroke }: { points: LinePoint[]; fallback: string; label: string; stroke: string }) {
+function LineOrEmpty({ points, fallback, label, stroke, ariaLabel }: { points: LinePoint[]; fallback: string; label: string; stroke: string; ariaLabel: string }) {
   const config = useMemo<ChartConfiguration | null>(() => {
     if (points.length < 2) return null;
     return {
@@ -375,12 +391,12 @@ function LineOrEmpty({ points, fallback, label, stroke }: { points: LinePoint[];
   }, [points, label, stroke]);
 
   if (!config) return <EmptyChart text={fallback} />;
-  return <ChartCanvas config={config} height={300} />;
+  return <ChartCanvas config={config} height={300} ariaLabel={ariaLabel} />;
 }
 
 // ---------- grouped bars (semester progress) ----------
 type ProgressGroup = { label: string; total: number; attempted: number; completed: number };
-function GroupedBarsOrEmpty({ groups, fallback }: { groups: ProgressGroup[]; fallback: string }) {
+function GroupedBarsOrEmpty({ groups, fallback, ariaLabel }: { groups: ProgressGroup[]; fallback: string; ariaLabel: string }) {
   const config = useMemo<ChartConfiguration | null>(() => {
     if (!groups.length) return null;
     return {
@@ -405,12 +421,12 @@ function GroupedBarsOrEmpty({ groups, fallback }: { groups: ProgressGroup[]; fal
   }, [groups]);
 
   if (!config) return <EmptyChart text={fallback} />;
-  return <ChartCanvas config={config} height={320} />;
+  return <ChartCanvas config={config} height={320} ariaLabel={ariaLabel} />;
 }
 
 // ---------- attempt rate (stacked horizontal) ----------
 type AttemptRow = { label: string; total: number; attempted: number; completed: number };
-function AttemptRateOrEmpty({ rows, fallback }: { rows: AttemptRow[]; fallback: string }) {
+function AttemptRateOrEmpty({ rows, fallback, ariaLabel }: { rows: AttemptRow[]; fallback: string; ariaLabel: string }) {
   const config = useMemo<ChartConfiguration | null>(() => {
     if (!rows.length) return null;
     const completedPct = rows.map((r) => r.total > 0 ? (r.completed / r.total) * 100 : 0);
@@ -440,12 +456,12 @@ function AttemptRateOrEmpty({ rows, fallback }: { rows: AttemptRow[]; fallback: 
   }, [rows]);
 
   if (!config) return <EmptyChart text={fallback} />;
-  return <ChartCanvas config={config} height={Math.max(280, rows.length * 50)} />;
+  return <ChartCanvas config={config} height={Math.max(280, rows.length * 50)} ariaLabel={ariaLabel} />;
 }
 
 // ---------- scatter ----------
 type Scatter = { x: number; y: number; label: string };
-function ScatterOrEmpty({ points, fallback }: { points: Scatter[]; fallback: string }) {
+function ScatterOrEmpty({ points, fallback, ariaLabel }: { points: Scatter[]; fallback: string; ariaLabel: string }) {
   const config = useMemo<ChartConfiguration | null>(() => {
     if (points.length < 2) return null;
     return {
@@ -483,7 +499,7 @@ function ScatterOrEmpty({ points, fallback }: { points: Scatter[]; fallback: str
   }, [points]);
 
   if (!config) return <EmptyChart text={fallback} />;
-  return <ChartCanvas config={config} height={320} />;
+  return <ChartCanvas config={config} height={320} ariaLabel={ariaLabel} />;
 }
 
 // ---------- data-shape helpers ----------
