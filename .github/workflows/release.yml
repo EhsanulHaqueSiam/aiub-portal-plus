@@ -70,13 +70,20 @@ jobs:
       - name: Build Firefox zip
         run: pnpm zip:firefox
 
-      - name: Rename zips for stable download URLs
+      - name: Rename zips + emit Firefox .xpi
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           cp ".output/aiub-portal-plus-${VERSION}-chrome.zip"  aiub-portal-plus-chrome.zip
           cp ".output/aiub-portal-plus-${VERSION}-firefox.zip" aiub-portal-plus-firefox.zip
-          ls -la aiub-portal-plus-*.zip
+          # Firefox consumes add-ons as .xpi files. A .xpi is structurally a
+          # ZIP archive with a manifest.json at the root — byte-for-byte what
+          # `wxt zip -b firefox` produces. Copying to a .xpi extension lets
+          # users drag-drop install on Firefox Developer / Nightly builds
+          # (with xpinstall.signatures.required = false) and makes the file
+          # ready for AMO submission.
+          cp ".output/aiub-portal-plus-${VERSION}-firefox.zip" aiub-portal-plus-firefox.xpi
+          ls -la aiub-portal-plus-*
 
       - name: Create / update GitHub Release
         uses: softprops/action-gh-release@v2
@@ -88,3 +95,4 @@ jobs:
           files: |
             aiub-portal-plus-chrome.zip
             aiub-portal-plus-firefox.zip
+            aiub-portal-plus-firefox.xpi

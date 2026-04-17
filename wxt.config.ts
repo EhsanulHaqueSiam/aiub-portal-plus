@@ -1,7 +1,11 @@
 import { defineConfig } from 'wxt';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   modules: ['@wxt-dev/module-react'],
+  vite: () => ({
+    plugins: [tailwindcss()],
+  }),
   manifest: {
     name: 'AIUB Portal+',
     description: 'Comprehensive enhancement suite for the AIUB Student Portal',
@@ -17,7 +21,6 @@ export default defineConfig({
           'Academic/*',
           'Grade/*',
           'RoutineGenerator/*',
-          'CGPAPlanner/*',
           'offered-filter.js',
           'offered-filter.css',
           'aiub.jpg',

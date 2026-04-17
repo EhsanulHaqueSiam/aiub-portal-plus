@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+/* Design tokens shared across the extension's standalone pages.
+   Tailwind v4 @theme directive registers these as `bg-navy`, `text-royal`, etc. */
+@theme {
+  --font-display: "Fraunces", "Times New Roman", serif;
+  --font-body: "Geist", "Inter", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, Menlo, monospace;
+
+  --color-navy-50: #eef2ff;
+  --color-navy-500: #162b6b;
+  --color-navy-700: #0f1f4d;
+  --color-navy-900: #0a1838;
+
+  --color-royal-50: #eff6ff;
+  --color-royal-100: #dbeafe;
+  --color-royal-400: #3b82f6;
+  --color-royal-500: #2563eb;
+  --color-royal-600: #1d4ed8;
+  --color-royal-700: #1e3a8a;
+
+  --color-sky-400: #38bdf8;
+  --color-sky-500: #60a5fa;
+
+  --color-gold-400: #fbbf24;
+  --color-gold-500: #f59e0b;
+
+  --color-ink: #0b1a3a;
+  --color-ink-2: #1e2a4a;
+  --color-ink-3: #334266;
+  --color-paper: #f4f7fc;
+  --color-paper-soft: #f8fbff;
+  --color-line: #d4def0;
+  --color-line-soft: #e4ecf8;
+  --color-muted: #5c6987;
+  --color-muted-2: #8291b1;
+}
+
+html { overflow-x: clip; width: 100%; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: clip;
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background: var(--color-paper);
+  background-image:
+    radial-gradient(ellipse 900px 500px at -10% -200px, rgba(37, 99, 235, 0.09), transparent 60%),
+    radial-gradient(ellipse 700px 400px at 110% -100px, rgba(96, 165, 250, 0.08), transparent 60%);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Number-heavy UI looks best with tabular figures. */
+.tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* Small helper: gradient text for emphasis. */
+.text-gradient-royal {
+  background-image: linear-gradient(90deg, var(--color-royal-600), var(--color-sky-500));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
