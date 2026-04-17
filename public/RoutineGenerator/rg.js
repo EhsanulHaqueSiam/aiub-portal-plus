@@ -20,7 +20,8 @@
 
   const WEEK_DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
   const ALL_DAYS  = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const MAX_RESULTS = 30;
+  const MAX_RESULTS = 100;   // upper bound computed, not shown
+  const RESULTS_PAGE = 5;    // how many routine cards render per "Load more"
   const MAX_SEARCH = 40000;
   const SYNC_TIMEOUT_MS = 30000;
 
@@ -631,8 +632,11 @@
   }
 
   // ------- Rendering -------
+  let _shownCount = 0;   // how many routine cards are currently visible
+
   function renderResults(result) {
     lastResult = result;
+    _shownCount = 0;
     const section = document.getElementById('rg-results-section');
     const hint = document.getElementById('rg-results-hint');
     const host = document.getElementById('rg-results');
@@ -663,15 +667,62 @@
     }
 
     section.hidden = false;
-    const shown = Math.min(result.routines.length, MAX_RESULTS);
-    countEl.textContent = shown + ' routine' + (shown !== 1 ? 's' : '');
-    hint.textContent = result.exploredCap
+    appendNextResultsPage();
+  }
+
+  function appendNextResultsPage() {
+    const host = document.getElementById('rg-results');
+    const countEl = document.getElementById('rg-result-count');
+    const hint = document.getElementById('rg-results-hint');
+    if (!lastResult || !lastResult.routines) return;
+
+    // Remove any previous "Load more" row so we can re-append at the end.
+    host.querySelectorAll('.rg-load-more-row').forEach((n) => n.remove());
+
+    const total = lastResult.routines.length;
+    const from = _shownCount;
+    const to = Math.min(total, from + RESULTS_PAGE);
+    for (let i = from; i < to; i++) {
+      host.appendChild(buildRoutineCard(lastResult.routines[i], i));
+    }
+    _shownCount = to;
+
+    countEl.textContent =
+      'Showing ' + _shownCount + ' of ' + total + ' routine' + (total !== 1 ? 's' : '');
+    hint.textContent = lastResult.exploredCap
       ? 'Search capped — narrow filters for a full scan.'
       : 'Ranked by your sort preference.';
 
-    result.routines.slice(0, MAX_RESULTS).forEach((routine, idx) => {
-      host.appendChild(buildRoutineCard(routine, idx));
-    });
+    if (_shownCount < total) {
+      const row = document.createElement('div');
+      row.className = 'rg-load-more-row';
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn-ghost rg-load-more-btn';
+      const remaining = total - _shownCount;
+      const next = Math.min(RESULTS_PAGE, remaining);
+      const lbl = document.createElement('span');
+      lbl.className = 'btn-label';
+      lbl.textContent = 'Load ' + next + ' more';
+      const arrow = document.createElement('span');
+      arrow.className = 'btn-arrow';
+      arrow.setAttribute('aria-hidden', 'true');
+      arrow.textContent = '↓';
+      btn.appendChild(lbl);
+      btn.appendChild(arrow);
+      btn.addEventListener('click', appendNextResultsPage);
+      row.appendChild(btn);
+
+      const meta = document.createElement('span');
+      meta.className = 'rg-load-more-meta';
+      meta.textContent = remaining + ' more ranked routine'
+        + (remaining !== 1 ? 's' : '')
+        + ' waiting. Click to reveal the next batch.';
+      row.appendChild(meta);
+
+      host.appendChild(row);
+    }
   }
 
   function buildCoursePill(sec) {
