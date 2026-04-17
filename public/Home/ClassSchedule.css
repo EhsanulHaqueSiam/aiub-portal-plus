@@ -1,39 +1,41 @@
+/* =========================================================================
+   Home — today / tomorrow class schedule with live countdown
+   Uses tokens.css. Editorial display heading, royal for today, sky for
+   tomorrow (no off-brand purple). No colored side-stripe borders — card
+   state is signalled via full border tint + tone dot + status pill.
+   ========================================================================= */
 
 .sched-section-head {
+  margin: 0 0 var(--p-s-5);
+  padding: 0;
+  font: 400 clamp(26px, 3vw, 34px)/1.05 var(--p-font-display);
+  color: var(--p-royal-900);
+  letter-spacing: -0.02em;
   display: flex;
   align-items: baseline;
-  justify-content: flex-start;
   flex-wrap: wrap;
   gap: 10px;
-  font: 400 var(--p-fs-2xl, 28px)/1.1 var(--p-font-display, 'Playfair Display', 'Georgia', serif);
-  color: var(--p-royal-900, #0f1f4d);
-  letter-spacing: -0.02em;
-  margin: 0 0 20px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 0;
   position: relative;
   padding-left: 18px;
 }
 .sched-section-head::before {
   content: '';
   position: absolute;
-  left: 0; top: 6px; bottom: 10px;
+  left: 0; top: 8px; bottom: 10px;
   width: 4px;
   border-radius: 999px;
-  background: var(--p-grad-royal, linear-gradient(180deg, #1e40af, #3b82f6));
-  box-shadow: 0 4px 10px -2px rgba(37, 99, 235, 0.35);
+  background: var(--p-grad-royal);
+  box-shadow: 0 4px 10px -2px oklch(0.42 0.18 258 / 0.35);
 }
 .sched-section-head span {
-  color: var(--p-royal-500, #2563eb);
+  color: var(--p-royal-600);
   font-style: italic;
 }
 
 .sched-schedule-panel {
   border: none !important;
   box-shadow: none !important;
-  margin-bottom: 24px !important;
+  margin-bottom: var(--p-s-6) !important;
 }
 .sched-schedule-panel > .panel-heading { display: none !important; }
 .sched-schedule-panel > .panel-body {
@@ -48,182 +50,174 @@
   gap: 0;
 }
 
-.sched-day-group {
-  margin-bottom: 28px;
-}
+.sched-day-group { margin-bottom: 28px; }
 
-/* Override Bootstrap column floats — rows are now flex */
-.sched-original-row {
-  display: none !important;
-}
-.sched-schedule-panel .scheduleTable .col-md-2 {
-  width: 100% !important;
-  float: none !important;
-  padding: 0 !important;
-}
+/* Strip Bootstrap column floats. */
+.sched-original-row { display: none !important; }
+.sched-schedule-panel .scheduleTable .col-md-2,
 .sched-schedule-panel .scheduleTable .col-md-10 {
-  width: 100% !important;
-  float: none !important;
-  padding: 0 !important;
+  width: 100% !important; float: none !important; padding: 0 !important;
 }
 .sched-schedule-panel .scheduleTable .col-md-6 {
-  width: auto !important;
-  float: none !important;
+  width: auto !important; float: none !important;
 }
 
+/* -------------------------------------------------------------------------
+   Day header — "Today" / "Tomorrow" eyebrow pill + full date + class count.
+   Today = royal, Tomorrow = sky (both from the blue spine; no purple).
+   ------------------------------------------------------------------------- */
 .sched-day-header {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--p-s-3);
   padding: 0 0 12px 0;
-  border-bottom: 2px solid #e2e8f0;
-  margin-bottom: 14px;
+  border-bottom: 1px solid var(--p-line);
+  margin-bottom: var(--p-s-3);
 }
-.sched-day-today   .sched-day-header { border-bottom-color: #2563eb; }
-.sched-day-tomorrow .sched-day-header { border-bottom-color: #7c3aed; }
+.sched-day-today   .sched-day-header { border-bottom-color: var(--p-royal-200); }
+.sched-day-tomorrow .sched-day-header { border-bottom-color: oklch(0.82 0.12 240); }
 
 .sched-day-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  font-weight: 700;
+  font: 700 var(--p-fs-xs)/1 var(--p-font-body);
   padding: 6px 14px;
-  border-radius: 6px;
-  background: #eff6ff;
-  color: #2563eb;
+  border-radius: var(--p-r-pill);
+  background: var(--p-royal-50);
+  color: var(--p-royal-700);
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: var(--p-tracking-wide);
   white-space: nowrap;
   flex-shrink: 0;
+  border: 1px solid var(--p-royal-100);
 }
-.sched-day-today   .sched-day-badge { background: #2563eb; color: #fff; }
-.sched-day-tomorrow .sched-day-badge { background: #7c3aed; color: #fff; }
+.sched-day-today   .sched-day-badge {
+  background: var(--p-royal-600);
+  color: #fff;
+  border-color: transparent;
+}
+.sched-day-tomorrow .sched-day-badge {
+  background: oklch(0.85 0.08 235);
+  color: oklch(0.32 0.12 235);
+  border-color: oklch(0.78 0.09 235);
+}
 
 .sched-day-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px; height: 6px;
   border-radius: 50%;
   display: inline-block;
   background: currentColor;
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
 .sched-day-date-full {
-  font-size: 13px;
-  color: #64748b;
-  font-weight: 500;
-  margin-left: 8px;
+  font: 500 var(--p-fs-sm)/1 var(--p-font-body);
+  color: var(--p-muted);
+  margin-left: 6px;
 }
-.sched-day-today   .sched-day-date-full { color: #2563eb; }
-.sched-day-tomorrow .sched-day-date-full { color: #7c3aed; }
+.sched-day-today   .sched-day-date-full { color: var(--p-royal-700); }
+.sched-day-tomorrow .sched-day-date-full { color: oklch(0.38 0.12 235); }
 
 .sched-day-count {
   margin-left: auto;
-  font-size: 12px;
-  color: #64748b;
-  font-weight: 600;
-  background: #f1f5f9;
-  padding: 4px 12px;
-  border-radius: 6px;
+  font: 600 var(--p-fs-xs)/1 var(--p-font-mono);
+  color: var(--p-muted);
+  background: var(--p-line-soft);
+  padding: 5px 12px;
+  border-radius: var(--p-r-pill);
   flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
 }
-.sched-day-today   .sched-day-count { background: #dbeafe; color: #2563eb; }
-.sched-day-tomorrow .sched-day-count { background: #ede9fe; color: #7c3aed; }
+.sched-day-today   .sched-day-count { background: var(--p-royal-100); color: var(--p-royal-700); }
+.sched-day-tomorrow .sched-day-count { background: oklch(0.93 0.05 235); color: oklch(0.38 0.12 235); }
 
 .sched-cards-wrap {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--p-s-2);
   padding: 0;
 }
 
+/* -------------------------------------------------------------------------
+   "No class" empty state — no side-stripe border. Full tinted surface +
+   leading glyph to keep the empty state friendly, not alarming.
+   ------------------------------------------------------------------------- */
 .sched-no-class {
-  padding: 16px 14px;
-  font-size: 13px;
-  color: #94a3b8;
+  padding: 14px 18px;
+  font: 500 var(--p-fs-sm)/1.4 var(--p-font-body);
   font-style: italic;
+  color: var(--p-muted);
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: #f8fafc;
-  border-left: 3px solid #cbd5e1;
-  border-radius: 4px;
+  gap: var(--p-s-2);
+  background: var(--p-surface-soft);
+  border: 1px solid var(--p-line);
+  border-radius: var(--p-r-sm);
 }
 .sched-no-class::before {
-  content: '◦';
-  display: inline-block;
-  font-size: 18px;
+  content: '○';
+  font-size: 14px;
+  color: var(--p-mute-soft);
   flex-shrink: 0;
 }
 
+/* -------------------------------------------------------------------------
+   Class entry card — course name (mono-anchored via sep) + meta + timer.
+   State signalled by full border + timer pill, NOT a colored side rail.
+   ------------------------------------------------------------------------- */
 .sched-class-entry {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 16px 14px 18px;
-  background: var(--p-surface, #fff);
-  border: 1px solid var(--p-line, #e2e8f0);
-  border-radius: var(--p-r-md, 14px);
-  position: relative;
-  overflow: hidden;
+  gap: var(--p-s-3);
+  padding: 14px 18px;
+  background: var(--p-surface);
+  border: 1px solid var(--p-line);
+  border-radius: var(--p-r-md);
   transition:
-    transform var(--p-dur-2, 220ms) var(--p-ease),
-    border-color var(--p-dur-2, 220ms) var(--p-ease),
-    box-shadow var(--p-dur-2, 220ms) var(--p-ease),
-    background var(--p-dur-2, 220ms) var(--p-ease);
-}
-.sched-class-entry::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 10px; bottom: 10px;
-  width: 3px;
-  border-radius: 999px;
-  background: var(--p-grad-royal, linear-gradient(180deg, #1e40af, #3b82f6));
-  transition: width var(--p-dur-2, 220ms) var(--p-ease);
+    transform var(--p-dur-2) var(--p-ease),
+    border-color var(--p-dur-2) var(--p-ease),
+    box-shadow var(--p-dur-2) var(--p-ease),
+    background var(--p-dur-2) var(--p-ease);
 }
 .sched-class-entry:hover {
   transform: translateY(-1px);
-  border-color: var(--p-royal-200, #bfdbfe);
-  background: var(--p-surface-tint, #f0f7ff);
+  border-color: var(--p-royal-200);
+  background: var(--p-surface-tint);
   box-shadow: var(--p-sh-2);
 }
-.sched-class-entry:hover::before { width: 5px; }
 
-/* Active class — pulsing green rail with soft glow. */
+/* Active class — live state. Soft green fill + full border + pulsing timer. */
 .sched-class-entry.sched-state-active {
-  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
-  border-color: #86efac;
-  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.18), 0 8px 22px -14px rgba(22, 163, 74, 0.35);
+  background: linear-gradient(135deg, oklch(0.96 0.05 150) 0%, oklch(0.97 0.03 150) 100%);
+  border-color: oklch(0.80 0.12 150);
+  box-shadow: 0 0 0 1px oklch(0.70 0.15 150 / 0.25),
+              0 8px 22px -14px oklch(0.50 0.16 150 / 0.40);
 }
-.sched-class-entry.sched-state-active::before {
-  background: linear-gradient(180deg, #22c55e, #16a34a);
+.sched-class-entry.sched-state-active:hover {
+  box-shadow: 0 0 0 1px oklch(0.70 0.15 150 / 0.35), var(--p-sh-2);
 }
-.sched-class-entry.sched-state-active:hover { box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.25), var(--p-sh-2); }
 
 .sched-class-entry.sched-state-ended {
-  opacity: 0.6;
-  background: var(--p-surface-soft, #f8fafc);
+  opacity: 0.55;
+  background: var(--p-surface-soft);
 }
-.sched-class-entry.sched-state-ended::before { background: var(--p-mute-soft, #94a3b8); }
 
-/* Course name link — displayed on the left */
+/* Course name link */
 .sched-course-name {
-  font-weight: 700;
-  font-size: 14px;
-  color: #0f172a;
+  font: 700 var(--p-fs-base)/1.3 var(--p-font-body);
+  color: var(--p-ink);
   text-decoration: none;
   display: block;
   min-width: 140px;
-  line-height: 1.3;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   flex-shrink: 0;
 }
-.sched-course-name:hover { color: #2563eb; text-decoration: none; }
+.sched-course-name:hover { color: var(--p-royal-600); text-decoration: none; }
 
-/* Meta row (time + room) */
+/* Meta chips (time + room) */
 .sched-meta {
   display: flex;
   flex-wrap: wrap;
@@ -236,78 +230,76 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #64748b;
-  background: transparent;
-  border: none;
-  border-radius: 4px;
-  padding: 0;
-  white-space: nowrap;
+  font: 500 var(--p-fs-xs)/1 var(--p-font-body);
+  color: var(--p-muted);
+  font-variant-numeric: tabular-nums;
 }
 .sched-meta-chip .sched-meta-icon {
-  font-size: 11px;
-  color: #94a3b8;
-  opacity: 0.8;
+  font-size: 10px;
+  color: var(--p-mute-soft);
 }
 
+/* Timer pill — status tone matches timer state (upcoming/active/ended). */
 .sched-timer {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 4px;
+  gap: 6px;
+  font: 700 var(--p-fs-xs)/1 var(--p-font-body);
+  padding: 5px 11px;
+  border-radius: var(--p-r-pill);
   white-space: nowrap;
-  letter-spacing: 0.3px;
+  letter-spacing: var(--p-tracking-wide);
+  text-transform: uppercase;
   flex-shrink: 0;
   margin-left: auto;
+  font-variant-numeric: tabular-nums;
 }
 .sched-timer-upcoming {
-  background: #eff6ff;
-  color: #2563eb;
-  border: 1px solid #bfdbfe;
+  background: var(--p-royal-50);
+  color: var(--p-royal-700);
+  border: 1px solid var(--p-royal-100);
 }
 .sched-timer-active {
-  background: #f0fdf4;
-  color: #15803d;
-  border: 1px solid #bbf7d0;
+  background: var(--p-ok-soft);
+  color: oklch(0.30 0.13 150);
+  border: 1px solid oklch(0.80 0.12 150);
   animation: sched-pulse 2s ease-in-out infinite;
 }
 .sched-timer-ended {
-  background: #f1f5f9;
-  color: #94a3b8;
-  border: 1px solid #e2e8f0;
+  background: var(--p-line-soft);
+  color: var(--p-mute-soft);
+  border: 1px solid var(--p-line);
 }
 
 .sched-timer-dot {
-  width: 6px;
-  height: 6px;
+  width: 6px; height: 6px;
   border-radius: 50%;
   display: inline-block;
   flex-shrink: 0;
 }
-.sched-timer-upcoming .sched-timer-dot { background: #2563eb; }
-.sched-timer-active   .sched-timer-dot { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.2); animation: sched-dot-ping 1.5s ease-in-out infinite; }
-.sched-timer-ended    .sched-timer-dot { background: #cbd5e1; }
+.sched-timer-upcoming .sched-timer-dot { background: var(--p-royal-500); }
+.sched-timer-active   .sched-timer-dot {
+  background: oklch(0.60 0.18 150);
+  box-shadow: 0 0 0 3px oklch(0.60 0.18 150 / 0.20);
+  animation: sched-dot-ping 1.5s ease-in-out infinite;
+}
+.sched-timer-ended    .sched-timer-dot { background: var(--p-mute-soft); }
 
 @keyframes sched-pulse {
   0%, 100% { opacity: 1; }
-  50%       { opacity: 0.85; }
+  50%       { opacity: 0.88; }
 }
 @keyframes sched-dot-ping {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,.4); }
-  50%       { box-shadow: 0 0 0 5px rgba(34,197,94,.0); }
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.60 0.18 150 / 0.4); }
+  50%       { box-shadow: 0 0 0 6px oklch(0.60 0.18 150 / 0); }
 }
 
 @media (max-width: 768px) {
-  .sched-cards-wrap { flex-direction: column; gap: 8px; }
+  .sched-cards-wrap { gap: 8px; }
   .sched-class-entry { flex-direction: column; align-items: flex-start; }
   .sched-course-name { min-width: auto; width: 100%; }
   .sched-meta { width: 100%; }
   .sched-timer { margin-left: 0; margin-top: 6px; }
-  .sched-section-head { font-size: 15px; }
   .sched-day-header { flex-direction: column; align-items: flex-start; gap: 8px; }
   .sched-day-count { margin-left: 0; }
 }

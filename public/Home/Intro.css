@@ -1,6 +1,14 @@
 /* =========================================================================
    Home — greeting banner + alerts + action buttons
-   Uses tokens from Shared/tokens.css. Editorial display + depth.
+   Uses tokens + shared components from Shared/tokens.css.
+
+   Design direction (see .impeccable.md):
+   - Fraunces italic greeting, Geist body, Geist Mono for codes/values
+   - No colored side-stripe borders on alerts (banned). Full 1px border +
+     tinted background + leading dot for severity signalling instead.
+   - The Teams credentials card is a HIGH-VALUE surface — students copy
+     these values daily. Make the values the hero: mono display face,
+     tabular, readable at distance.
    ========================================================================= */
 
 .intro-root-panel {
@@ -14,176 +22,240 @@
   padding: 0 !important;
 }
 
-/* Greeting banner ─ rich gradient + two soft ambient light sources. */
+/* -------------------------------------------------------------------------
+   Greeting banner — navy ink gradient + two ambient-light radials.
+   Editorial italic display, tabular clock, gold-dot live indicator.
+   ------------------------------------------------------------------------- */
 .intro-banner {
-  background: var(--p-grad-ink, linear-gradient(120deg, #1d4ed8 0%, #2563eb 55%, #3b82f6 100%));
-  border-radius: var(--p-r-lg, 18px);
-  padding: 26px 30px;
-  margin-bottom: var(--p-s-5, 20px);
-  display: flex;
+  background: var(--p-grad-ink);
+  border-radius: var(--p-r-lg);
+  padding: 30px 34px;
+  margin-bottom: var(--p-s-5);
+  display: grid;
+  grid-template-columns: 1.6fr auto;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--p-s-4, 16px);
-  flex-wrap: wrap;
+  gap: var(--p-s-5);
   position: relative;
   overflow: hidden;
   isolation: isolate;
   color: #fff;
-  box-shadow: 0 28px 60px -28px rgba(15, 31, 77, 0.55),
-              inset 0 0 0 1px rgba(255, 255, 255, 0.06);
-  animation: p-rise var(--p-dur-enter, 520ms) var(--p-ease, cubic-bezier(0.22, 1, 0.36, 1)) both;
+  box-shadow: var(--p-sh-3);
+  animation: p-rise var(--p-dur-enter) var(--p-ease) both;
 }
-.intro-banner::before {
-  content: '';
-  position: absolute;
-  right: -80px;
-  top: -120px;
-  width: 320px;
-  height: 320px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(147, 197, 253, 0.35), transparent 60%);
-  pointer-events: none;
-  z-index: -1;
-}
+.intro-banner::before,
 .intro-banner::after {
   content: '';
   position: absolute;
-  left: -60px;
-  bottom: -80px;
-  width: 260px;
-  height: 260px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.22), transparent 65%);
   pointer-events: none;
   z-index: -1;
 }
+.intro-banner::before {
+  right: -80px; top: -120px;
+  width: 340px; height: 340px;
+  background: radial-gradient(circle, oklch(0.72 0.15 250 / 0.35), transparent 60%);
+}
+.intro-banner::after {
+  left: -60px; bottom: -80px;
+  width: 260px; height: 260px;
+  background: radial-gradient(circle, oklch(0.76 0.15 230 / 0.22), transparent 65%);
+}
 
 .intro-banner-left {
-  flex: 1;
-  min-width: 220px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  min-width: 220px;
 }
 
 .intro-greeting {
-  font: 400 var(--p-fs-2xl, 28px)/1.1 var(--p-font-display, 'Playfair Display', 'Georgia', serif);
+  margin: 0;
+  font: 400 clamp(28px, 3.6vw, 42px)/1.02 var(--p-font-display);
   font-style: italic;
   color: #fff;
-  margin: 0;
   letter-spacing: -0.01em;
-  text-shadow: 0 2px 10px rgba(15, 31, 77, 0.3);
+  text-shadow: 0 2px 10px rgba(10, 24, 56, 0.35);
 }
 
 .intro-date {
-  font: 600 var(--p-fs-sm, 12.5px)/1.2 var(--p-font-body);
-  color: rgba(255, 255, 255, 0.78);
-  display: flex;
+  font: 500 var(--p-fs-sm)/1.3 var(--p-font-body);
+  color: rgba(255, 255, 255, 0.82);
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   letter-spacing: 0.01em;
 }
 .intro-date::before {
   content: '';
   display: inline-block;
-  width: 6px;
-  height: 6px;
+  width: 7px; height: 7px;
   border-radius: 50%;
-  background: var(--p-royal-300, #60a5fa);
-  box-shadow: 0 0 10px rgba(96, 165, 250, 0.8);
+  background: var(--p-gold);
+  box-shadow: 0 0 0 0 oklch(0.83 0.15 84 / 0.6);
+  animation: p-pulse 1.8s infinite;
 }
 
-/* Live clock badge — glass panel anchored to the right. */
+/* Live clock — glass-inset panel, anchored right. Time is the hero. */
 .intro-banner-badge {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: var(--p-r-md, 14px);
-  padding: 14px 22px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--p-r-md);
+  padding: 16px 24px;
   text-align: right;
   flex-shrink: 0;
-  min-width: 150px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  min-width: 160px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10);
 }
 .intro-banner-badge-label {
-  font: 700 var(--p-fs-xs, 11px)/1.1 var(--p-font-body);
-  color: rgba(255, 255, 255, 0.7);
-  text-transform: uppercase;
-  letter-spacing: var(--p-tracking-eyebrow, 0.14em);
   display: block;
-  margin-bottom: 4px;
+  font: 700 var(--p-fs-xs)/1 var(--p-font-body);
+  color: rgba(255, 255, 255, 0.70);
+  text-transform: uppercase;
+  letter-spacing: var(--p-tracking-eyebrow);
+  margin-bottom: 6px;
 }
 .intro-banner-badge-value {
-  font: 800 var(--p-fs-xl, 22px)/1 var(--p-font-body);
-  color: #fff;
   display: block;
+  font: 400 var(--p-fs-3xl)/1 var(--p-font-display);
   font-variant-numeric: tabular-nums;
+  color: #fff;
   letter-spacing: -0.02em;
 }
 
-/* Alerts — flat, color-coded, left-rail accent. */
+/* -------------------------------------------------------------------------
+   Alerts — the portal's info boxes (Teams credentials, registration
+   reminder, identity submission, etc). No side-stripe borders. Use a
+   tinted fill + thin full border + tone-dot lead-in instead.
+   ------------------------------------------------------------------------- */
 #main-content .alert {
-  border: none !important;
-  border-radius: var(--p-r-sm, 10px) !important;
-  font: 500 var(--p-fs-base, 13.5px)/1.5 var(--p-font-body) !important;
-  padding: 14px 18px !important;
-  margin-bottom: 14px !important;
-  box-shadow: var(--p-sh-1, 0 1px 3px rgba(15, 23, 42, 0.06)) !important;
-  animation: p-fade var(--p-dur-3, 380ms) var(--p-ease) both;
+  position: relative;
+  border: 1px solid transparent !important;
+  border-radius: var(--p-r-md) !important;
+  padding: 18px 22px 18px 46px !important;
+  margin: 0 0 var(--p-s-3) !important;
+  font: 500 var(--p-fs-base)/var(--p-lh-body) var(--p-font-body) !important;
+  box-shadow: var(--p-sh-1) !important;
+  animation: p-fade var(--p-dur-3) var(--p-ease) both;
 }
-#main-content .alert-success {
-  background: var(--p-ok-soft, #d1fae5) !important;
-  color: #14532d !important;
-  border-left: 4px solid var(--p-ok, #059669) !important;
+#main-content .alert::before {
+  content: '';
+  position: absolute;
+  left: 20px; top: 22px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
-#main-content .alert-success a { color: #14532d !important; text-decoration: underline; }
-/* The Download link inside the Teams-credentials card renders as a
-   `btn-primary` — inherit the button's white-on-blue colour rather than
-   the bright-green link colour that applies to the rest of the card. */
-#main-content .alert-success a.btn-primary,
-#main-content .alert-success .btn-primary a,
-#main-content .alert-success .btn-primary {
-  color: #fff !important;
-  text-decoration: none !important;
-}
-#main-content .alert-success .table-bordered {
-  border-radius: 8px !important;
-  overflow: hidden;
-  border-color: #bbf7d0 !important;
-}
-#main-content .alert-success .table-bordered td {
-  border-color: #bbf7d0 !important;
-  padding: 8px 12px !important;
-}
-#main-content .alert-success .btn-primary {
-  background: var(--p-grad-royal) !important;
-  border: none !important;
-  border-radius: 8px !important;
-  font-weight: 700 !important;
-  padding: 8px 16px !important;
-}
-#main-content .alert-warning {
-  background: var(--p-warn-soft, #fef3c7) !important;
-  color: #78350f !important;
-  border-left: 4px solid var(--p-warn, #d97706) !important;
-}
-#main-content .alert-info {
-  background: var(--p-royal-50, #eff6ff) !important;
-  color: var(--p-royal-700, #1e3a8a) !important;
-  border-left: 4px solid var(--p-royal-500, #2563eb) !important;
-}
-#main-content .alert-danger {
-  background: var(--p-err-soft, #fee2e2) !important;
-  color: #7f1d1d !important;
-  border-left: 4px solid var(--p-err, #dc2626) !important;
+#main-content .alert strong { font-weight: 700; }
+#main-content .alert a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 600;
 }
 
-/* Action buttons (Go to Registration, View Schedule, etc). */
+#main-content .alert-success {
+  background: var(--p-ok-soft) !important;
+  border-color: oklch(0.80 0.13 150) !important;
+  color: oklch(0.26 0.12 150) !important;
+}
+#main-content .alert-success::before { background: var(--p-ok); }
+
+#main-content .alert-warning {
+  background: var(--p-warn-soft) !important;
+  border-color: oklch(0.85 0.13 84) !important;
+  color: oklch(0.30 0.12 60) !important;
+}
+#main-content .alert-warning::before { background: var(--p-warn); }
+
+#main-content .alert-info {
+  background: var(--p-royal-50) !important;
+  border-color: var(--p-royal-100) !important;
+  color: var(--p-royal-700) !important;
+}
+#main-content .alert-info::before { background: var(--p-royal-500); }
+
+#main-content .alert-danger {
+  background: var(--p-err-soft) !important;
+  border-color: oklch(0.84 0.12 25) !important;
+  color: oklch(0.30 0.14 25) !important;
+}
+#main-content .alert-danger::before { background: var(--p-err); }
+
+/* Links inside alerts track the alert's tone. */
+#main-content .alert a { color: inherit; }
+
+/* -------------------------------------------------------------------------
+   Teams credentials card — this is THE most-copied surface on the Home
+   page. Students pull their Microsoft Teams one-time password from here
+   every semester. Treat the values as the hero: mono display face,
+   generous tracking, high contrast against the green fill.
+   ------------------------------------------------------------------------- */
+#main-content .alert-success .table-bordered {
+  border-collapse: separate !important;
+  border-radius: var(--p-r-sm) !important;
+  overflow: hidden !important;
+  border: 1px solid oklch(0.85 0.10 150) !important;
+  background: rgba(255, 255, 255, 0.55);
+  margin-top: 12px;
+}
+#main-content .alert-success .table-bordered td {
+  border-color: oklch(0.88 0.08 150) !important;
+  padding: 10px 14px !important;
+  vertical-align: middle !important;
+}
+#main-content .alert-success .table-bordered td:first-child {
+  font: 700 var(--p-fs-xs)/1 var(--p-font-body) !important;
+  letter-spacing: var(--p-tracking-eyebrow);
+  text-transform: uppercase;
+  color: oklch(0.42 0.12 150) !important;
+  width: 1%; white-space: nowrap;
+}
+#main-content .alert-success .table-bordered td:nth-child(2) { width: 1%; white-space: nowrap; color: oklch(0.50 0.08 150); }
+#main-content .alert-success .table-bordered td:last-child {
+  font: 500 var(--p-fs-md)/1 var(--p-font-mono) !important;
+  font-variant-numeric: tabular-nums;
+  color: oklch(0.24 0.10 150) !important;
+  letter-spacing: 0.02em;
+  user-select: all;  /* one-click-to-select; students copy this constantly */
+}
+
+/* Download button inside the credentials card — the only button in this
+   alert, and it needs to read as an action, not part of the prose. */
+#main-content .alert-success a.btn-primary,
+#main-content .alert-success .btn-primary {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  background: var(--p-grad-royal) !important;
+  border: none !important;
+  border-radius: var(--p-r-sm) !important;
+  color: #fff !important;
+  font: 700 var(--p-fs-sm)/1 var(--p-font-body) !important;
+  letter-spacing: 0.02em;
+  text-decoration: none !important;
+  padding: 10px 18px !important;
+  box-shadow: var(--p-sh-2) !important;
+  transition: transform var(--p-dur-2) var(--p-ease), box-shadow var(--p-dur-2) var(--p-ease), filter var(--p-dur-2) var(--p-ease);
+}
+#main-content .alert-success a.btn-primary:hover,
+#main-content .alert-success .btn-primary:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: var(--p-sh-3) !important;
+  filter: brightness(1.05);
+}
+
+/* -------------------------------------------------------------------------
+   Action buttons row (Go to Registration / Submit Identity / Vaccine info)
+   These read as primary navigation from the Home page. Rank them:
+   - Registration (red) = primary, most-important action during a window
+   - Identity / Vaccine (info) = secondary
+   - Any `default` = tertiary, ghost
+   ------------------------------------------------------------------------- */
 .intro-actions {
   border: none !important;
   box-shadow: none !important;
   background: transparent !important;
-  margin-bottom: var(--p-s-5, 20px) !important;
+  margin-bottom: var(--p-s-6) !important;
 }
 .intro-actions > .panel-body { padding: 0 !important; }
 .intro-actions .text-center {
@@ -193,38 +265,47 @@
   justify-content: flex-start !important;
 }
 .intro-actions .btn {
-  border-radius: var(--p-r-sm, 10px) !important;
-  font: 700 var(--p-fs-sm, 12.5px)/1 var(--p-font-body) !important;
-  padding: 12px 22px !important;
+  border-radius: var(--p-r-sm) !important;
+  font: 700 var(--p-fs-sm)/1 var(--p-font-body) !important;
+  padding: 13px 22px !important;
   border: none !important;
   box-shadow: var(--p-sh-2) !important;
-  transition:
-    transform var(--p-dur-2, 220ms) var(--p-ease),
-    box-shadow var(--p-dur-2, 220ms) var(--p-ease),
-    filter var(--p-dur-2, 220ms) var(--p-ease) !important;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   position: relative;
   overflow: hidden;
+  transition:
+    transform var(--p-dur-2) var(--p-ease),
+    box-shadow var(--p-dur-2) var(--p-ease),
+    filter var(--p-dur-2) var(--p-ease) !important;
 }
 .intro-actions .btn:hover {
   transform: translateY(-2px) !important;
   box-shadow: var(--p-sh-3) !important;
-  filter: brightness(1.05);
+  filter: brightness(1.06);
 }
 .intro-actions .btn:active { transform: translateY(0) !important; }
+.intro-actions .btn:focus-visible {
+  outline: none;
+  box-shadow: var(--p-sh-glow), var(--p-sh-2) !important;
+}
+
+/* Registration CTA — critical, warm red. */
 .intro-actions .btn-danger {
-  background: linear-gradient(135deg, #b91c1c, #dc2626) !important;
+  background: linear-gradient(135deg, oklch(0.45 0.18 25) 0%, oklch(0.55 0.21 25) 100%) !important;
   color: #fff !important;
 }
+/* Secondary action buttons — sapphire/sky. */
 .intro-actions .btn-info {
-  background: linear-gradient(135deg, #0369a1, #38bdf8) !important;
+  background: linear-gradient(135deg, oklch(0.50 0.15 235) 0%, oklch(0.65 0.14 230) 100%) !important;
   color: #fff !important;
 }
+/* Tertiary ghost — white with hover tint. */
 .intro-actions .btn-default {
   background: #fff !important;
   color: var(--p-text) !important;
   border: 1px solid var(--p-line) !important;
+  box-shadow: var(--p-sh-1) !important;
 }
 .intro-actions .btn-default:hover {
   background: var(--p-royal-50) !important;
@@ -232,10 +313,13 @@
   border-color: var(--p-royal-200) !important;
 }
 
+/* -------------------------------------------------------------------------
+   Responsive
+   ------------------------------------------------------------------------- */
 @media (max-width: 768px) {
-  .intro-banner { padding: 20px 22px; }
-  .intro-greeting { font-size: 22px; }
-  .intro-banner-badge { display: none; }
+  .intro-banner { grid-template-columns: 1fr; padding: 22px 22px; }
+  .intro-banner-badge { justify-self: start; text-align: left; }
   .intro-actions .text-center { flex-direction: column !important; }
   .intro-actions .btn { width: 100% !important; text-align: center !important; }
+  #main-content .alert { padding-left: 42px !important; }
 }
