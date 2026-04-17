@@ -154,14 +154,10 @@ export async function writeHighlights(payload: {
   courseTitles: string[];
   enabled: boolean;
 }) {
-  const api = extApi();
-  if (!api) return;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const set = (api.storage.local as any).set;
-  if (typeof set !== 'function') return;
-  await new Promise<void>((resolve) => set.call(
-    api.storage.local,
-    { aiubHighlights: { ...payload, updatedAt: new Date().toISOString() } },
-    () => resolve(),
-  ));
+  // Bypass extApi() — its Chrome branch wraps storage.local.get and drops
+  // set/remove from the returned surface, causing silent write failures.
+  // WXT's `browser` polyfill works cross-browser on extension pages.
+  await browser.storage.local.set({
+    aiubHighlights: { ...payload, updatedAt: new Date().toISOString() },
+  });
 }

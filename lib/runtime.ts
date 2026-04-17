@@ -3,6 +3,8 @@
 
 type StorageLocal = {
   get(keys: Record<string, unknown>): Promise<Record<string, unknown>>;
+  set(items: Record<string, unknown>): Promise<void>;
+  remove(keys: string | string[]): Promise<void>;
 };
 type StorageChangedHost = {
   addListener(
@@ -23,11 +25,15 @@ export function extApi(): ExtRuntime | null {
     return b as ExtRuntime;
   }
   if (c && (c as { storage?: unknown }).storage) {
-    // Chrome's storage.local.get uses callbacks; wrap for a unified promise API.
+    // Chrome's storage.local uses callbacks; wrap for a unified promise API.
+    // All three methods must be wrapped — an earlier version only wrapped
+    // `get` which caused writeHighlights() to silently drop its writes.
     const cc = c as {
       storage: {
         local: {
           get(keys: Record<string, unknown>, cb: (res: Record<string, unknown>) => void): void;
+          set(items: Record<string, unknown>, cb: () => void): void;
+          remove(keys: string | string[], cb: () => void): void;
         };
         onChanged?: StorageChangedHost;
       };
@@ -41,6 +47,16 @@ export function extApi(): ExtRuntime | null {
           get(keys) {
             return new Promise<Record<string, unknown>>((resolve) => {
               cc.storage.local.get(keys, resolve);
+            });
+          },
+          set(items) {
+            return new Promise<void>((resolve) => {
+              cc.storage.local.set(items, () => resolve());
+            });
+          },
+          remove(keys) {
+            return new Promise<void>((resolve) => {
+              cc.storage.local.remove(keys, () => resolve());
             });
           },
         },
