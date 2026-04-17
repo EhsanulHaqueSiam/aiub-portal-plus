@@ -4,9 +4,96 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AIUB Graph Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400;1,9..144,600&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="../Shared/portal-app-shell.css">
   <link rel="stylesheet" href="Graphs.css">
 </head>
 <body>
+  <!-- PORTAL NAVBAR -->
+  <header class="portal-navbar">
+    <div class="portal-navbar-inner">
+      <a class="portal-brand" href="https://portal.aiub.edu/Student" target="_self" rel="noopener">
+        <span class="portal-brand-logo" aria-hidden="true"></span>
+        <span class="portal-brand-label">AIUB Portal<span class="portal-brand-plus">+</span></span>
+      </a>
+      <nav class="portal-navlinks" aria-label="Portal sections">
+        <a href="https://portal.aiub.edu/Student/Course" target="_self" rel="noopener">
+          <span class="glyphicon">&#8801;</span> Courses &amp; Results
+        </a>
+        <a href="https://portal.aiub.edu/Student/Registration" target="_self" rel="noopener">
+          <span class="glyphicon">&#9889;</span> Registration
+        </a>
+        <a href="https://portal.aiub.edu/Student/GradeReport/ByCurriculum" target="_self" rel="noopener">
+          <span class="glyphicon">&#10022;</span> Grade Report
+        </a>
+      </nav>
+      <div class="portal-navright">
+        <span class="portal-welcome">
+          Welcome <span class="portal-welcome-name" id="portal-welcome-name">student</span>
+        </span>
+        <a class="portal-iconbtn" href="https://portal.aiub.edu/Student" target="_self" rel="noopener" title="Portal home" aria-label="Portal home">&#127968;</a>
+        <a class="portal-iconbtn portal-iconbtn-danger" href="https://portal.aiub.edu/Login/Logout" title="Log out" aria-label="Log out">&#8618;</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- PAGE LAYOUT: sidebar + content -->
+  <div class="portal-layout">
+    <aside class="portal-sidebar" aria-label="Navigation">
+      <div class="nav-profile-block">
+        <div class="nav-profile-name" id="portal-profile-name">Student</div>
+        <div class="nav-profile-id" id="portal-profile-id"></div>
+      </div>
+
+      <div class="nav-panel-group">
+        <section class="nav-panel">
+          <div class="nav-panel-head">
+            <span class="glyphicon">&#128202;</span> Academics
+            <span class="nav-chevron">&#9662;</span>
+          </div>
+          <div class="nav-panel-body">
+            <a class="nav-link" href="https://portal.aiub.edu/Student/Course" target="_self">Courses &amp; Results</a>
+            <a class="nav-link" href="https://portal.aiub.edu/Student/Registration" target="_self">Registration</a>
+            <a class="nav-link" href="https://portal.aiub.edu/Student/Adrop/DropApplication" target="_self">Drop Application</a>
+            <a class="nav-link" href="https://portal.aiub.edu/Student/Section/Offered" target="_self">Offered Courses</a>
+            <a class="nav-link" href="https://portal.aiub.edu/Student/Curriculum" target="_self">My Curriculum</a>
+            <a class="nav-link" href="https://portal.aiub.edu/Student/Accounts" target="_self">Financials</a>
+          </div>
+        </section>
+
+        <section class="nav-panel">
+          <div class="nav-panel-head">
+            <span class="glyphicon">&#10022;</span> Grade Reports
+            <span class="nav-chevron">&#9662;</span>
+          </div>
+          <div class="nav-panel-body">
+            <a class="nav-link" href="https://portal.aiub.edu/Student/GradeReport/ByCurriculum" target="_self">By Curriculum</a>
+            <a class="nav-link" href="https://portal.aiub.edu/Student/GradeReport/BySemester" target="_self">By Semester</a>
+          </div>
+        </section>
+
+        <section class="nav-panel">
+          <div class="nav-panel-head">
+            <span class="glyphicon">&#9881;</span> Tools
+            <span class="nav-chevron">&#9662;</span>
+          </div>
+          <div class="nav-panel-body">
+            <a class="nav-link active" href="Graphs.html" aria-current="page">Graphs</a>
+            <a class="nav-link" href="../RoutineGenerator/index.html">Routine Generator</a>
+          </div>
+        </section>
+      </div>
+
+      <footer class="portal-sidebar-foot">
+        <span class="foot-badge">Unofficial extension</span>
+        <p>Open the Grade Report pages to sync the data powering these charts.</p>
+      </footer>
+    </aside>
+
+    <main class="portal-main">
   <div class="graph-shell">
     <header class="hero">
       <div class="hero-copy">
@@ -30,7 +117,7 @@
       </div>
     </section>
 
-    <main id="dashboard" hidden>
+    <div id="dashboard" hidden>
       <section id="kpiGrid" class="kpi-grid"></section>
       <section id="insightsRow" class="insights-row"></section>
 
@@ -107,10 +194,13 @@
           <div id="creditsChart"></div>
         </article>
       </section>
+    </div>
+  </div>
     </main>
   </div>
 
   <script src="chart.umd.js"></script>
   <script src="Graphs.js"></script>
+  <script src="shell-profile.js"></script>
 </body>
 </html>

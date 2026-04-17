@@ -137,6 +137,15 @@
   border-left: 4px solid var(--p-ok, #059669) !important;
 }
 #main-content .alert-success a { color: #14532d !important; text-decoration: underline; }
+/* The Download link inside the Teams-credentials card renders as a
+   `btn-primary` — inherit the button's white-on-blue colour rather than
+   the bright-green link colour that applies to the rest of the card. */
+#main-content .alert-success a.btn-primary,
+#main-content .alert-success .btn-primary a,
+#main-content .alert-success .btn-primary {
+  color: #fff !important;
+  text-decoration: none !important;
+}
 #main-content .alert-success .table-bordered {
   border-radius: 8px !important;
   overflow: hidden;

@@ -16,6 +16,14 @@ export default defineContentScript({
     if (window.__aiubNavbarEnhanced) return;
     window.__aiubNavbarEnhanced = true;
 
+    // Tokens must be loaded on every Student/* page, not only where the
+    // sidebar exists. Pages like Drop Application skip the sidebar entirely,
+    // and without tokens the navbar's `var(--p-grad-ink)` resolves to the
+    // initial value — turning the bar into white-on-white text. Tokens are
+    // purely CSS variables, so they're safe to load even on pages where the
+    // navbar DOM isn't present (e.g. the login form rendered at /Student).
+    loadCSS('aiub-tokens', 'Shared/tokens.css');
+
     const tryEnhance = () => {
       if (document.querySelector('.topbar-container')) {
         enhance();
@@ -33,6 +41,9 @@ export default defineContentScript({
 });
 
 function enhance() {
+  // Navbar.css restyles body (padding-top, mesh background). Load it only
+  // when the topbar DOM is actually present so the login form rendered at
+  // /Student (no topbar) doesn't inherit a 60px top gap or the mesh surface.
   loadCSS('navbar-style', 'Shared/Navbar.css');
 
   const path = window.location.pathname;

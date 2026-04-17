@@ -66,6 +66,7 @@
 
 html, body {
   margin: 0; padding: 0;
+  width: 100%;
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font-body);
@@ -75,8 +76,14 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+/* Clip any accidental horizontal overflow (e.g. from the body's off-canvas
+   radial gradients or wide children) so the native vertical scrollbar stays
+   at the viewport's right edge and the full page remains reachable. `clip`
+   doesn't create a scroll container, so the sticky navbar still sticks. */
+html { overflow-x: clip; }
 body {
   min-height: 100vh;
+  overflow-x: clip;
   background-image:
     radial-gradient(ellipse 900px 500px at -10% -200px, rgba(37,99,235,.09), transparent 60%),
     radial-gradient(ellipse 700px 400px at 110% -100px, rgba(96,165,250,.08), transparent 60%);
@@ -104,7 +111,7 @@ a:hover { text-decoration: none; }
   pointer-events: none;
 }
 .portal-navbar-inner {
-  max-width: 1440px; margin: 0 auto;
+  max-width: none; width: 100%; margin: 0 auto;
   padding: 0 24px;
   height: 100%;
   display: flex; align-items: center; gap: 6px;
@@ -173,7 +180,7 @@ a:hover { text-decoration: none; }
    LAYOUT — sidebar + main
    ============================================================ */
 .portal-layout {
-  max-width: 1440px; margin: 0 auto;
+  max-width: none; width: 100%; margin: 0 auto;
   padding: 20px 24px 48px;
   display: grid;
   grid-template-columns: var(--sidebar-w) minmax(0, 1fr);

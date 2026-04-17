@@ -5,6 +5,22 @@ body {
   color: var(--p-text) !important;
 }
 
+/* Bootstrap caps `.container` at 1170px on >=1200px viewports, stranding the
+   dashboard in the middle with huge paper margins on 1920px+ displays. Let
+   the container flow with the viewport instead (capped only by explicit edge
+   padding), so the layout uses the full screen at any size — laptops, 1080p,
+   1440p, 4K, ultrawides.
+
+   Scoped to bodies that contain our topbar so this can never leak to pages
+   where Navbar.css is unexpectedly present (e.g., the login form) and
+   misalign the native layout. */
+body:has(.topbar-container) > .container,
+.navbar > .container,
+.navbar > .topbar-container {
+  max-width: none !important;
+  width: auto !important;
+}
+
 .navbar,
 .navbar-default {
   background: var(--p-grad-ink) !important;

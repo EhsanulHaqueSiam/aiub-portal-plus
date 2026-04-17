@@ -113,9 +113,8 @@ function enhance() {
   const sidebar = document.getElementById('navigation-bar');
   if (!sidebar) return;
 
-  // Shared blue-theme design tokens come first so every other stylesheet
-  // can reference --p-* variables.
-  loadCSS('aiub-tokens', 'Shared/tokens.css');
+  // Shared design tokens are loaded by navbar.content.ts so every
+  // Student/* page gets them — not just pages where this sidebar renders.
   loadCSS('sidebar-style', 'Shared/Sidebar.css');
   injectExtraNavItems(sidebar);
 
