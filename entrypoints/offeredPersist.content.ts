@@ -1,4 +1,5 @@
 import { extensionEnabled } from '@/utils/storage';
+import type { OfferedCourse, Section } from '@/lib/offered';
 
 type TimeSlot = {
   classType: string;
@@ -8,7 +9,7 @@ type TimeSlot = {
   room: string;
 };
 
-type Course = {
+type FlatSection = {
   classId: string;
   title: string;
   section: string;
@@ -18,6 +19,34 @@ type Course = {
   count: number;
   timeSlots: TimeSlot[];
 };
+
+/* The parser (both the DOM-reading fallback here and the MAIN-world
+   offered-filter.js) produces one flat record per <tr> — that is, one per
+   section. The Routine Generator expects the storage shape from
+   lib/offered.ts (OfferedCourse[] with nested sections[] per title).
+   Group by title once at the write boundary so downstream code only has
+   to handle one shape. */
+function groupFlatIntoCourses(flat: FlatSection[]): OfferedCourse[] {
+  const byTitle = new Map<string, OfferedCourse>();
+  for (const row of flat) {
+    const title = (row.title ?? '').trim();
+    if (!title) continue;
+    let bucket = byTitle.get(title);
+    if (!bucket) {
+      bucket = { title, sections: [] };
+      byTitle.set(title, bucket);
+    }
+    const s: Section = {
+      classId: row.classId,
+      section: row.section,
+      status: row.status,
+      capacity: row.capacity,
+      timeSlots: row.timeSlots,
+    };
+    bucket.sections!.push(s);
+  }
+  return Array.from(byTitle.values());
+}
 
 declare global {
   interface Window {
@@ -45,15 +74,15 @@ export default defineContentScript({
       // filter script (offered-filter.js) will expand pagination and overwrite this
       // payload with the full list once it loads. We still write a best-effort copy
       // so the Routine Generator has something if the user skipped interacting.
-      const courses = parseRows(rows);
-      if (courses.length === 0) {
+      const flat = parseRows(rows);
+      if (flat.length === 0) {
         if (attempts < 60) setTimeout(() => tryPersist(attempts + 1), 500);
         return;
       }
 
       await browser.storage.local.set({
         aiubOfferedCourses: {
-          courses,
+          courses: groupFlatIntoCourses(flat),
           capturedAt: new Date().toISOString(),
           partial: true,
         },
@@ -65,13 +94,13 @@ export default defineContentScript({
     // to persist on its behalf.
     window.addEventListener('message', (event) => {
       if (event.source !== window) return;
-      const data = event.data as { type?: string; courses?: Course[] } | null;
+      const data = event.data as { type?: string; courses?: FlatSection[] } | null;
       if (!data || data.type !== 'AIUB_PORTAL_PLUS_OFFERED' || !Array.isArray(data.courses)) {
         return;
       }
       browser.storage.local.set({
         aiubOfferedCourses: {
-          courses: data.courses,
+          courses: groupFlatIntoCourses(data.courses),
           capturedAt: new Date().toISOString(),
           partial: false,
         },
@@ -82,8 +111,8 @@ export default defineContentScript({
   },
 });
 
-function parseRows(rows: NodeListOf<Element>): Course[] {
-  const courses: Course[] = [];
+function parseRows(rows: NodeListOf<Element>): FlatSection[] {
+  const courses: FlatSection[] = [];
   rows.forEach((row) => {
     const cells = row.querySelectorAll('td');
     if (cells.length < 3) return;
