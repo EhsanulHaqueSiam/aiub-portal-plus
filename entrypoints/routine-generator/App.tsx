@@ -1,7 +1,8 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { PortalShell } from '@/components/PortalShell';
-import type { OfferedCourse, Section } from '@/lib/offered';
+import type { OfferedCourse, Section, HighlightColor } from '@/lib/offered';
 import type { CurriculumCourse } from '@/lib/offered';
+import { HIGHLIGHT_COLORS } from '@/lib/offered';
 import {
   WEEK_DAYS, generateRoutines, fmtClockTime, fmtAgo, parseClockTime, norm,
   type Filters, type Selection, type Routine,
@@ -13,6 +14,18 @@ import { triggerSync, writeHighlights, type SyncProgress } from './sync';
 
 const MAX_SEARCH_RESULTS = 40;
 const RESULTS_PAGE = 5;
+
+/* Swatch tokens for the Routine Generator's pinned-routine indicator.
+   Matches the HIGHLIGHT_COLORS palette keys in lib/offered.ts. The
+   Offered Courses page has its own CSS for the actual row highlight
+   (see highlight.content.ts). Keep the two palettes visually aligned. */
+const PIN_SWATCH: Record<HighlightColor, { border: string; ring: string; dot: string }> = {
+  amber:   { border: '#d97706', ring: 'rgba(217,119,6,0.22)',  dot: '#fbbf24' },
+  royal:   { border: '#1d4ed8', ring: 'rgba(29,78,216,0.22)',  dot: '#60a5fa' },
+  emerald: { border: '#059669', ring: 'rgba(5,150,105,0.22)',  dot: '#34d399' },
+  rose:    { border: '#be185d', ring: 'rgba(190,24,93,0.22)',  dot: '#fb7185' },
+  violet:  { border: '#6d28d9', ring: 'rgba(109,40,217,0.22)', dot: '#a78bfa' },
+};
 
 // ------- bucketing offered courses by title -------
 type CourseBucket = { title: string; sections: Section[]; courseCode?: string };
@@ -110,26 +123,68 @@ function Generator({ data }: { data: ReturnType<typeof useRoutineData> }) {
     routines: Routine[]; missing: string[]; exploredCap?: boolean; shownCount: number; filters: Filters;
   } | null>(null);
 
-  // highlight sync — write selected sections to chrome.storage.local.aiubHighlights
+  // highlight sync — pin 1..N routines, each painted a distinct palette
+  // color on the Offered Courses + Registration pages.
   const [highlightsEnabled, setHighlightsEnabled] = useState<boolean>(!!data.highlights?.enabled);
-  const [viewedRoutineIdx, setViewedRoutineIdx] = useState<number | null>(null);
+  const [viewedRoutineIndices, setViewedRoutineIndices] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     setHighlightsEnabled(!!data.highlights?.enabled);
   }, [data.highlights?.enabled]);
 
-  // Persist highlights whenever the user picks a routine to emphasize.
+  // Reconcile the local pin set with storage. When the popup removes a pin
+  // or another tab writes aiubHighlights, derive which routines are still
+  // pinned by matching each stored group's classIds against each routine's
+  // classIds. Without this reconciliation, a popup-side delete would get
+  // clobbered the next time the local write effect fires.
   useEffect(() => {
-    if (!lastResult || viewedRoutineIdx == null) return;
-    const routine = lastResult.routines[viewedRoutineIdx];
-    if (!routine) return;
-    const classIds = routine.sections
-      .map((s) => String(s.classId ?? s.section ?? '').trim())
-      .filter(Boolean);
+    if (!lastResult) return;
+    const storedGroups = data.highlights?.groups ?? [];
+    if (storedGroups.length === 0) {
+      setViewedRoutineIndices((prev) => (prev.size === 0 ? prev : new Set()));
+      return;
+    }
+    const routineKeys = lastResult.routines.map((r) =>
+      new Set(
+        r.sections.map((s) => String(s.classId ?? s.section ?? '').trim()).filter(Boolean),
+      ),
+    );
+    const derived = new Set<number>();
+    for (const g of storedGroups) {
+      const gSet = new Set(g.classIds.map((id) => String(id).trim()).filter(Boolean));
+      for (let i = 0; i < routineKeys.length; i++) {
+        const rSet = routineKeys[i];
+        if (rSet.size !== gSet.size) continue;
+        let match = true;
+        for (const v of gSet) { if (!rSet.has(v)) { match = false; break; } }
+        if (match) { derived.add(i); break; }
+      }
+    }
+    setViewedRoutineIndices((prev) => {
+      if (prev.size === derived.size && Array.from(prev).every((x) => derived.has(x))) return prev;
+      return derived;
+    });
+  }, [data.highlights, lastResult]);
+
+  // Persist highlights whenever the pin set changes. Gated on lastResult so
+  // an initial render (before routines are generated) doesn't clobber
+  // stored groups from a previous session.
+  useEffect(() => {
+    if (!lastResult) return;
+    const sortedPicks = Array.from(viewedRoutineIndices).sort((a, b) => a - b);
+    const groups = sortedPicks.flatMap((idx, pos) => {
+      const routine = lastResult.routines[idx];
+      if (!routine) return [];
+      const classIds = routine.sections
+        .map((s) => String(s.classId ?? s.section ?? '').trim())
+        .filter(Boolean);
+      if (classIds.length === 0) return [];
+      return [{ classIds, color: HIGHLIGHT_COLORS[pos % HIGHLIGHT_COLORS.length] }];
+    });
     const courseTitles: string[] = [];
     for (const sel of selections.values()) courseTitles.push(sel.title);
-    writeHighlights({ classIds, courseTitles, enabled: highlightsEnabled });
-  }, [viewedRoutineIdx, lastResult, highlightsEnabled, selections]);
+    writeHighlights({ groups, courseTitles, enabled: highlightsEnabled });
+  }, [viewedRoutineIndices, lastResult, highlightsEnabled, selections]);
 
   return (
     <>
@@ -151,9 +206,9 @@ function Generator({ data }: { data: ReturnType<typeof useRoutineData> }) {
             shownCount: Math.min(RESULTS_PAGE, result.routines.length),
             filters,
           });
-          setViewedRoutineIdx(null);
+          setViewedRoutineIndices(new Set());
         }}
-        onClear={() => { setSelections(new Map()); setLastResult(null); setViewedRoutineIdx(null); }}
+        onClear={() => { setSelections(new Map()); setLastResult(null); setViewedRoutineIndices(new Set()); }}
         resultCount={lastResult?.routines.length ?? 0}
         hasSelections={selections.size > 0}
       />
@@ -162,8 +217,12 @@ function Generator({ data }: { data: ReturnType<typeof useRoutineData> }) {
         <ResultsBlock
           result={lastResult}
           onShowMore={() => setLastResult((r) => r ? { ...r, shownCount: Math.min(r.shownCount + RESULTS_PAGE, r.routines.length) } : r)}
-          viewedIdx={viewedRoutineIdx}
-          onView={setViewedRoutineIdx}
+          viewedIndices={viewedRoutineIndices}
+          onToggleView={(i) => setViewedRoutineIndices((prev) => {
+            const next = new Set(prev);
+            if (next.has(i)) next.delete(i); else next.add(i);
+            return next;
+          })}
           highlightsEnabled={highlightsEnabled}
           onToggleHighlights={setHighlightsEnabled}
         />
@@ -641,11 +700,11 @@ function Radio({ checked, onChange, strong, sub }: { checked: boolean; onChange:
 }
 
 // ------- results -------
-function ResultsBlock({ result, onShowMore, viewedIdx, onView, highlightsEnabled, onToggleHighlights }: {
+function ResultsBlock({ result, onShowMore, viewedIndices, onToggleView, highlightsEnabled, onToggleHighlights }: {
   result: { routines: Routine[]; missing: string[]; exploredCap?: boolean; shownCount: number; filters: Filters };
   onShowMore: () => void;
-  viewedIdx: number | null;
-  onView: (i: number | null) => void;
+  viewedIndices: Set<number>;
+  onToggleView: (i: number) => void;
   highlightsEnabled: boolean;
   onToggleHighlights: (v: boolean) => void;
 }) {
@@ -671,19 +730,27 @@ function ResultsBlock({ result, onShowMore, viewedIdx, onView, highlightsEnabled
   }
 
   const shown = result.routines.slice(0, result.shownCount);
+  const sortedPicks = Array.from(viewedIndices).sort((a, b) => a - b);
+  const pinCountCopy = viewedIndices.size === 0
+    ? "Pick one or more routines below to highlight their class IDs on Offered Courses + Registration."
+    : `Highlighting ${viewedIndices.size} pinned routine${viewedIndices.size === 1 ? '' : 's'}.`;
   return (
     <Block index="03" title="Routines" subtitle={result.filters.sortBy === 'minimize' ? 'Ranked by fewest gaps first.' : 'Ranked by most off-days first.'}>
       <div className="flex flex-col gap-4">
         <label className="inline-flex items-center gap-2 text-[12px] text-ink-2 cursor-pointer">
           <input type="checkbox" checked={highlightsEnabled} onChange={(e) => onToggleHighlights(e.target.checked)} />
-          Highlight this routine's class IDs on Offered Courses + Registration
+          <span><span className="font-semibold">Highlight pinned class IDs</span> on Offered Courses + Registration — <span className="text-muted">{pinCountCopy}</span></span>
         </label>
 
         <div className="flex flex-col gap-4">
-          {shown.map((routine, i) => (
-            <RoutineCard key={i} routine={routine} idx={i} active={viewedIdx === i}
-                         onView={() => onView(viewedIdx === i ? null : i)} />
-          ))}
+          {shown.map((routine, i) => {
+            const pickPos = sortedPicks.indexOf(i);
+            const color = pickPos >= 0 ? HIGHLIGHT_COLORS[pickPos % HIGHLIGHT_COLORS.length] : null;
+            return (
+              <RoutineCard key={i} routine={routine} idx={i} pinColor={color}
+                           onToggleView={() => onToggleView(i)} />
+            );
+          })}
         </div>
 
         {result.shownCount < result.routines.length && (
@@ -703,19 +770,36 @@ function ResultsBlock({ result, onShowMore, viewedIdx, onView, highlightsEnabled
   );
 }
 
-function RoutineCard({ routine, idx, active, onView }: { routine: Routine; idx: number; active: boolean; onView: () => void }) {
+function RoutineCard({ routine, idx, pinColor, onToggleView }: {
+  routine: Routine;
+  idx: number;
+  pinColor: HighlightColor | null;
+  onToggleView: () => void;
+}) {
   const gapHours = (routine.totalGap / 60).toFixed(1);
+  const active = pinColor !== null;
+  const swatch = pinColor ? PIN_SWATCH[pinColor] : null;
+  const articleStyle = swatch
+    ? { borderColor: swatch.border, boxShadow: `0 0 0 3px ${swatch.ring}, 0 8px 22px -14px rgba(11,30,91,.18)` }
+    : undefined;
+  const buttonStyle = swatch ? { background: swatch.border, color: '#fff' } : undefined;
   return (
-    <article className={`rounded-xl border bg-white shadow-card overflow-hidden transition-shadow ${active ? 'border-royal-600 shadow-[0_0_0_3px_rgba(37,99,235,.18),0_8px_22px_-14px_rgba(11,30,91,.18)]' : 'border-line'}`}>
+    <article className={`rounded-xl border bg-white shadow-card overflow-hidden transition-shadow ${active ? '' : 'border-line'}`}
+             style={articleStyle}>
       <header className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-line-soft bg-paper-soft">
         <span className="rounded-md bg-navy-900 px-2.5 py-1 text-[11px] font-bold text-gold-400 font-mono">#{String(idx + 1).padStart(2, '0')}</span>
         <strong className="text-[13px] font-bold text-ink">Routine</strong>
+        {swatch && (
+          <span aria-hidden className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: swatch.dot }} />
+        )}
         <span className="text-[11.5px] text-muted tabular-nums">
           {routine.offDays} off-day{routine.offDays === 1 ? '' : 's'} · {gapHours}h total gap · starts {fmtClockTime(routine.earliestStart)}
         </span>
-        <button type="button" onClick={onView}
-                className={`ml-auto inline-flex items-center rounded-md px-3 py-1.5 min-h-[44px] text-[11.5px] font-semibold ${active ? 'bg-royal-600 text-white' : 'bg-white border border-line text-ink-2 hover:bg-royal-50'}`}>
-          {active ? 'Hide grid' : 'View grid'}
+        <button type="button" onClick={onToggleView}
+                className={`ml-auto inline-flex items-center rounded-md px-3 py-1.5 min-h-[44px] text-[11.5px] font-semibold ${active ? '' : 'bg-white border border-line text-ink-2 hover:bg-royal-50'}`}
+                style={buttonStyle}
+                aria-pressed={active}>
+          {active ? 'Unpin' : 'Pin & view'}
         </button>
       </header>
 

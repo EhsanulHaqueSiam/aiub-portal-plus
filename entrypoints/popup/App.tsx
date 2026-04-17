@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { extensionEnabled, latestRelease, type LatestRelease } from '@/utils/storage';
 import { currentVersion, isUpdateAvailable } from '@/utils/updateCheck';
+import type { Highlights, HighlightColor } from '@/lib/offered';
 import './App.css';
 
 const FEATURES = [
@@ -15,10 +16,22 @@ const FEATURES = [
 
 const VERSION = currentVersion();
 
+// Matches PALETTE in entrypoints/highlight.content.ts. Used only for the
+// popup's swatch dot so the pinned-list color reads as the same routine
+// the user sees on Offered Courses.
+const POPUP_SWATCH: Record<HighlightColor, string> = {
+  amber:   '#fbbf24',
+  royal:   '#60a5fa',
+  emerald: '#34d399',
+  rose:    '#fb7185',
+  violet:  '#a78bfa',
+};
+
 function App() {
   const [enabled, setEnabled] = useState(true);
   const [status, setStatus] = useState<'active' | 'inactive' | 'neutral'>('neutral');
   const [release, setRelease] = useState<LatestRelease | null>(null);
+  const [highlights, setHighlights] = useState<Highlights | null>(null);
 
   useEffect(() => {
     extensionEnabled.getValue().then((val) => {
@@ -28,6 +41,18 @@ function App() {
     latestRelease.getValue().then(setRelease);
     const unwatch = latestRelease.watch(setRelease);
     browser.runtime.sendMessage({ type: 'CHECK_UPDATE_NOW' }).catch(() => {});
+
+    browser.storage.local.get({ aiubHighlights: null }).then((res) => {
+      setHighlights((res.aiubHighlights as Highlights | null) ?? null);
+    });
+    const storageListener = (
+      changes: Record<string, { newValue?: unknown }>,
+      area: string,
+    ) => {
+      if (area !== 'local' || !changes.aiubHighlights) return;
+      setHighlights((changes.aiubHighlights.newValue as Highlights | null) ?? null);
+    };
+    browser.storage.onChanged.addListener(storageListener);
 
     browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
       const url = tabs[0]?.url ?? '';
@@ -40,10 +65,15 @@ function App() {
       }
     });
 
-    return () => unwatch();
+    return () => {
+      unwatch();
+      browser.storage.onChanged.removeListener(storageListener);
+    };
   }, [enabled]);
 
   const updateReady = release ? isUpdateAvailable(release.version, VERSION) : false;
+  const pinGroups = (highlights?.groups ?? []).filter((g) => Array.isArray(g.classIds) && g.classIds.length > 0);
+  const pinsEnabled = highlights?.enabled !== false;
 
   const handleToggle = async () => {
     const newValue = !enabled;
@@ -55,6 +85,40 @@ function App() {
     if (tabs[0]?.id) {
       browser.tabs.reload(tabs[0].id);
     }
+  };
+
+  const writeHighlights = async (next: Highlights) => {
+    await browser.storage.local.set({
+      aiubHighlights: { ...next, updatedAt: new Date().toISOString() },
+    });
+  };
+
+  const handleUnpin = (idx: number) => {
+    const nextGroups = pinGroups.filter((_, i) => i !== idx);
+    writeHighlights({
+      ...(highlights ?? {}),
+      groups: nextGroups,
+      classIds: [],
+      enabled: pinsEnabled,
+    });
+  };
+
+  const handleClearAll = () => {
+    writeHighlights({
+      ...(highlights ?? {}),
+      groups: [],
+      classIds: [],
+      enabled: pinsEnabled,
+    });
+  };
+
+  const handleTogglePins = () => {
+    writeHighlights({
+      ...(highlights ?? {}),
+      groups: pinGroups,
+      classIds: highlights?.classIds ?? [],
+      enabled: !pinsEnabled,
+    });
   };
 
   const statusMessages = {
@@ -108,6 +172,60 @@ function App() {
         <span>{status === 'active' ? '✓' : status === 'inactive' ? '✕' : '→'}</span>
         <span>{statusMessages[status]}</span>
       </div>
+
+      {enabled && pinGroups.length > 0 && (
+        <div className="popup-pinned">
+          <div className="popup-pinned-header">
+            <div className="popup-pinned-title">Pinned routines</div>
+            <div className="popup-pinned-actions">
+              <button
+                type="button"
+                className={`popup-pinned-btn${pinsEnabled ? '' : ' is-paused'}`}
+                onClick={handleTogglePins}
+                aria-pressed={!pinsEnabled}
+              >
+                {pinsEnabled ? 'Pause' : 'Resume'}
+              </button>
+              <button
+                type="button"
+                className="popup-pinned-btn"
+                onClick={handleClearAll}
+              >
+                Clear all
+              </button>
+            </div>
+          </div>
+          <ul className="popup-pinned-list">
+            {pinGroups.map((g, i) => {
+              const color: HighlightColor = (POPUP_SWATCH as Record<string, string>)[g.color]
+                ? (g.color as HighlightColor)
+                : 'amber';
+              return (
+                <li key={i} className="popup-pinned-item">
+                  <span
+                    className="popup-pinned-swatch"
+                    style={{ background: POPUP_SWATCH[color] }}
+                    aria-hidden
+                  />
+                  <span className="popup-pinned-label">Pin {i + 1}</span>
+                  <span className="popup-pinned-count">
+                    {g.classIds.length} class ID{g.classIds.length === 1 ? '' : 's'}
+                  </span>
+                  <button
+                    type="button"
+                    className="popup-pinned-remove"
+                    onClick={() => handleUnpin(i)}
+                    aria-label={`Unpin routine ${i + 1}`}
+                    title="Unpin"
+                  >
+                    ×
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
 
       <div className="popup-features">
         <div className="popup-features-title">Features</div>

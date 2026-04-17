@@ -65,7 +65,25 @@ export type RegistrationStatus = {
   buttonText?: string;
 };
 
+/* One colored highlight group. Multiple groups let the Routine Generator
+   pin 2–N routines simultaneously, each class ID set painted a distinct
+   color so the student can spot routine-A's sections at a glance among
+   routine-B's on the Offered Courses page. Color is a palette key, not
+   a raw CSS value — the content script maps it to styled classes. */
+export type HighlightColor = 'amber' | 'royal' | 'emerald' | 'rose' | 'violet';
+export const HIGHLIGHT_COLORS: HighlightColor[] = ['amber', 'royal', 'emerald', 'rose', 'violet'];
+
+export type HighlightGroup = {
+  classIds: string[];
+  color: HighlightColor;
+};
+
 export type Highlights = {
+  /* New shape (v1.4.14+): one entry per pinned routine. */
+  groups?: HighlightGroup[];
+  /* Legacy shape (≤v1.4.13): flat class IDs, treated as a single amber
+     group by the content script for backwards compat with stored state
+     written by older versions. */
   classIds?: string[];
   courseTitles?: string[];
   enabled?: boolean;

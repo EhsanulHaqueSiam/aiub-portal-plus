@@ -145,6 +145,112 @@
 .popup-status.neutral   { background: #fffbeb; color: var(--p-warn); }
 .popup-status.neutral  span:first-child { background: var(--p-warn); color: #fff; }
 
+/* Pinned routines — surfaced here so the student can see + manage highlights
+   without having to return to the Routine Generator tab. Per-pin Unpin writes
+   to aiubHighlights.groups; content scripts + the generator both reconcile. */
+.popup-pinned {
+  padding: 14px 20px 12px;
+  background: #fff;
+  border-bottom: 1px solid var(--p-line);
+}
+.popup-pinned-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.popup-pinned-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--p-royal);
+}
+.popup-pinned-actions {
+  display: flex;
+  gap: 6px;
+}
+.popup-pinned-btn {
+  font: 700 10px/1 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--p-muted);
+  background: none;
+  border: 1px solid var(--p-line);
+  border-radius: 999px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s, background 0.12s;
+}
+.popup-pinned-btn:hover {
+  color: var(--p-royal);
+  border-color: var(--p-royal);
+  background: var(--p-sky-softer);
+}
+.popup-pinned-btn.is-paused {
+  background: #fffbeb;
+  color: var(--p-warn);
+  border-color: #fcd34d;
+}
+.popup-pinned-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+.popup-pinned-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 9px;
+  border: 1px solid var(--p-line);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--p-ink-2);
+  background: #fff;
+}
+.popup-pinned-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(11, 30, 91, 0.15);
+  flex-shrink: 0;
+}
+.popup-pinned-label {
+  flex: 1;
+  font-weight: 600;
+}
+.popup-pinned-count {
+  font: 700 10.5px ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--p-muted);
+  background: var(--p-sky-softer);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+.popup-pinned-remove {
+  font: 700 16px/1 ui-sans-serif, system-ui, sans-serif;
+  color: var(--p-muted);
+  background: none;
+  border: none;
+  border-radius: 999px;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+.popup-pinned-remove:hover {
+  color: var(--p-err);
+  background: #fee2e2;
+}
+
 /* Features */
 .popup-features {
   padding: 14px 20px;

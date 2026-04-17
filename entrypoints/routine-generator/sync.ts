@@ -147,7 +147,13 @@ export async function triggerSync(opts: SyncOpts = {}): Promise<void> {
   );
 }
 
-export async function writeHighlights(payload: { classIds: string[]; courseTitles: string[]; enabled: boolean }) {
+import type { HighlightGroup } from '@/lib/offered';
+
+export async function writeHighlights(payload: {
+  groups: HighlightGroup[];
+  courseTitles: string[];
+  enabled: boolean;
+}) {
   const api = extApi();
   if (!api) return;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
