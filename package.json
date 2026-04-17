@@ -2,7 +2,7 @@
   "name": "aiub-portal-plus",
   "description": "Comprehensive enhancement suite for the AIUB Student Portal",
   "private": true,
-  "version": "1.4.10",
+  "version": "1.4.11",
   "type": "module",
   "scripts": {
     "dev": "wxt",

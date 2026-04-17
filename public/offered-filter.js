@@ -132,15 +132,23 @@
       try {
         const ft = FooTable.get(table);
         if (ft && ft.rows && ft.rows.all && ft.rows.all.length > 0) {
+          // FooTable retains row.$el for every row, including rows that are
+          // detached from the DOM by paging. Collect those element refs
+          // directly and parse from that array — querying tbody > tr only
+          // sees the current page and will always come up short on paged
+          // tables, triggering a needless fallback-expand redraw.
+          const els = [];
           const hidden = [];
           ft.rows.all.forEach(function (row) {
             const el = row.$el && row.$el[0];
-            if (el && el.style.display === 'none') {
+            if (!el) return;
+            if (el.style.display === 'none') {
               hidden.push(el);
               el.style.display = '';
             }
+            els.push(el);
           });
-          courses = parseRowElements(table.querySelectorAll('tbody > tr'));
+          courses = parseRowElements(els);
           hidden.forEach(function (el) { el.style.display = 'none'; });
           console.log('[AIUB Filter] rows.all → parsed ' + courses.length + '/' + (expectedTotal ?? '?'));
           if (isComplete(courses.length)) return courses;
