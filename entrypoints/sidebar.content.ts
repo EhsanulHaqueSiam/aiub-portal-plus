@@ -113,6 +113,9 @@ function enhance() {
   const sidebar = document.getElementById('navigation-bar');
   if (!sidebar) return;
 
+  // Shared blue-theme design tokens come first so every other stylesheet
+  // can reference --p-* variables.
+  loadCSS('aiub-tokens', 'Shared/tokens.css');
   loadCSS('sidebar-style', 'Shared/Sidebar.css');
   injectExtraNavItems(sidebar);
 

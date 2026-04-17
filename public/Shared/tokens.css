@@ -1,0 +1,145 @@
+/* =========================================================================
+   AIUB Portal+ — shared design tokens
+   -------------------------------------------------------------------------
+   Loaded on every Student/* page via sidebar.content.ts so the full
+   extension UI draws from a single blue palette, type scale, spacing
+   rhythm, and motion grammar. Override locally when a specific page
+   genuinely needs something different, but prefer these tokens first.
+   ========================================================================= */
+
+:root {
+  /* Blue spine — from refined midnight to vivid sky. Use --p-royal as the
+     default accent. --p-ink for body text, --p-soft for backgrounds. */
+  --p-royal-950: #0a1838;
+  --p-royal-900: #0f1f4d;
+  --p-royal-800: #162b6b;
+  --p-royal-700: #1e3a8a;
+  --p-royal-600: #1d4ed8;
+  --p-royal-500: #2563eb;  /* primary */
+  --p-royal-400: #3b82f6;
+  --p-royal-300: #60a5fa;
+  --p-royal-200: #93c5fd;
+  --p-royal-100: #dbeafe;
+  --p-royal-50:  #eff6ff;
+
+  --p-sky:       #38bdf8;
+  --p-indigo:    #4338ca;
+  --p-sapphire:  #0369a1;
+
+  /* Neutrals with a cool tint so they harmonize with the blues. */
+  --p-ink:       #0f172a;
+  --p-text:      #1e293b;
+  --p-text-soft: #475569;
+  --p-muted:     #64748b;
+  --p-mute-soft: #94a3b8;
+  --p-line:      #e2e8f0;
+  --p-line-soft: #eef2f7;
+  --p-surface:   #ffffff;
+  --p-surface-soft: #f8fafc;
+  --p-surface-tint: #f0f7ff;
+
+  /* Feedback */
+  --p-ok:     #059669;
+  --p-ok-soft:#d1fae5;
+  --p-warn:   #d97706;
+  --p-warn-soft:#fef3c7;
+  --p-err:    #dc2626;
+  --p-err-soft:#fee2e2;
+
+  /* Type scale — editorial display + clean humanist sans. */
+  --p-font-display: 'Playfair Display', 'Source Serif Pro', 'Georgia', serif;
+  --p-font-body: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --p-font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --p-fs-xs:   11px;
+  --p-fs-sm:   12.5px;
+  --p-fs-base: 13.5px;
+  --p-fs-md:   15px;
+  --p-fs-lg:   17px;
+  --p-fs-xl:   22px;
+  --p-fs-2xl:  28px;
+  --p-fs-3xl:  36px;
+
+  --p-lh-tight: 1.18;
+  --p-lh-snug:  1.32;
+  --p-lh-body:  1.55;
+
+  --p-tracking-wide: 0.08em;
+  --p-tracking-eyebrow: 0.14em;
+
+  /* Spacing — 4px rhythm. */
+  --p-s-1: 4px;
+  --p-s-2: 8px;
+  --p-s-3: 12px;
+  --p-s-4: 16px;
+  --p-s-5: 20px;
+  --p-s-6: 24px;
+  --p-s-8: 32px;
+  --p-s-10: 40px;
+  --p-s-12: 56px;
+
+  /* Radius */
+  --p-r-xs: 6px;
+  --p-r-sm: 10px;
+  --p-r-md: 14px;
+  --p-r-lg: 18px;
+  --p-r-xl: 24px;
+  --p-r-pill: 999px;
+
+  /* Shadows — three-tier depth. */
+  --p-sh-1: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+  --p-sh-2: 0 6px 16px -6px rgba(30, 58, 138, 0.18), 0 2px 4px rgba(15, 23, 42, 0.06);
+  --p-sh-3: 0 22px 44px -20px rgba(30, 58, 138, 0.35), 0 8px 16px -10px rgba(15, 23, 42, 0.12);
+  --p-sh-glow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+
+  /* Surface treatments — reusable gradients. */
+  --p-grad-royal: linear-gradient(135deg, #1e40af 0%, #2563eb 55%, #3b82f6 100%);
+  --p-grad-soft:  linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+  --p-grad-ink:   linear-gradient(135deg, #0f1f4d 0%, #1e3a8a 60%, #1d4ed8 100%);
+  --p-grad-mesh:
+    radial-gradient(1200px 600px at 10% -10%, rgba(59, 130, 246, 0.18), transparent 60%),
+    radial-gradient(900px 500px at 110% 10%, rgba(14, 165, 233, 0.14), transparent 65%),
+    linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+
+  /* Motion */
+  --p-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --p-ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+  --p-dur-1: 120ms;
+  --p-dur-2: 220ms;
+  --p-dur-3: 380ms;
+  --p-dur-enter: 520ms;
+}
+
+/* -------------------------------------------------------------------------
+   Shared micro-utilities (namespaced so they don't collide with Bootstrap).
+   ------------------------------------------------------------------------- */
+
+.p-eyebrow {
+  font: 700 var(--p-fs-xs)/1.1 var(--p-font-body);
+  letter-spacing: var(--p-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--p-royal-500);
+}
+
+.p-hairline { height: 1px; background: linear-gradient(90deg, transparent, var(--p-line), transparent); }
+
+@keyframes p-rise {
+  0%   { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes p-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes p-shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+/* When a focus ring is needed, use this so every focus state rhymes. */
+.p-focus-ring:focus-visible,
+:root :focus-visible.p-focus-opt-in {
+  outline: none;
+  box-shadow: var(--p-sh-glow);
+  border-radius: var(--p-r-sm);
+}

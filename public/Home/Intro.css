@@ -1,3 +1,8 @@
+/* =========================================================================
+   Home — greeting banner + alerts + action buttons
+   Uses tokens from Shared/tokens.css. Editorial display + depth.
+   ========================================================================= */
+
 .intro-root-panel {
   border: none !important;
   box-shadow: none !important;
@@ -9,192 +14,218 @@
   padding: 0 !important;
 }
 
+/* Greeting banner ─ rich gradient + two soft ambient light sources. */
 .intro-banner {
-  background: linear-gradient(120deg, #1d4ed8 0%, #2563eb 55%, #3b82f6 100%);
-  border-radius: 10px;
-  padding: 20px 24px;
-  margin-bottom: 16px;
+  background: var(--p-grad-ink, linear-gradient(120deg, #1d4ed8 0%, #2563eb 55%, #3b82f6 100%));
+  border-radius: var(--p-r-lg, 18px);
+  padding: 26px 30px;
+  margin-bottom: var(--p-s-5, 20px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--p-s-4, 16px);
   flex-wrap: wrap;
   position: relative;
   overflow: hidden;
+  isolation: isolate;
+  color: #fff;
+  box-shadow: 0 28px 60px -28px rgba(15, 31, 77, 0.55),
+              inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  animation: p-rise var(--p-dur-enter, 520ms) var(--p-ease, cubic-bezier(0.22, 1, 0.36, 1)) both;
 }
 .intro-banner::before {
   content: '';
   position: absolute;
-  right: -30px;
-  top: -30px;
-  width: 160px;
-  height: 160px;
+  right: -80px;
+  top: -120px;
+  width: 320px;
+  height: 320px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
+  background: radial-gradient(circle, rgba(147, 197, 253, 0.35), transparent 60%);
   pointer-events: none;
+  z-index: -1;
 }
 .intro-banner::after {
   content: '';
   position: absolute;
-  right: 60px;
-  bottom: -50px;
-  width: 120px;
-  height: 120px;
+  left: -60px;
+  bottom: -80px;
+  width: 260px;
+  height: 260px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.04);
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.22), transparent 65%);
   pointer-events: none;
+  z-index: -1;
 }
 
-.intro-banner-left { flex: 1; min-width: 200px; }
+.intro-banner-left {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 
 .intro-greeting {
-  font-size: 11px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.75);
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  margin: 0 0 4px;
+  font: 400 var(--p-fs-2xl, 28px)/1.1 var(--p-font-display, 'Playfair Display', 'Georgia', serif);
+  font-style: italic;
+  color: #fff;
+  margin: 0;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 10px rgba(15, 31, 77, 0.3);
 }
 
 .intro-date {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
-  font-weight: 500;
+  font: 600 var(--p-fs-sm, 12.5px)/1.2 var(--p-font-body);
+  color: rgba(255, 255, 255, 0.78);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  letter-spacing: 0.01em;
 }
 .intro-date::before {
   content: '';
   display: inline-block;
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--p-royal-300, #60a5fa);
+  box-shadow: 0 0 10px rgba(96, 165, 250, 0.8);
 }
 
+/* Live clock badge — glass panel anchored to the right. */
 .intro-banner-badge {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  padding: 10px 18px;
-  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--p-r-md, 14px);
+  padding: 14px 22px;
+  text-align: right;
   flex-shrink: 0;
+  min-width: 150px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 .intro-banner-badge-label {
-  font-size: 10px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.65);
+  font: 700 var(--p-fs-xs, 11px)/1.1 var(--p-font-body);
+  color: rgba(255, 255, 255, 0.7);
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: var(--p-tracking-eyebrow, 0.14em);
   display: block;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 .intro-banner-badge-value {
-  font-size: 14px;
-  font-weight: 800;
+  font: 800 var(--p-fs-xl, 22px)/1 var(--p-font-body);
   color: #fff;
   display: block;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
 }
 
+/* Alerts — flat, color-coded, left-rail accent. */
 #main-content .alert {
   border: none !important;
-  border-radius: 8px !important;
-  font-size: 13px !important;
-  padding: 12px 16px !important;
+  border-radius: var(--p-r-sm, 10px) !important;
+  font: 500 var(--p-fs-base, 13.5px)/1.5 var(--p-font-body) !important;
+  padding: 14px 18px !important;
   margin-bottom: 14px !important;
+  box-shadow: var(--p-sh-1, 0 1px 3px rgba(15, 23, 42, 0.06)) !important;
+  animation: p-fade var(--p-dur-3, 380ms) var(--p-ease) both;
 }
 #main-content .alert-success {
-  background: #f0fdf4 !important;
-  color: #166534 !important;
-  border-left: 4px solid #22c55e !important;
+  background: var(--p-ok-soft, #d1fae5) !important;
+  color: #14532d !important;
+  border-left: 4px solid var(--p-ok, #059669) !important;
 }
-#main-content .alert-success a { color: #166534 !important; text-decoration: underline; }
+#main-content .alert-success a { color: #14532d !important; text-decoration: underline; }
 #main-content .alert-success .table-bordered {
-  border-radius: 6px !important;
+  border-radius: 8px !important;
   overflow: hidden;
   border-color: #bbf7d0 !important;
 }
 #main-content .alert-success .table-bordered td {
   border-color: #bbf7d0 !important;
-  padding: 7px 12px !important;
+  padding: 8px 12px !important;
 }
 #main-content .alert-success .btn-primary {
-  background: linear-gradient(135deg, #1d4ed8, #3b82f6) !important;
+  background: var(--p-grad-royal) !important;
   border: none !important;
-  border-radius: 6px !important;
-  font-weight: 600 !important;
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+  padding: 8px 16px !important;
 }
 #main-content .alert-warning {
-  background: #fffbeb !important;
-  color: #92400e !important;
-  border-left: 4px solid #f59e0b !important;
+  background: var(--p-warn-soft, #fef3c7) !important;
+  color: #78350f !important;
+  border-left: 4px solid var(--p-warn, #d97706) !important;
 }
 #main-content .alert-info {
-  background: #eff6ff !important;
-  color: #1e40af !important;
-  border-left: 4px solid #3b82f6 !important;
+  background: var(--p-royal-50, #eff6ff) !important;
+  color: var(--p-royal-700, #1e3a8a) !important;
+  border-left: 4px solid var(--p-royal-500, #2563eb) !important;
 }
 #main-content .alert-danger {
-  background: #fef2f2 !important;
-  color: #991b1b !important;
-  border-left: 4px solid #ef4444 !important;
+  background: var(--p-err-soft, #fee2e2) !important;
+  color: #7f1d1d !important;
+  border-left: 4px solid var(--p-err, #dc2626) !important;
 }
 
+/* Action buttons (Go to Registration, View Schedule, etc). */
 .intro-actions {
   border: none !important;
   box-shadow: none !important;
   background: transparent !important;
-  margin-bottom: 20px !important;
+  margin-bottom: var(--p-s-5, 20px) !important;
 }
 .intro-actions > .panel-body { padding: 0 !important; }
-
 .intro-actions .text-center {
   display: flex !important;
   gap: 10px !important;
   flex-wrap: wrap !important;
   justify-content: flex-start !important;
 }
-
 .intro-actions .btn {
-  border-radius: 7px !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
-  padding: 10px 22px !important;
+  border-radius: var(--p-r-sm, 10px) !important;
+  font: 700 var(--p-fs-sm, 12.5px)/1 var(--p-font-body) !important;
+  padding: 12px 22px !important;
   border: none !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
-  transition: transform 0.12s, box-shadow 0.12s !important;
-  letter-spacing: 0.1px;
+  box-shadow: var(--p-sh-2) !important;
+  transition:
+    transform var(--p-dur-2, 220ms) var(--p-ease),
+    box-shadow var(--p-dur-2, 220ms) var(--p-ease),
+    filter var(--p-dur-2, 220ms) var(--p-ease) !important;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
 }
 .intro-actions .btn:hover {
   transform: translateY(-2px) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18) !important;
+  box-shadow: var(--p-sh-3) !important;
+  filter: brightness(1.05);
 }
-.intro-actions .btn:active {
-  transform: translateY(0) !important;
-}
+.intro-actions .btn:active { transform: translateY(0) !important; }
 .intro-actions .btn-danger {
-  background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+  background: linear-gradient(135deg, #b91c1c, #dc2626) !important;
   color: #fff !important;
 }
 .intro-actions .btn-info {
-  background: linear-gradient(135deg, #0284c7, #38bdf8) !important;
+  background: linear-gradient(135deg, #0369a1, #38bdf8) !important;
   color: #fff !important;
 }
 .intro-actions .btn-default {
   background: #fff !important;
-  color: #374151 !important;
-  border: 1px solid #e2e8f0 !important;
+  color: var(--p-text) !important;
+  border: 1px solid var(--p-line) !important;
 }
 .intro-actions .btn-default:hover {
-  background: #f8fafc !important;
-  color: #2563eb !important;
-  border-color: #bfdbfe !important;
+  background: var(--p-royal-50) !important;
+  color: var(--p-royal-600) !important;
+  border-color: var(--p-royal-200) !important;
 }
 
 @media (max-width: 768px) {
-  .intro-banner { padding: 18px 20px; }
-  .intro-name { font-size: 18px; }
+  .intro-banner { padding: 20px 22px; }
+  .intro-greeting { font-size: 22px; }
   .intro-banner-badge { display: none; }
   .intro-actions .text-center { flex-direction: column !important; }
   .intro-actions .btn { width: 100% !important; text-align: center !important; }

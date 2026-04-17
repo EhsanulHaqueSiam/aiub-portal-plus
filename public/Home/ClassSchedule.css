@@ -1,21 +1,34 @@
 
 .sched-section-head {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: flex-start;
   flex-wrap: wrap;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 700;
-  color: #1e3a5f;
-  letter-spacing: -0.2px;
-  margin: 0 0 16px;
-  padding: 12px 16px;
-  background: linear-gradient(90deg, #dbeafe 0%, #eff6ff 100%);
-  border-left: 4px solid #2563eb;
-  border-radius: 6px;
+  gap: 10px;
+  font: 400 var(--p-fs-2xl, 28px)/1.1 var(--p-font-display, 'Playfair Display', 'Georgia', serif);
+  color: var(--p-royal-900, #0f1f4d);
+  letter-spacing: -0.02em;
+  margin: 0 0 20px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  position: relative;
+  padding-left: 18px;
 }
-.sched-section-head span { color: #2563eb; }
+.sched-section-head::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 6px; bottom: 10px;
+  width: 4px;
+  border-radius: 999px;
+  background: var(--p-grad-royal, linear-gradient(180deg, #1e40af, #3b82f6));
+  box-shadow: 0 4px 10px -2px rgba(37, 99, 235, 0.35);
+}
+.sched-section-head span {
+  color: var(--p-royal-500, #2563eb);
+  font-style: italic;
+}
 
 .sched-schedule-panel {
   border: none !important;
@@ -147,35 +160,52 @@
 .sched-class-entry {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-left: 4px solid #2563eb;
-  border-radius: 6px;
-  transition: all 0.2s ease;
+  gap: 14px;
+  padding: 14px 16px 14px 18px;
+  background: var(--p-surface, #fff);
+  border: 1px solid var(--p-line, #e2e8f0);
+  border-radius: var(--p-r-md, 14px);
   position: relative;
+  overflow: hidden;
+  transition:
+    transform var(--p-dur-2, 220ms) var(--p-ease),
+    border-color var(--p-dur-2, 220ms) var(--p-ease),
+    box-shadow var(--p-dur-2, 220ms) var(--p-ease),
+    background var(--p-dur-2, 220ms) var(--p-ease);
+}
+.sched-class-entry::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 10px; bottom: 10px;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--p-grad-royal, linear-gradient(180deg, #1e40af, #3b82f6));
+  transition: width var(--p-dur-2, 220ms) var(--p-ease);
 }
 .sched-class-entry:hover {
-  border-left-color: #2563eb;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
-  background: #f8fbff;
+  transform: translateY(-1px);
+  border-color: var(--p-royal-200, #bfdbfe);
+  background: var(--p-surface-tint, #f0f7ff);
+  box-shadow: var(--p-sh-2);
 }
+.sched-class-entry:hover::before { width: 5px; }
 
-/* Active class highlight */
+/* Active class — pulsing green rail with soft glow. */
 .sched-class-entry.sched-state-active {
-  border-left-color: #22c55e;
-  background: #f0fdf4;
-  border-color: #bbf7d0;
+  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+  border-color: #86efac;
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.18), 0 8px 22px -14px rgba(22, 163, 74, 0.35);
 }
-.sched-class-entry.sched-state-active:hover {
-  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.08);
+.sched-class-entry.sched-state-active::before {
+  background: linear-gradient(180deg, #22c55e, #16a34a);
 }
+.sched-class-entry.sched-state-active:hover { box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.25), var(--p-sh-2); }
 
 .sched-class-entry.sched-state-ended {
-  opacity: 0.65;
-  background: #f8fafc;
+  opacity: 0.6;
+  background: var(--p-surface-soft, #f8fafc);
 }
+.sched-class-entry.sched-state-ended::before { background: var(--p-mute-soft, #94a3b8); }
 
 /* Course name link — displayed on the left */
 .sched-course-name {
