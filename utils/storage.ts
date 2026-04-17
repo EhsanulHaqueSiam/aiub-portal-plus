@@ -11,3 +11,14 @@ export const extensionEnabled = storage.defineItem<boolean>('sync:extensionEnabl
 export const teamsCredsDismissed = storage.defineItem<boolean>('local:teamsCredsDismissed', {
   fallback: false,
 });
+
+export interface LatestRelease {
+  tag: string;
+  version: string;
+  url: string;
+  checkedAt: number;
+}
+
+export const latestRelease = storage.defineItem<LatestRelease | null>('local:latestRelease', {
+  fallback: null,
+});

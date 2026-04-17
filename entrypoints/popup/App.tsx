@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { extensionEnabled } from '@/utils/storage';
+import { extensionEnabled, latestRelease, type LatestRelease } from '@/utils/storage';
+import { currentVersion, isUpdateAvailable } from '@/utils/updateCheck';
 import './App.css';
 
 const FEATURES = [
@@ -12,14 +13,21 @@ const FEATURES = [
   { icon: '⚡', label: 'Conflict Detection' },
 ];
 
+const VERSION = currentVersion();
+
 function App() {
   const [enabled, setEnabled] = useState(true);
   const [status, setStatus] = useState<'active' | 'inactive' | 'neutral'>('neutral');
+  const [release, setRelease] = useState<LatestRelease | null>(null);
 
   useEffect(() => {
     extensionEnabled.getValue().then((val) => {
       setEnabled(val);
     });
+
+    latestRelease.getValue().then(setRelease);
+    const unwatch = latestRelease.watch(setRelease);
+    browser.runtime.sendMessage({ type: 'CHECK_UPDATE_NOW' }).catch(() => {});
 
     browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
       const url = tabs[0]?.url ?? '';
@@ -31,7 +39,11 @@ function App() {
         setStatus('neutral');
       }
     });
+
+    return () => unwatch();
   }, [enabled]);
+
+  const updateReady = release ? isUpdateAvailable(release.version, VERSION) : false;
 
   const handleToggle = async () => {
     const newValue = !enabled;
@@ -59,6 +71,21 @@ function App() {
         </div>
         <div className="popup-subtitle">Portal Enhancement Suite</div>
       </div>
+
+      {updateReady && release && (
+        <a
+          className="popup-update-banner"
+          href={release.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span className="popup-update-dot" />
+          <span className="popup-update-text">
+            Update available — <strong>{release.tag}</strong>
+          </span>
+          <span className="popup-update-cta">Download ↗</span>
+        </a>
+      )}
 
       <div className="popup-toggle-section">
         <div className="toggle-label">
@@ -95,7 +122,7 @@ function App() {
       </div>
 
       <div className="popup-footer">
-        AIUB Portal+ v1.0.0
+        AIUB Portal+ v{VERSION}
       </div>
     </div>
   );

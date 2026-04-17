@@ -54,6 +54,36 @@
   letter-spacing: 0.2px;
 }
 
+/* Update banner */
+.popup-update-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: linear-gradient(90deg, #fffbeb 0%, #fef3c7 100%);
+  border-bottom: 1px solid #fcd34d;
+  color: var(--p-warn);
+  font-size: 12.5px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.popup-update-banner:hover { background: #fef3c7; }
+.popup-update-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--p-gold);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+  flex-shrink: 0;
+}
+.popup-update-text { flex: 1; color: var(--p-ink-2); }
+.popup-update-text strong { color: var(--p-warn); font-weight: 700; }
+.popup-update-cta {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--p-warn);
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
 /* Toggle section */
 .popup-toggle-section {
   display: flex;

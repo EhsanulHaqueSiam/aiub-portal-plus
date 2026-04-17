@@ -1,10 +1,33 @@
 import { extensionEnabled } from '@/utils/storage';
+import { checkForUpdate, refreshBadge } from '@/utils/updateCheck';
 
 const OFFERED_URL = 'https://portal.aiub.edu/Student/Section/Offered';
 const CURRICULUM_URL = 'https://portal.aiub.edu/Student/Curriculum';
+const UPDATE_ALARM = 'aiub-plus-update-check';
 
 export default defineBackground(() => {
+  browser.runtime.onInstalled.addListener(() => {
+    browser.alarms.create(UPDATE_ALARM, { periodInMinutes: 360 });
+    checkForUpdate();
+  });
+
+  browser.runtime.onStartup.addListener(() => {
+    refreshBadge();
+    checkForUpdate();
+  });
+
+  browser.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === UPDATE_ALARM) checkForUpdate();
+  });
+
+  refreshBadge();
+
   browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (message?.type === 'CHECK_UPDATE_NOW') {
+      checkForUpdate().then(() => sendResponse({ ok: true }));
+      return true;
+    }
+
     if (message?.type === 'GET_ENABLED') {
       extensionEnabled.getValue().then((enabled) => sendResponse({ enabled }));
       return true;

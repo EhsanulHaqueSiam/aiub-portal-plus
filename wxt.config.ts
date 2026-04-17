@@ -11,7 +11,7 @@ export default defineConfig({
     description: 'Comprehensive enhancement suite for the AIUB Student Portal',
     // version intentionally omitted — WXT picks it up from package.json so
     // the CI workflow's `npm version <tag>` flows through to the manifest.
-    permissions: ['activeTab', 'storage', 'tabs'],
+    permissions: ['activeTab', 'alarms', 'storage', 'tabs'],
     host_permissions: ['https://portal.aiub.edu/*'],
     web_accessible_resources: [
       {
