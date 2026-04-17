@@ -145,12 +145,11 @@ function SidebarSection({ title, icon, children }: { title: string; icon: string
 function SidebarLink({ href, active, children }: { href: string; active?: boolean; children: ReactNode }) {
   const base = 'block px-3 py-2 text-[12px] font-medium leading-tight rounded-md transition-colors no-underline!';
   const inactive = 'text-ink-3 hover:bg-royal-50 hover:text-royal-600';
-  const activeCls = 'text-white font-bold shadow-[0_2px_8px_-3px_rgba(37,99,235,.45)]';
+  const activeCls = 'bg-grad-royal text-white font-bold shadow-[0_2px_8px_-3px_rgba(37,99,235,.45)]';
   return (
     <a href={href}
        aria-current={active ? 'page' : undefined}
        className={[base, active ? activeCls : inactive].join(' ')}
-       style={active ? { background: 'linear-gradient(135deg, var(--color-royal-600) 0%, var(--color-royal-500) 100%)' } : undefined}
     >
       {children}
     </a>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { PortalShell } from '@/components/PortalShell';
 import type { OfferedCourse, Section } from '@/lib/offered';
 import type { CurriculumCourse } from '@/lib/offered';
@@ -238,7 +238,7 @@ function DataCard({ data, selectionCount }: { data: ReturnType<typeof useRoutine
 
         <div className="flex flex-wrap items-center gap-2.5">
           <button type="button" onClick={() => doSync()} disabled={busy}
-                  className="inline-flex items-center gap-2 rounded-lg bg-royal-600 px-4 py-2 min-h-[44px] text-[13px] font-bold text-white hover:bg-royal-500 disabled:opacity-60 shadow-[0_1px_2px_rgba(11,30,91,.04),0_8px_22px_-14px_rgba(11,30,91,.28)]">
+                  className="inline-flex items-center gap-2 rounded-lg bg-grad-royal px-4 py-2 min-h-[44px] text-[13px] font-bold text-white hover:brightness-105 disabled:opacity-60 disabled:brightness-100 shadow-[0_1px_2px_rgba(11,30,91,.04),0_8px_22px_-14px_rgba(11,30,91,.28)]">
             <span aria-hidden>↻</span>
             {busy && progress ? `Syncing ${progress.step}/${progress.total}…` : 'Sync now'}
           </button>
@@ -688,13 +688,13 @@ function ResultsBlock({ result, onShowMore, viewedIdx, onView, highlightsEnabled
 
         {result.shownCount < result.routines.length && (
           <button type="button" onClick={onShowMore}
-                  className="self-center inline-flex items-center rounded-lg bg-royal-600 px-4 py-2 min-h-[44px] text-[12.5px] font-bold text-white hover:bg-royal-500">
+                  className="self-center inline-flex items-center rounded-lg bg-grad-royal px-4 py-2 min-h-[44px] text-[12.5px] font-bold text-white hover:brightness-105">
             Load {Math.min(RESULTS_PAGE, result.routines.length - result.shownCount)} more
           </button>
         )}
 
         {result.exploredCap && (
-          <p className="text-[11.5px] text-muted text-center">
+          <p className="text-[11.5px] text-muted max-w-[65ch]">
             Search budget hit before enumerating every combination — these are the first clash-free ones found.
           </p>
         )}
@@ -769,8 +769,8 @@ function WeeklyGrid({ sections }: { sections: Section[] }) {
           <div key={d} className="px-2 py-2 text-center font-bold uppercase tracking-wider text-muted">{d.slice(0, 3)}</div>
         ))}
         {rows.map((t) => (
-          <>
-            <div key={`label-${t}`} className="px-2 py-2 text-[10.5px] text-muted-2 border-t border-line-soft tabular-nums">
+          <Fragment key={t}>
+            <div className="px-2 py-2 text-[10.5px] text-muted-2 border-t border-line-soft tabular-nums">
               {fmtClockTime(t)}
             </div>
             {WEEK_DAYS.map((d) => {
@@ -784,7 +784,7 @@ function WeeklyGrid({ sections }: { sections: Section[] }) {
                 </div>
               );
             })}
-          </>
+          </Fragment>
         ))}
       </div>
     </div>

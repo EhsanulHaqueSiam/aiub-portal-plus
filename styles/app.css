@@ -88,3 +88,24 @@ body {
     0 1px 2px rgba(11, 30, 91, 0.04),
     0 8px 22px -14px rgba(11, 30, 91, 0.18);
 }
+
+/* Royal gradient — reserved for surfaces that carry semantic weight. The
+   flat `bg-royal-600` convention stays for dense, many-per-row controls
+   (checkboxes, chips, day boxes, matrix cells); a gradient there reads as
+   noise. One rule, applied consistently across React and content scripts:
+
+     • Primary page CTA (Generate, Sync, Apply)         → bg-grad-royal
+     • Active nav link / preset pill / selected cell    → bg-grad-royal
+     • Checkbox, chip, toggle, day box, grid cell       → bg-royal-600 (flat)
+
+   Pair with `hover:brightness-105` for the hover state — preserves the
+   gradient while signalling interactivity. Mirrors the content-script
+   `--p-grad-royal` token in public/Shared/tokens.css (three OKLCH stops vs
+   this file's two — visually close; a future polish pass can unify). */
+@utility bg-grad-royal {
+  background: linear-gradient(
+    135deg,
+    var(--color-royal-600) 0%,
+    var(--color-royal-500) 100%
+  );
+}

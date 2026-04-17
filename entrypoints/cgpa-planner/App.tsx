@@ -114,7 +114,7 @@ export function App() {
 
       {!model ? <EmptyState /> : <Planner model={model} />}
 
-      <p className="my-8 py-3.5 px-5 bg-royal-50 border border-royal-100 rounded-xl text-center text-[12px] leading-relaxed text-muted">
+      <p className="my-8 py-3.5 px-5 max-w-[65ch] bg-royal-50 border border-royal-100 rounded-xl text-[12px] leading-relaxed text-muted">
         AIUB CSE curriculum requires <strong className="text-ink-2">148 credits</strong> to graduate. This planner uses AIUB's
         standard grade scale (A+ 4.00 · A 3.75 · B+ 3.50 · B 3.25 · C+ 3.00 · C 2.75 · D+ 2.50 · D 2.25 · F 0.00).
         Elective credits beyond the core curriculum don't count toward the 148.
@@ -415,7 +415,7 @@ function TargetSetter({ value, onChange, model, creditsInPlay, req, feas }: {
                       onClick={() => onChange(p)}
                       className={`inline-flex items-center px-4 min-h-[44px] text-[12px] font-semibold font-mono rounded-full border cursor-pointer transition-colors ${
                         fmt(value) === fmt(p)
-                          ? 'text-white border-transparent bg-[linear-gradient(135deg,var(--color-royal-600)_0%,var(--color-royal-500)_100%)]'
+                          ? 'bg-grad-royal text-white border-transparent'
                           : 'bg-white text-ink-2 border-line hover:bg-royal-50 hover:text-royal-600 hover:border-royal-100'
                       }`}>
                 {p.toFixed(2)}
@@ -519,7 +519,7 @@ function OngoingMatrix({ model, picks, onToggle, pickedCgpa, pickedDelta, picked
                           title={`If this course ends at ${grade} your CGPA would be ${fmt(proj)}`}
                           className={`cursor-pointer text-center font-mono text-[12px] select-none px-2 py-2.5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-royal-400 focus-visible:ring-inset ${
                             active
-                              ? 'text-white font-extrabold bg-[linear-gradient(135deg,var(--color-royal-600)_0%,var(--color-royal-500)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,.2)]'
+                              ? 'bg-grad-royal text-white font-extrabold shadow-[inset_0_1px_0_rgba(255,255,255,.2)]'
                               : 'text-ink-3 hover:bg-royal-50 hover:text-royal-600'
                           }`}>
                         {fmt(proj)}

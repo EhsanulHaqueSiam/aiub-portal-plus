@@ -126,24 +126,28 @@
   transition: background var(--p-dur-2) var(--p-ease), color var(--p-dur-2) var(--p-ease), transform var(--p-dur-1) var(--p-ease) !important;
   text-decoration: none !important;
 }
-/* Thin left accent that appears on hover/active for visual anchoring. */
+/* Thin left accent that appears on hover/active for visual anchoring.
+   Scale-Y from 0 → 1 around the pseudo's center. Transform animates on the
+   compositor; animating height instead would force layout + paint on every
+   frame for every hovered nav item. */
 #navigation-bar .list-group-item::before {
   content: '';
   position: absolute;
   left: 5px;
   top: 50%;
   width: 3px;
-  height: 0;
+  height: 14px;
   background: var(--p-royal-500);
   border-radius: 999px;
-  transform: translateY(-50%);
-  transition: height var(--p-dur-2) var(--p-ease);
+  transform: translateY(-50%) scaleY(0);
+  transform-origin: center center;
+  transition: transform var(--p-dur-2) var(--p-ease);
 }
 #navigation-bar .list-group-item:hover {
   background: var(--p-royal-50) !important;
   color: var(--p-royal-600) !important;
 }
-#navigation-bar .list-group-item:hover::before { height: 14px; }
+#navigation-bar .list-group-item:hover::before { transform: translateY(-50%) scaleY(1); }
 
 #navigation-bar .list-group-item.active,
 #navigation-bar .list-group-item:focus {
@@ -153,9 +157,21 @@
   outline: none !important;
   box-shadow: 0 6px 14px -8px rgba(37, 99, 235, 0.55) !important;
 }
-#navigation-bar .list-group-item.active::before { height: 0; }
+#navigation-bar .list-group-item.active::before { transform: translateY(-50%) scaleY(0); }
 #navigation-bar .list-group-item.active .glyphicon {
   color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Respect users who request reduced motion — snap between states instead
+   of animating. Transform changes still happen; only the transition is
+   neutralised. Matches the React side's global reduced-motion guard in
+   styles/app.css. */
+@media (prefers-reduced-motion: reduce) {
+  #navigation-bar .list-group-item,
+  #navigation-bar .list-group-item::before,
+  #navigation-bar .list-group-item .glyphicon {
+    transition: none !important;
+  }
 }
 
 #navigation-bar .list-group-item .glyphicon {
