@@ -71,18 +71,43 @@ jobs:
         run: pnpm zip:firefox
 
       - name: Rename zips + emit Firefox .xpi
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
         run: |
-          cp ".output/aiub-portal-plus-${VERSION}-chrome.zip"  aiub-portal-plus-chrome.zip
-          cp ".output/aiub-portal-plus-${VERSION}-firefox.zip" aiub-portal-plus-firefox.zip
+          set -euo pipefail
+          # Glob instead of interpolating the version — this way the rename
+          # step can't break if WXT's filename convention ever changes or
+          # if package.json/tag drift temporarily. Fail loudly if zero or
+          # more-than-one match turns up.
+          pick_one() {
+            local glob="$1" desc="$2"
+            local -a found
+            # shellcheck disable=SC2206
+            found=($glob)
+            if [ ${#found[@]} -eq 0 ] || [ ! -f "${found[0]}" ]; then
+              echo "No file matching $desc at: $glob"
+              ls -la .output/ || true
+              exit 1
+            fi
+            if [ ${#found[@]} -gt 1 ]; then
+              echo "Ambiguous matches for $desc:"
+              printf '  %s\n' "${found[@]}"
+              exit 1
+            fi
+            echo "${found[0]}"
+          }
+
+          CHROME_ZIP="$(pick_one '.output/aiub-portal-plus-*-chrome.zip'  'Chrome zip')"
+          FIREFOX_ZIP="$(pick_one '.output/aiub-portal-plus-*-firefox.zip' 'Firefox zip')"
+
+          cp "$CHROME_ZIP"  aiub-portal-plus-chrome.zip
+          cp "$FIREFOX_ZIP" aiub-portal-plus-firefox.zip
           # Firefox consumes add-ons as .xpi files. A .xpi is structurally a
           # ZIP archive with a manifest.json at the root — byte-for-byte what
           # `wxt zip -b firefox` produces. Copying to a .xpi extension lets
           # users drag-drop install on Firefox Developer / Nightly builds
           # (with xpinstall.signatures.required = false) and makes the file
           # ready for AMO submission.
-          cp ".output/aiub-portal-plus-${VERSION}-firefox.zip" aiub-portal-plus-firefox.xpi
+          cp "$FIREFOX_ZIP" aiub-portal-plus-firefox.xpi
+
           ls -la aiub-portal-plus-*
 
       - name: Create / update GitHub Release

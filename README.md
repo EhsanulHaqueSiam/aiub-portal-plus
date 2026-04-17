@@ -204,7 +204,7 @@ This is designed to be a **good citizen** on top of the AIUB portal.
 | Layer | Tooling |
 |---|---|
 | Framework | **[WXT](https://wxt.dev/)** — Vite-powered cross-browser extension framework |
-| Popup · CGPA Planner · Graph Dashboard | **React 19** + **TypeScript 5** + **[Tailwind CSS v4](https://tailwindcss.com/)** with self-hosted fonts via `@fontsource/*` |
+| Popup · CGPA Planner · Graph Dashboard · Routine Generator | **React 19** + **TypeScript 5** + **[Tailwind CSS v4](https://tailwindcss.com/)** with self-hosted fonts via `@fontsource/*` |
 | Content scripts | Vanilla DOM + TypeScript — deliberately lean because they graft onto the portal's existing Angular / Bootstrap DOM |
 | Charts | **[Chart.js](https://www.chartjs.org/)** (dynamically imported on chart pages) |
 | Manifest | **MV3** for Chrome / Edge / Brave · **MV2** for Firefox |
@@ -216,8 +216,8 @@ This is designed to be a **good citizen** on top of the AIUB portal.
 - [x] CGPA Planner migrated to React + TS + Tailwind
 - [x] Firefox `.xpi` produced by CI alongside the `.zip`
 - [x] Graph Dashboard migrated to React + TS + Tailwind
-- [x] Fonts self-hosted on the migrated pages (via `@fontsource/*`)
-- [ ] Migrate Routine Generator to React + TS + Tailwind
+- [x] Routine Generator migrated to React + TS + Tailwind
+- [x] Fonts self-hosted on all standalone pages (zero third-party network)
 - [ ] AMO submission for signed Firefox install
 - [ ] Chrome Web Store listing
 

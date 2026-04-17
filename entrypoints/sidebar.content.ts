@@ -107,7 +107,7 @@ function injectExtraNavItems(sidebar: HTMLElement) {
   }
 
   if (!sidebar.querySelector('.aiub-routine-nav-item')) {
-    const routineUrl = browser.runtime.getURL('/RoutineGenerator/index.html');
+    const routineUrl = browser.runtime.getURL('/routine-generator.html');
     if (routineUrl) {
       insertAfterLast(
         buildNavLink('aiub-routine-nav-item', routineUrl, 'glyphicon-calendar', 'Routine Generator'),

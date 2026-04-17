@@ -20,7 +20,6 @@ export default defineConfig({
           'Home/*',
           'Academic/*',
           'Grade/*',
-          'RoutineGenerator/*',
           'offered-filter.js',
           'offered-filter.css',
           'aiub.jpg',
