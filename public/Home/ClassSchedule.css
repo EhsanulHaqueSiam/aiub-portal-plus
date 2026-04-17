@@ -290,26 +290,37 @@
 }
 
 .sched-timer-dot {
+  position: relative;
   width: 6px; height: 6px;
   border-radius: 50%;
   display: inline-block;
   flex-shrink: 0;
 }
 .sched-timer-upcoming .sched-timer-dot { background: var(--p-royal-500); }
-.sched-timer-active   .sched-timer-dot {
-  background: oklch(0.60 0.18 150);
-  box-shadow: 0 0 0 3px oklch(0.60 0.18 150 / 0.20);
-  animation: sched-dot-ping 1.5s ease-in-out infinite;
-}
+.sched-timer-active   .sched-timer-dot { background: oklch(0.60 0.18 150); }
 .sched-timer-ended    .sched-timer-dot { background: var(--p-mute-soft); }
+
+/* Emerald ring ping on the active timer — same GPU-friendly primitive
+   (transform + opacity) as tokens.css p-ring-ping. Old implementation
+   animated box-shadow ring radius which forced paint every frame. */
+.sched-timer-active .sched-timer-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: oklch(0.60 0.18 150);
+  pointer-events: none;
+  transform-origin: center;
+  animation: p-ring-ping 1.5s var(--p-ease-out) infinite;
+  will-change: transform, opacity;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sched-timer-active .sched-timer-dot::after { animation: none; opacity: 0; }
+}
 
 @keyframes sched-pulse {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.88; }
-}
-@keyframes sched-dot-ping {
-  0%, 100% { box-shadow: 0 0 0 0 oklch(0.60 0.18 150 / 0.4); }
-  50%       { box-shadow: 0 0 0 6px oklch(0.60 0.18 150 / 0); }
 }
 
 @media (max-width: 768px) {

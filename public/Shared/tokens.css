@@ -90,13 +90,18 @@
   --p-surface-tint: oklch(0.96 0.02 248);
   --p-paper:     oklch(0.975 0.008 258);
 
-  /* Feedback — all OKLCH for consistent luminance across tones. */
+  /* Feedback — all OKLCH for consistent luminance across tones.
+     *-700 deepens the mid-tone for text-on-light use (e.g. dismiss button
+     copy on a soft-tinted alert), so we don't end up with arbitrary
+     off-scale oklch values scattered across content-script CSS. */
   --p-ok:        oklch(0.53 0.15 150);
   --p-ok-soft:   oklch(0.94 0.07 150);
+  --p-ok-700:    oklch(0.40 0.12 150);
   --p-warn:      oklch(0.55 0.14 60);
   --p-warn-soft: oklch(0.94 0.10 86);
   --p-err:       oklch(0.49 0.18 25);
   --p-err-soft:  oklch(0.94 0.07 25);
+  --p-err-700:   oklch(0.34 0.16 25);
 
   /* Editorial typography — Fraunces for display + Geist for body + mono for
      codes. Matches the React pages exactly. */
@@ -141,11 +146,14 @@
   --p-sh-glow: 0 0 0 4px oklch(0.50 0.20 258 / 0.16);
 
   /* Gradient treatments — the navy ink on hero surfaces, royal for CTAs,
-     mesh for page backgrounds. */
+     danger for destructive/critical CTAs, mesh for page backgrounds. */
   --p-grad-royal: linear-gradient(135deg,
                     oklch(0.38 0.19 260) 0%,
                     oklch(0.42 0.18 258) 55%,
                     oklch(0.50 0.20 258) 100%);
+  --p-grad-danger: linear-gradient(135deg,
+                    oklch(0.45 0.18 25) 0%,
+                    oklch(0.55 0.21 25) 100%);
   --p-grad-soft:  linear-gradient(135deg,
                     oklch(0.97 0.015 250) 0%,
                     oklch(0.98 0.01 240) 100%);
@@ -188,17 +196,43 @@
 .p-pill--err   { background: var(--p-err-soft);   color: oklch(0.34 0.16 25);  }
 .p-pill--info  { background: var(--p-royal-50);   color: var(--p-royal-700);   }
 .p-pill--muted { background: var(--p-line-soft);  color: var(--p-muted);       }
+/* Solid dot (::before) stays stationary; the ring pulse lives on ::after
+   so it can scale+fade on the GPU. Old implementation animated box-shadow
+   rings which triggered a paint every frame — this version only touches
+   transform and opacity, both compositor-layer properties. */
+.p-pill--live { position: relative; }
 .p-pill--live::before {
   content: ''; display: inline-block;
   width: 6px; height: 6px; border-radius: 50%;
   background: var(--p-gold);
-  box-shadow: 0 0 0 0 oklch(0.83 0.15 84 / 0.5);
-  animation: p-pulse 1.6s infinite;
+  flex-shrink: 0;
 }
-@keyframes p-pulse {
-  0%   { box-shadow: 0 0 0 0 oklch(0.83 0.15 84 / 0.6); }
-  70%  { box-shadow: 0 0 0 8px oklch(0.83 0.15 84 / 0); }
-  100% { box-shadow: 0 0 0 0 oklch(0.83 0.15 84 / 0); }
+.p-pill--live::after {
+  content: '';
+  position: absolute;
+  /* Pill padding-inline is 10px; first flex item (the dot) sits at that
+     offset. Overlaying here matches the dot's position pixel-for-pixel. */
+  left: 10px;
+  top: 50%;
+  width: 6px; height: 6px;
+  margin-top: -3px;
+  border-radius: 50%;
+  background: var(--p-gold);
+  pointer-events: none;
+  transform-origin: center;
+  animation: p-ring-ping 1.6s var(--p-ease-out) infinite;
+  will-change: transform, opacity;
+}
+
+/* Ring ping — shared primitive used wherever a "live" dot needs a
+   radiating pulse. Scale + opacity only; no box-shadow, no layout, no
+   paint beyond the ::after's own pixel box. */
+@keyframes p-ring-ping {
+  0%        { transform: scale(1);   opacity: 0.6; }
+  75%, 100% { transform: scale(2.6); opacity: 0;   }
+}
+@media (prefers-reduced-motion: reduce) {
+  .p-pill--live::after { animation: none; opacity: 0; }
 }
 
 /* Banners — contextual stripes. Same tone vocabulary as pills. No colored

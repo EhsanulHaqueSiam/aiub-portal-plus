@@ -75,6 +75,7 @@
 }
 
 .intro-date {
+  position: relative;
   font: 500 var(--p-fs-sm)/1 var(--p-font-body);
   color: rgba(255, 255, 255, 0.75);
   display: inline-flex;
@@ -82,14 +83,32 @@
   gap: 8px;
   letter-spacing: 0.01em;
 }
+/* Stationary gold dot. Ring pulse lives on ::after so we can scale+fade
+   on the GPU instead of repainting a box-shadow ring every frame. */
 .intro-date::before {
   content: '';
   display: inline-block;
   width: 5px; height: 5px;
   border-radius: 50%;
   background: var(--p-gold);
-  box-shadow: 0 0 0 0 oklch(0.83 0.15 84 / 0.6);
-  animation: p-pulse 1.8s infinite;
+  flex-shrink: 0;
+}
+.intro-date::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 5px; height: 5px;
+  margin-top: -2.5px;
+  border-radius: 50%;
+  background: var(--p-gold);
+  pointer-events: none;
+  transform-origin: center;
+  animation: p-ring-ping 1.8s var(--p-ease-out) infinite;
+  will-change: transform, opacity;
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro-date::after { animation: none; opacity: 0; }
 }
 
 /* Live clock — inline on the right. Reads as time, not hero number.
@@ -107,7 +126,9 @@
 .intro-banner-badge-label {
   display: inline;
   font: 700 10px/1 var(--p-font-body);
-  color: rgba(255, 255, 255, 0.55);
+  /* 0.55 → 0.72 lifts contrast from ~3.2:1 to ~5:1 on the navy gradient,
+     clearing the WCAG AA 4.5:1 threshold for sub-18px text. */
+  color: rgba(255, 255, 255, 0.72);
   text-transform: uppercase;
   letter-spacing: var(--p-tracking-eyebrow);
   margin: 0;
@@ -191,18 +212,21 @@
 .intro-teams-card { padding-right: 48px !important; }
 .intro-teams-card.is-dismissed { display: none !important; }
 
+/* The visible circle stays compact (28px) so it doesn't dominate the alert,
+   but the ::before pseudo expands the click surface to 44×44 — meeting
+   WCAG 2.5.5 AAA touch target without bloating the glyph. */
 .intro-teams-dismiss {
   position: absolute;
   top: 10px;
   right: 12px;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   border: 1px solid oklch(0.82 0.09 150 / 0.55);
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.65);
-  color: oklch(0.40 0.12 150);
-  font: 500 17px/1 var(--p-font-body);
+  color: var(--p-ok-700);
+  font: 500 18px/1 var(--p-font-body);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -213,9 +237,15 @@
     border-color var(--p-dur-2) var(--p-ease),
     transform var(--p-dur-1) var(--p-ease);
 }
+.intro-teams-dismiss::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+}
 .intro-teams-dismiss:hover {
   background: #fff;
-  color: oklch(0.34 0.16 25);
+  color: var(--p-err-700);
   border-color: oklch(0.75 0.12 25 / 0.5);
   transform: scale(1.05);
 }
@@ -226,12 +256,13 @@
 
 .intro-teams-reopen {
   display: none;
-  padding: 7px 14px 7px 12px;
+  padding: 10px 16px;
+  min-height: 44px;
   margin: 0 0 var(--p-s-3);
   background: transparent;
   border: 1px dashed oklch(0.80 0.10 150 / 0.55);
   border-radius: var(--p-r-sm);
-  color: oklch(0.38 0.12 150);
+  color: var(--p-ok-700);
   font: 500 var(--p-fs-sm)/1 var(--p-font-body);
   cursor: pointer;
   align-items: center;
@@ -244,15 +275,15 @@
 .intro-teams-reopen::before {
   content: '+';
   font: 600 15px/1 var(--p-font-body);
-  color: oklch(0.50 0.14 150);
+  color: var(--p-ok);
   margin-right: 2px;
 }
 .intro-teams-reopen.is-visible { display: inline-flex; }
 .intro-teams-reopen:hover {
   background: var(--p-ok-soft);
-  border-color: oklch(0.68 0.13 150);
+  border-color: var(--p-ok);
   border-style: solid;
-  color: oklch(0.30 0.13 150);
+  color: var(--p-ok-700);
 }
 .intro-teams-reopen:focus-visible {
   outline: none;
@@ -368,12 +399,15 @@
 }
 .intro-actions .btn:active { transform: translateY(0) !important; }
 
-/* Registration CTA — critical red. Biggest, filled, with trailing arrow. */
+/* Registration CTA — critical red. Biggest, filled, with trailing arrow.
+   min-height: 44px guarantees WCAG AAA touch target (2.5.5) regardless of
+   how the browser computes padding + line-height. */
 .intro-actions .btn-danger {
-  padding: 11px 22px !important;
+  padding: 12px 22px !important;
+  min-height: 44px !important;
   font: 600 var(--p-fs-base)/1 var(--p-font-body) !important;
   border: none !important;
-  background: linear-gradient(135deg, oklch(0.45 0.18 25) 0%, oklch(0.55 0.21 25) 100%) !important;
+  background: var(--p-grad-danger) !important;
   color: #fff !important;
   box-shadow: var(--p-sh-2) !important;
   display: inline-flex !important;
@@ -395,15 +429,18 @@
 .intro-actions .btn-danger:hover::after { transform: translateX(2px); }
 
 /* Secondary chores — ghost buttons, royal-tinted. Visually subordinate to
-   the red CTA; still tappable targets with a 36px-ish hit area. */
+   the red CTA; still a full WCAG-compliant 44×44 tap target on mobile. */
 .intro-actions .btn-info,
 .intro-actions .btn-default {
-  padding: 8px 14px !important;
+  padding: 10px 16px !important;
+  min-height: 44px !important;
   font: 500 var(--p-fs-sm)/1 var(--p-font-body) !important;
   background: transparent !important;
   color: var(--p-royal-700) !important;
   border: 1px solid var(--p-royal-100) !important;
   box-shadow: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
 }
 .intro-actions .btn-info:hover,
 .intro-actions .btn-default:hover {

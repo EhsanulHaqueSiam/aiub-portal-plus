@@ -82,6 +82,20 @@ function enhanceTeamsCredentials(mainContent: HTMLElement) {
 
   alert.classList.add('intro-teams-card');
 
+  // The portal's copy here reads awkwardly. Rewrite the two stock phrases
+  // in place so students see grammatical English without us rebuilding the
+  // alert's DOM structure.
+  rewriteTextIn(alert, [
+    [
+      'Please use this below information for log in to Microsoft Teams',
+      'Please use the information below to log in to Microsoft Teams',
+    ],
+    [
+      'How to log in to Microsoft Teams with one time password',
+      'How to log in to Microsoft Teams with a one-time password',
+    ],
+  ]);
+
   const dismiss = document.createElement('button');
   dismiss.type = 'button';
   dismiss.className = 'intro-teams-dismiss';
@@ -114,4 +128,24 @@ function enhanceTeamsCredentials(mainContent: HTMLElement) {
     reopen.classList.remove('is-visible');
     teamsCredsDismissed.setValue(false);
   });
+}
+
+/**
+ * Walk text nodes under `root` and replace each `[find, replace]` pair
+ * wherever it occurs. Exact-substring match — we don't want a regex
+ * rewriting the student's own name if it happens to contain one of the
+ * search strings. Structure-preserving: only textContent is touched.
+ */
+function rewriteTextIn(root: HTMLElement, pairs: Array<[string, string]>): void {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let node = walker.nextNode();
+  while (node) {
+    const text = node.textContent ?? '';
+    let next = text;
+    for (const [find, replace] of pairs) {
+      if (next.includes(find)) next = next.split(find).join(replace);
+    }
+    if (next !== text) node.textContent = next;
+    node = walker.nextNode();
+  }
 }

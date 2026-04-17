@@ -204,8 +204,15 @@ function buildCard(entry: Entry, date: Date | null): HTMLDivElement {
     timer.className = 'sched-timer';
     timer.dataset.start = String(s.getTime());
     timer.dataset.end = String(e.getTime());
+    // Live region so screen-reader users hear the state changes as a class
+    // transitions upcoming → in-progress → ended. Atomic = true re-reads
+    // the whole phrase instead of just the diff, avoiding "90. minutes."
+    timer.setAttribute('role', 'status');
+    timer.setAttribute('aria-live', 'polite');
+    timer.setAttribute('aria-atomic', 'true');
     const tDot = document.createElement('span');
     tDot.className = 'sched-timer-dot';
+    tDot.setAttribute('aria-hidden', 'true');
     const tText = document.createElement('span');
     tText.className = 'sched-timer-text';
     timer.append(tDot, tText);
