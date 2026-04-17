@@ -861,6 +861,14 @@ a:hover { text-decoration: none; }
   cursor: pointer; outline: none;
 }
 .chip-select:focus { background: rgba(255,255,255,.3); }
+/* Native <option>s render inside the browser's popup on a white panel, so
+   they must carry their own dark foreground — otherwise they inherit the
+   chip's white color and disappear. */
+.chip-select option {
+  background: #ffffff;
+  color: var(--ink, #0f172a);
+  font-weight: 600;
+}
 .chip-section {
   font-family: var(--font-mono);
   font-size: 10.5px; letter-spacing: 0.1em;
