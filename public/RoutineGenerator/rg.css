@@ -532,6 +532,63 @@ a:hover { text-decoration: none; }
   line-height: 1.5;
   font-style: italic;
 }
+
+/* Picked-routine status card (highlights saved for the portal). */
+.picked-card {
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1px solid #fbbf24;
+  border-radius: var(--rad-sm, 10px);
+  color: #78350f;
+}
+.picked-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  margin-bottom: 4px;
+}
+.picked-title strong { font-weight: 700; color: #78350f; }
+.picked-star { font-size: 15px; }
+.picked-ids {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px;
+  color: #92400e;
+  word-break: break-word;
+  padding: 4px 0 8px;
+}
+.picked-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.picked-actions .btn-sm {
+  padding: 5px 12px !important;
+  font-size: 12px !important;
+  border-color: #fbbf24 !important;
+  color: #78350f !important;
+}
+.picked-actions .btn-sm:hover { background: #fbbf24 !important; color: #78350f !important; }
+
+/* Routine card action row */
+.routine-actions {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.rg-pick-btn {
+  border: 1px solid #fbbf24;
+  color: #92400e;
+  padding: 6px 14px;
+  background: #fffbeb;
+  font-weight: 600;
+  transition: background 0.15s, transform 0.1s;
+}
+.rg-pick-btn:hover { background: #fbbf24; color: #78350f; transform: translateY(-1px); }
 .data-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

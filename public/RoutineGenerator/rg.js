@@ -87,6 +87,7 @@
 
   // ------- Data -------
   let _registrationStatus = null; // { active, detectedAt, buttonText } from homeIntro.content.ts
+  let _pickedHighlights = null;   // { classIds, courseTitles, enabled } — synced by highlight.content.ts
 
   async function loadAllData() {
     try {
@@ -96,6 +97,7 @@
         aiubGraphData: null,
         aiubStudent: null,
         aiubRegistrationStatus: null,
+        aiubHighlights: null,
       });
       if (res && res.aiubOfferedCourses && Array.isArray(res.aiubOfferedCourses.courses)) {
         courseData = res.aiubOfferedCourses;
@@ -111,6 +113,7 @@
       }
       if (res && res.aiubStudent) renderStudentIdentity(res.aiubStudent);
       if (res && res.aiubRegistrationStatus) _registrationStatus = res.aiubRegistrationStatus;
+      if (res && res.aiubHighlights) _pickedHighlights = res.aiubHighlights;
     } catch (_) { /* ignore */ }
   }
 
@@ -789,7 +792,100 @@
     routine.sections.forEach((sec) => courses.appendChild(buildCoursePill(sec)));
     card.appendChild(courses);
 
+    const cardActions = document.createElement('div');
+    cardActions.className = 'routine-actions';
+    const pickBtn = document.createElement('button');
+    pickBtn.type = 'button';
+    pickBtn.className = 'btn btn-ghost rg-pick-btn';
+    pickBtn.dataset.idx = String(idx);
+    const pickLbl = document.createElement('span');
+    pickLbl.className = 'btn-label';
+    pickLbl.textContent = '\u{1F3AF} Highlight in portal';
+    pickBtn.appendChild(pickLbl);
+    pickBtn.title = 'Save these class IDs so the extension highlights them on '
+      + 'Offered Courses + Registration pages — easier to spot when you register.';
+    pickBtn.addEventListener('click', () => savePicked(routine));
+    cardActions.appendChild(pickBtn);
+    card.appendChild(cardActions);
+
     return card;
+  }
+
+  async function savePicked(routine) {
+    const classIds = routine.sections.map((s) => String(s.classId)).filter(Boolean);
+    const courseTitles = routine.sections.map((s) => s.title).filter(Boolean);
+    await api.storage.local.set({
+      aiubHighlights: {
+        classIds,
+        courseTitles,
+        enabled: true,
+        updatedAt: new Date().toISOString(),
+      },
+    });
+    renderPickedStatus({ classIds, courseTitles, enabled: true });
+    flashHint('Highlight saved — class IDs will light up on Offered + Registration pages.');
+  }
+
+  function renderPickedStatus(next) {
+    const el = document.getElementById('rg-picked-status');
+    if (!el) return;
+    const h = next || _pickedHighlights || { classIds: [], enabled: false };
+    el.textContent = '';
+    if (!h.classIds || h.classIds.length === 0) {
+      el.hidden = true;
+      return;
+    }
+    el.hidden = false;
+    const title = document.createElement('div');
+    title.className = 'picked-title';
+    const star = document.createElement('span');
+    star.className = 'picked-star';
+    star.textContent = '\u{1F3AF}';
+    title.appendChild(star);
+    const strong = document.createElement('strong');
+    strong.textContent = h.enabled
+      ? `Highlighting ${h.classIds.length} class ID${h.classIds.length !== 1 ? 's' : ''} on portal pages`
+      : `Highlight paused`;
+    title.appendChild(strong);
+    el.appendChild(title);
+
+    const ids = document.createElement('div');
+    ids.className = 'picked-ids';
+    ids.textContent = h.classIds.join(' · ');
+    el.appendChild(ids);
+
+    const actions = document.createElement('div');
+    actions.className = 'picked-actions';
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.type = 'button';
+    toggleBtn.className = 'btn btn-ghost btn-sm';
+    const toggleLbl = document.createElement('span');
+    toggleLbl.className = 'btn-label';
+    toggleLbl.textContent = h.enabled ? 'Pause' : 'Resume';
+    toggleBtn.appendChild(toggleLbl);
+    toggleBtn.addEventListener('click', async () => {
+      const nextH = { ...h, enabled: !h.enabled, updatedAt: new Date().toISOString() };
+      await api.storage.local.set({ aiubHighlights: nextH });
+      renderPickedStatus(nextH);
+    });
+    actions.appendChild(toggleBtn);
+
+    const clearBtn = document.createElement('button');
+    clearBtn.type = 'button';
+    clearBtn.className = 'btn btn-ghost btn-sm';
+    const clearLbl = document.createElement('span');
+    clearLbl.className = 'btn-label';
+    clearLbl.textContent = 'Clear';
+    clearBtn.appendChild(clearLbl);
+    clearBtn.addEventListener('click', async () => {
+      const nextH = { classIds: [], courseTitles: [], enabled: true, updatedAt: new Date().toISOString() };
+      await api.storage.local.set({ aiubHighlights: nextH });
+      renderPickedStatus(nextH);
+    });
+    actions.appendChild(clearBtn);
+
+    el.appendChild(actions);
   }
 
   function buildWeeklyGrid(sections) {
@@ -1122,6 +1218,10 @@
           _registrationStatus = changes.aiubRegistrationStatus.newValue;
           renderRegistrationBanner();
         }
+        if (changes.aiubHighlights) {
+          _pickedHighlights = changes.aiubHighlights.newValue;
+          renderPickedStatus(_pickedHighlights);
+        }
         if (dirty) renderEligible();
       });
     }
@@ -1140,6 +1240,7 @@
     renderDataStatus();
     renderEligible();
     renderRegistrationBanner();
+    renderPickedStatus(_pickedHighlights);
     // Reveal the page only after everything is wired, eliminating any
     // flash of unstyled or half-wired content.
     document.body.classList.add('rg-ready');
