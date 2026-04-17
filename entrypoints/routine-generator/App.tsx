@@ -93,6 +93,7 @@ function Notice() {
             ['Your username and password are never seen, handled, or stored', 'by this extension. Sync happens inside your authenticated session on portal.aiub.edu.'],
             ['This extension is not affiliated with AIUB', 'and is not endorsed by AIUB.'],
             ['Provided exclusively for educational purposes.', 'Users are expected to act responsibly and comply with all applicable laws, regulations, and institutional policies.'],
+            ['Under the hood, when you click "Sync now":', 'a portal tab briefly opens in the background and a content script programmatically expands curriculum panels to read prerequisite data from pages you already have access to. No data is submitted, modified, or transmitted outside your browser.'],
           ].map(([strong, rest], i) => (
             <li key={String(strong)} className="pl-9 relative text-[13px] leading-relaxed">
               <span className="absolute left-0 top-[3px] font-mono text-[10px] tracking-[0.08em] text-gold-500 font-bold" aria-hidden>

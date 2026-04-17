@@ -68,6 +68,39 @@ automatically.
 - **No scraping on a schedule.** The extension refuses to poll the portal
   in the background. Sync is always initiated by the user visiting a page.
 
+## How "Sync now" works
+
+When you click **Sync now** inside the Routine Generator, the extension
+performs a short, user-initiated sequence in your own browser:
+
+1. The background service worker opens **new AIUB Portal tabs** — up to
+   four of them, one for each page the Routine Generator needs to read
+   (Offered Courses, Curriculum, Grade Report by Curriculum, Grade
+   Report by Semester). These tabs are opened **non-focused** so they
+   don't disrupt what you are currently doing.
+2. Each tab navigates to a `portal.aiub.edu/Student/...` URL inside
+   **your own authenticated portal session**. The extension does not
+   log in for you. If you are not logged in, the portal redirects the
+   tab to its login screen and the sync step times out with a message
+   telling you to log in first.
+3. A content script that runs only on the matching AIUB Portal page
+   **reads the DOM** (the HTML the portal has already rendered to you)
+   and, for the Curriculum page, **programmatically clicks the portal's
+   own "Show Curriculum Courses" buttons** so the prerequisite modal
+   content is revealed in-page. The script then reads that revealed
+   content. It does **not** submit any form, change any portal state,
+   or trigger any action that has side effects on your AIUB account.
+4. The extracted data is written to your browser's **local extension
+   storage**. Nothing leaves your browser.
+5. The background worker **closes the sync tab** once the extraction
+   is complete.
+
+The entire sequence only happens because you clicked Sync now; it does
+not run on a schedule, does not run when the browser starts, and does
+not run when you visit AIUB Portal pages in the normal course of
+browsing (beyond the read-only DOM enhancement the content scripts
+apply to pages you open yourself).
+
 ## Permissions and why they are needed
 
 | Permission | Why |

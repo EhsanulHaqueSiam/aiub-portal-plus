@@ -189,13 +189,19 @@ This is designed to be a **good citizen** on top of the AIUB portal.
 
 - Your AIUB username and password are **never seen, handled, or stored**. The extension does not render a login form, does not intercept keystrokes, does not hook `fetch`/`XHR` for credentials.
 - **No background sync.** The extension only reads portal pages when **you** navigate to them in your own browser. There is no polling, no scheduled job, no worker that wakes up to "refresh" things.
-- **No third-party network.** Content scripts only talk to `portal.aiub.edu`, and only *as* the portal — inside your logged-in session. Standalone extension pages currently load fonts from Google Fonts; self-hosting those is tracked on the [roadmap](#roadmap).
+- **No third-party network.** Content scripts only talk to `portal.aiub.edu`, and only *as* the portal — inside your logged-in session. All fonts and assets used by the standalone extension pages are bundled locally.
 - **No analytics, no telemetry.** No event tracking, no error reporting, no remote config.
 - **Local-first storage.** Cached Offered Courses, curriculum, grade data, highlights — all in your browser's extension storage. Uninstall and the data is gone.
+- **Sync now is explicit.** When you click **Sync now** in the Routine Generator, a portal tab briefly opens in the background and a content script programmatically expands the curriculum panels on pages you already have access to. The script reads the revealed data and writes it to your browser's local storage — it never submits a form, never mutates portal state, and never transmits data to any external server.
 
 **AIUB policy, repeated:** never enter your AIUB Portal username and password into any third-party application other than official AIUB platforms. This extension does not ask for your password — it only reads pages you are already logged into.
 
 **This extension is not affiliated with or endorsed by AIUB.** Provided exclusively for educational purposes. Users are expected to act responsibly and comply with all applicable laws, regulations and institutional policies.
+
+### Compliance documents
+
+- 📜 [**AIUB policy compliance**](./docs/aiub-policy-compliance.md) — each of the 6 AIUB Portal rules mapped to the code that enforces it, plus the manifest permissions, content-script scope, and automation disclosure for `Sync now`.
+- 🔒 [**Privacy policy**](./docs/privacy-policy.md) — what the extension reads, where it stores it, the full list of storage keys, permissions, and what it deliberately does not do.
 
 ---
 

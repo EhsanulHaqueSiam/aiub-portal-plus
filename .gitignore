@@ -24,3 +24,7 @@ web-ext.config.ts
 *.njsproj
 *.sln
 *.sw?
+
+# Local design-system context — private notes for Claude's /impeccable
+# skill, not intended to ship in the public repo.
+.impeccable.md

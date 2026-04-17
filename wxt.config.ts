@@ -15,6 +15,15 @@ export default defineConfig({
     host_permissions: ['https://portal.aiub.edu/*'],
     web_accessible_resources: [
       {
+        // Intentionally does NOT include AIUB's institutional logo. If the
+        // extension ever needs to display the official AIUB mark (e.g. for
+        // visual continuity in a styled header), the portal's own DOM
+        // already contains it — content scripts can reposition or restyle
+        // the existing `<img>` in place instead of shipping a copy of the
+        // logo inside the extension bundle. AIUB's policy prohibits
+        // using the AIUB name or logo without permission; shipping the
+        // logo file inside this extension would be the most likely way to
+        // trip that rule, so we do not ship it.
         resources: [
           'Shared/*',
           'Home/*',
@@ -23,7 +32,6 @@ export default defineConfig({
           'fonts/*',
           'offered-filter.js',
           'offered-filter.css',
-          'aiub.jpg',
           // Standalone extension pages linked from the sidebar. MV3 requires
           // each chrome-extension:// HTML that the portal navigates to be
           // listed here; otherwise Chromium blocks the click with
