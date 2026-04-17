@@ -128,57 +128,130 @@
   // prereq code → curriculum name → completed-name check.
   function normCode(v) { return norm(v).replace(/\s+/g, ''); }
 
+  // Course names drift between the Curriculum page and the Grade Report:
+  //  "OBJECT ORIENTED PROGRAMMING 1" vs "OBJECT ORIENTED PROGRAMMING 1 (JAVA)"
+  //  "BUSINESS COMMUNICATION"        vs "BUSINESS COMMUNICATION [CS/ENGG]"
+  //  "MICROPROCESSOR AND EMBEDDED SYSTEM" vs "...SYSTEMS"
+  //  "ENGLISH WRITING SKILLS & COMMUNICATION" vs "...COMMUNICATIONS [CS/ENGG]"
+  // Strip bracketed/parenthesized suffixes, drop non-alnum, collapse obvious
+  // singular/plural so both sides compare on the same key.
+  function normName(v) {
+    let s = norm(v)
+      .replace(/\[[^\]]*\]/g, ' ')   // drop [CS/ENGG] etc
+      .replace(/\([^)]*\)/g, ' ')     // drop (JAVA) etc
+      .replace(/[^A-Z0-9 ]+/g, ' ')   // drop punctuation (&, ., commas, slashes)
+      .replace(/\s+/g, ' ')
+      .trim();
+    // Fold trailing S on each word so SYSTEM ↔ SYSTEMS, COMMUNICATION ↔ COMMUNICATIONS.
+    s = s.split(' ').map((w) => (w.length > 3 && w.endsWith('S') ? w.slice(0, -1) : w)).join(' ');
+    return s;
+  }
+
+  function namesMatch(a, b) {
+    const na = normName(a);
+    const nb = normName(b);
+    if (!na || !nb) return false;
+    if (na === nb) return true;
+    // Substring match for cases where one side adds a suffix/prefix annotation.
+    // Require a meaningful overlap (≥8 chars) to avoid false positives like
+    // "PHYSICS 1" matching "PHYSICS 1 LAB".
+    if (na.length >= 8 && nb.includes(na)) return true;
+    if (nb.length >= 8 && na.includes(nb)) return true;
+    return false;
+  }
+
   let _semesterData = null; // from aiubGraphData.semester
 
-  function completedNameSet() {
+  function completedCodeSet() {
+    // ByCurriculum grade report is the gold standard: it uses the same course
+    // codes as the Curriculum page, so matching is exact and unambiguous.
     const s = new Set();
-    if (_semesterData && Array.isArray(_semesterData.completedNames)) {
-      for (const n of _semesterData.completedNames) s.add(norm(n));
-    }
-    // Backward compatible: also read courseStates if present
-    if (_semesterData && Array.isArray(_semesterData.courseStates)) {
-      for (const r of _semesterData.courseStates) {
-        if (r.state === 'done' || r.state === 'ong') s.add(norm(r.name || ''));
-      }
-    }
-    // Fall back to ByCurriculum data if only that is available
-    if (!s.size && gradeData && Array.isArray(gradeData.courseStates)) {
+    if (gradeData && Array.isArray(gradeData.courseStates)) {
       for (const r of gradeData.courseStates) {
-        if (r.state === 'done' || r.state === 'ong') s.add(norm(r.name || ''));
+        if ((r.state === 'done' || r.state === 'ong') && r.code) s.add(normCode(r.code));
       }
     }
     return s;
   }
 
+  function completedNameList() {
+    // Fallback name-list for when ByCurriculum hasn't been captured yet and we
+    // only have BySemester (which has names but no codes).
+    const list = [];
+    if (_semesterData && Array.isArray(_semesterData.completedNames)) {
+      for (const n of _semesterData.completedNames) if (n) list.push(n);
+    }
+    if (_semesterData && Array.isArray(_semesterData.courseStates)) {
+      for (const r of _semesterData.courseStates) {
+        if ((r.state === 'done' || r.state === 'ong') && r.name) list.push(r.name);
+      }
+    }
+    if (gradeData && Array.isArray(gradeData.courseStates)) {
+      for (const r of gradeData.courseStates) {
+        if ((r.state === 'done' || r.state === 'ong') && r.name) list.push(r.name);
+      }
+    }
+    return list;
+  }
+
+  function buildCompletedLookup() {
+    // Unified lookup: code-exact first (ByCurriculum), fuzzy-name fallback
+    // (BySemester names are slightly different from curriculum names).
+    const codes = completedCodeSet();
+    const names = completedNameList();
+    const nameKeys = new Set(names.map(normName));
+    return {
+      size: codes.size + nameKeys.size,
+      hasCode(code) {
+        const k = normCode(code);
+        return !!k && codes.has(k);
+      },
+      hasName(rawName) {
+        const k = normName(rawName);
+        if (!k) return false;
+        if (nameKeys.has(k)) return true;
+        for (const n of names) if (namesMatch(n, rawName)) return true;
+        return false;
+      },
+      hasCourse(course) {
+        if (course && course.code && this.hasCode(course.code)) return true;
+        if (course && course.name && this.hasName(course.name)) return true;
+        return false;
+      },
+    };
+  }
+
   function curriculumCodeToName() {
     const m = new Map();
     for (const c of curriculumData.courses || []) {
-      if (c.code) m.set(normCode(c.code), norm(c.name || ''));
+      if (c.code) m.set(normCode(c.code), c.name || '');
     }
     return m;
   }
 
-  function isReqSatisfied(reqToken, completedNames, codeToName) {
+  function isReqSatisfied(reqToken, completed, codeToName) {
     const t = String(reqToken || '').trim();
     if (!t || NIL.has(t.toUpperCase())) return true;
     if (/\bCREDITS?\b/i.test(t)) return false;
     const code = normCode(t);
+    // Prereqs in curriculum use CODES. If we have code-level completion data
+    // (ByCurriculum), that's an exact match. Otherwise map code → curriculum
+    // name and fuzzy-match against completed names (BySemester).
+    if (completed.hasCode(code)) return true;
     const name = codeToName.get(code);
-    // If we can't resolve the code to a curriculum name, assume user handled it
-    // (prereqs that live outside your curriculum — treat permissively).
-    if (!name) return true;
-    return completedNames.has(name);
+    if (!name) return true; // unresolved code → treat permissively
+    return completed.hasName(name);
   }
 
   function computeEligibleCourses() {
     if (!curriculumData.courses.length) return { list: [], reason: 'no-curriculum' };
-    const completed = completedNameSet();
+    const completed = buildCompletedLookup();
     if (completed.size === 0) return { list: [], reason: 'no-grades' };
 
     const codeToName = curriculumCodeToName();
     const out = [];
     for (const c of curriculumData.courses) {
-      if (completed.has(norm(c.name))) continue;  // already done/ongoing
+      if (completed.hasCourse(c)) continue;  // already done/ongoing
       const reqs = Array.isArray(c.prerequisites) ? c.prerequisites : [];
       const missing = reqs.filter((r) => !isReqSatisfied(r, completed, codeToName));
       if (missing.length === 0) out.push(c);
@@ -187,12 +260,11 @@
   }
 
   function findOfferedForCurriculumCourse(c) {
-    // Look for a course in the offered list whose name matches (or whose
-    // course code prefix matches).
-    const nameKey = norm(c.name);
+    // Offered-course titles carry suffixes ((JAVA), [CS/ENGG]) same as the
+    // grade report — use the shared fuzzy matcher so curriculum ↔ offered
+    // names line up.
     for (const bucket of courseBuckets.values()) {
-      if (norm(bucket.title) === nameKey) return bucket;
-      if (norm(bucket.title).includes(nameKey) || nameKey.includes(norm(bucket.title))) return bucket;
+      if (namesMatch(bucket.title, c.name)) return bucket;
     }
     return null;
   }
@@ -788,18 +860,21 @@
     };
 
     try {
-      // STEP 1: Offered courses (the catalog)
-      setStep(1, 3, 'Reading this semester\'s offered courses…');
-      const beforeAt = courseData.capturedAt ?? null;
+      // STEP 1: Offered courses (the catalog).
+      // The portal's Offered page renders only ~10 rows in the DOM (footable
+      // pagination). Our MAIN-world filter script expands pagination and posts
+      // the full list with partial:false. We must wait for partial:false —
+      // accepting the first partial:true write captures just page one, which
+      // is why "none are offered this semester" shows up for real courses.
+      setStep(1, 4, 'Reading this semester\'s offered courses…');
       await runOneSyncStep(
         'offered',
         ['aiubOfferedCourses'],
         (next) => {
           if (!next || !Array.isArray(next.courses) || next.courses.length === 0) return false;
-          const newAt = next.capturedAt ?? null;
-          return next.partial === false || (newAt && newAt !== beforeAt);
+          return next.partial === false;
         },
-        30000,
+        60000,
       );
 
       // STEP 2: My Curriculum (course list + prerequisites). Curriculum rarely
@@ -814,9 +889,9 @@
       const curFresh = curCached && curAge < CURRICULUM_TTL_MS && !forceCurriculum;
 
       if (curFresh) {
-        setStep(2, 3, 'Curriculum cached — skipping (use "Refresh curriculum" to force).');
+        setStep(2, 4, 'Curriculum cached — skipping (use "Refresh curriculum" to force).');
       } else {
-        setStep(2, 3, 'Capturing your curriculum + prerequisites…');
+        setStep(2, 4, 'Capturing your curriculum + prerequisites…');
         await runOneSyncStep(
           'curriculum',
           ['aiubCurriculumSyncDone', 'aiubCurriculum'],
@@ -828,8 +903,23 @@
         );
       }
 
-      // STEP 3: Grade Report → By Semester (completed courses)
-      setStep(3, 3, 'Reading your completed courses…');
+      // STEP 3: Grade Report → By Curriculum (completed courses, code-exact).
+      // This is the authoritative source for eligibility since it uses the
+      // same course codes as the Curriculum page.
+      setStep(3, 4, 'Reading your completed courses (by curriculum)…');
+      await runOneSyncStep(
+        'gradeByCurriculum',
+        ['aiubGraphData'],
+        (next) => {
+          return !!(next && next.curriculum && Array.isArray(next.curriculum.courseStates)
+            && next.curriculum.courseStates.length > 0);
+        },
+        20000,
+      );
+
+      // STEP 4: Grade Report → By Semester (supplementary — fills in names and
+      // SGPA trend for graphs even when codes alone would be enough).
+      setStep(4, 4, 'Reading your completed courses (by semester)…');
       await runOneSyncStep(
         'gradeBySemester',
         ['aiubGraphData'],
@@ -840,7 +930,7 @@
       );
 
       label.textContent = 'Sync complete';
-      hint.textContent = 'All three datasets captured. Eligible courses are ready below.';
+      hint.textContent = 'All datasets captured. Eligible courses are ready below.';
     } catch (err) {
       hint.textContent = 'Sync failed: ' + (err && err.message ? err.message : String(err));
     } finally {
