@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1e5b" />
+  <title>Routine Generator · AIUB Portal+</title>
+  <!-- Critical paint: matches the portal's navbar gradient immediately. -->
+  <style id="critical-paint">
+    html, body {
+      margin: 0; padding: 0;
+      background: #f4f7fc;
+      color: #0b1a3a;
+      font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .portal-navbar {
+      background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #1e40af 100%);
+      min-height: 60px;
+      box-shadow: 0 2px 12px rgba(37, 99, 235, 0.35);
+    }
+    body { visibility: hidden; }
+    body.rg-ready { visibility: visible; }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400;1,9..144,600&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="rg.css" />
+</head>
+<body>
+  <!-- PORTAL NAVBAR (matches navbar.content.ts styling) -->
+  <header class="portal-navbar">
+    <div class="portal-navbar-inner">
+      <a class="portal-brand" href="https://portal.aiub.edu/Student" target="_self" rel="noopener">
+        <span class="portal-brand-logo" aria-hidden="true"></span>
+        <span class="portal-brand-label">AIUB Portal<span class="portal-brand-plus">+</span></span>
+      </a>
+      <nav class="portal-navlinks" aria-label="Portal sections">
+        <a href="https://portal.aiub.edu/Student/Course" target="_self" rel="noopener">
+          <span class="glyphicon">≡</span> Courses &amp; Results
+        </a>
+        <a href="https://portal.aiub.edu/Student/Registration" target="_self" rel="noopener">
+          <span class="glyphicon">⚡</span> Registration
+        </a>
+        <a href="https://portal.aiub.edu/Student/GradeReport/ByCurriculum" target="_self" rel="noopener">
+          <span class="glyphicon">✦</span> Grade Report
+        </a>
+      </nav>
+      <div class="portal-navright">
+        <span class="portal-welcome">
+          Welcome <span class="portal-welcome-name" id="portal-welcome-name">student</span>
+        </span>
+        <a class="portal-iconbtn" href="https://portal.aiub.edu/Student" target="_self" rel="noopener" title="Portal home" aria-label="Portal home">🏠</a>
+        <a class="portal-iconbtn portal-iconbtn-danger" href="https://portal.aiub.edu/Login/Logout" title="Log out" aria-label="Log out">↪</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- PAGE LAYOUT: sidebar + content -->
+  <div class="portal-layout">
+    <aside class="portal-sidebar" aria-label="Navigation">
+      <div class="nav-profile-block">
+        <div class="nav-profile-name" id="portal-profile-name">Student</div>
+        <div class="nav-profile-id" id="portal-profile-id"></div>
+      </div>
+
+      <div class="nav-panel-group">
+        <section class="nav-panel">
+          <div class="nav-panel-head">
+            <span class="glyphicon">📊</span> Academics
+            <span class="nav-chevron">▾</span>
+          </div>
+          <div class="nav-panel-body">
+            <a class="nav-link" href="https://portal.aiub.edu/Student/Course" target="_self">Courses &amp; Results</a>
+            <a class="nav-link" href="https://portal.aiub.edu/Student/Registration" target="_self">Registration</a>
+            <a class="nav-link" href="https://portal.aiub.edu/Student/Adrop/DropApplication" target="_self">Drop Application</a>
+            <a class="nav-link" href="https://portal.aiub.edu/Student/Section/Offered" target="_self">Offered Courses</a>
+            <a class="nav-link" href="https://portal.aiub.edu/Student/Curriculum" target="_self">My Curriculum</a>
+            <a class="nav-link" href="https://portal.aiub.edu/Student/Accounts" target="_self">Financials</a>
+          </div>
+        </section>
+
+        <section class="nav-panel">
+          <div class="nav-panel-head">
+            <span class="glyphicon">✦</span> Grade Reports
+            <span class="nav-chevron">▾</span>
+          </div>
+          <div class="nav-panel-body">
+            <a class="nav-link" href="https://portal.aiub.edu/Student/GradeReport/ByCurriculum" target="_self">By Curriculum</a>
+            <a class="nav-link" href="https://portal.aiub.edu/Student/GradeReport/BySemester" target="_self">By Semester</a>
+          </div>
+        </section>
+
+        <section class="nav-panel">
+          <div class="nav-panel-head">
+            <span class="glyphicon">⚙</span> Tools
+            <span class="nav-chevron">▾</span>
+          </div>
+          <div class="nav-panel-body">
+            <a class="nav-link" href="Graphs.html">Graphs</a>
+            <a class="nav-link active" href="index.html" aria-current="page">Routine Generator</a>
+          </div>
+        </section>
+      </div>
+
+      <footer class="portal-sidebar-foot">
+        <span class="foot-badge">Unofficial extension</span>
+        <p>No credentials handled. Verify routines on the official AIUB Portal before registering.</p>
+      </footer>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="portal-main">
+      <!-- Title breadcrumb strip -->
+      <div class="page-strip">
+        <div class="page-strip-crumbs">
+          <a href="https://portal.aiub.edu/Student" target="_self">Portal</a>
+          <span class="page-strip-sep">›</span>
+          <a href="https://portal.aiub.edu/Student/Section/Offered" target="_self">Tools</a>
+          <span class="page-strip-sep">›</span>
+          <span class="page-strip-current">Routine Generator</span>
+        </div>
+        <h1 class="page-strip-title">Routine <em>Generator</em></h1>
+        <p class="page-strip-sub">
+          Pick courses, tune filters, and we assemble every clash-free timetable from
+          your Offered Courses — inside your browser, under your account.
+        </p>
+      </div>
+
+      <!-- Notice -->
+      <aside class="notice" id="rg-disclosure" role="note" aria-label="Important notice">
+        <div class="notice-head">
+          <span class="notice-tag">Read this first</span>
+          <button class="notice-dismiss" id="rg-disclosure-dismiss" aria-label="Dismiss notice" type="button">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <ol class="notice-list">
+          <li><strong>AIUB policy:</strong> never use your AIUB Portal username and password on any third-party application other than official AIUB platforms.</li>
+          <li>This extension <strong>does not sync in real time</strong>. Syncing is <strong>user-initiated</strong> — data is only read from the <em>Offered Courses</em> page when you visit it in your own browser.</li>
+          <li>If you sync for fresh data, you log in to the official AIUB Portal <strong>at your own discretion</strong>.</li>
+          <li>Your <strong>username and password are never seen, handled, or stored</strong> by this extension. Sync happens inside your authenticated session on portal.aiub.edu.</li>
+          <li>This extension is <strong>not affiliated with AIUB</strong> and is <strong>not endorsed by AIUB</strong>.</li>
+          <li>Provided <strong>exclusively for educational purposes</strong>. Users are expected to act responsibly and comply with all applicable laws, regulations, and institutional policies.</li>
+        </ol>
+      </aside>
+
+      <div class="sheet">
+
+        <!-- DATA STATUS -->
+        <section class="block block-data">
+          <header class="block-head">
+            <span class="block-index">00</span>
+            <h2 class="block-title"><em>Data.</em></h2>
+            <p class="block-sub">What we know about your Offered Courses.</p>
+          </header>
+
+          <div class="data-card" id="rg-data-card">
+            <div class="data-row">
+              <div class="data-stat">
+                <span class="stat-key">Sections cached</span>
+                <span class="stat-val" id="stat-count">—</span>
+              </div>
+              <div class="data-stat">
+                <span class="stat-key">Last synced</span>
+                <span class="stat-val" id="stat-when">never</span>
+              </div>
+              <div class="data-stat">
+                <span class="stat-key">Source</span>
+                <span class="stat-val">portal.aiub.edu</span>
+              </div>
+              <div class="data-stat data-stat-state">
+                <span class="stat-key">Status</span>
+                <span class="stat-val" id="stat-state">
+                  <span class="pill pill-muted">No data yet</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="data-actions">
+              <button class="btn btn-primary" id="rg-sync" type="button">
+                <span class="btn-icon" aria-hidden="true">↻</span>
+                <span class="btn-label">Sync now</span>
+              </button>
+              <button class="btn btn-ghost" id="rg-refresh-curriculum" type="button" title="Re-scrape My Curriculum (prerequisites). Only needed when your curriculum changes.">
+                <span class="btn-label">Refresh curriculum</span>
+              </button>
+              <a class="btn btn-ghost" href="https://portal.aiub.edu/Student/Section/Offered" target="_self" rel="noopener">
+                <span class="btn-label">Open Offered Courses</span>
+                <span class="btn-arrow" aria-hidden="true">↗</span>
+              </a>
+              <span class="data-hint" id="rg-sync-hint">
+                Sync reads this semester's Offered Courses + your completed courses. Your curriculum
+                (prerequisites) is cached — click "Refresh curriculum" if your program changes.
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <!-- COURSES -->
+        <section class="block">
+          <header class="block-head">
+            <span class="block-index">01</span>
+            <h2 class="block-title"><em>Courses.</em></h2>
+            <p class="block-sub">Search and add. Pin a section, or leave it wide open.</p>
+          </header>
+
+          <div class="section-body">
+            <div class="picker">
+              <div class="picker-field">
+                <span class="picker-label">Search</span>
+                <input
+                  type="search"
+                  id="rg-search"
+                  class="picker-input"
+                  placeholder="Course name, code, or class id…"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+                <div class="suggestions" id="rg-suggestions" hidden></div>
+              </div>
+            </div>
+
+            <div class="eligible-bar" id="rg-eligible" hidden>
+              <div class="eligible-head">
+                <strong>Eligible for you</strong>
+                <em>— prerequisites satisfied · offered this semester</em>
+                <span class="eligible-count" id="rg-eligible-count">—</span>
+              </div>
+              <div class="eligible-chips" id="rg-eligible-chips"></div>
+            </div>
+
+            <div class="chips" id="rg-selected" aria-label="Selected courses">
+              <p class="chips-empty" id="rg-selected-empty">No courses selected yet — start typing above or tap an eligible course.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- FILTERS -->
+        <section class="block">
+          <header class="block-head">
+            <span class="block-index">02</span>
+            <h2 class="block-title"><em>Generate options.</em></h2>
+            <p class="block-sub">Trim the search before we look.</p>
+          </header>
+
+          <div class="filters">
+            <div class="filter-grid filter-grid-2">
+              <div class="field">
+                <label class="field-label" for="rg-earliest">Earliest class start</label>
+                <div class="field-control"><select id="rg-earliest" class="select"></select></div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="rg-latest">Latest class end</label>
+                <div class="field-control"><select id="rg-latest" class="select"></select></div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="rg-seat">
+                Max seat count allowed
+                <span class="field-hint">Excludes overfilled sections.</span>
+              </label>
+              <div class="slider-row">
+                <input type="range" id="rg-seat" min="0" max="100" value="100" class="slider" />
+                <output id="rg-seat-val" class="slider-out">100</output>
+              </div>
+            </div>
+
+            <fieldset class="field">
+              <legend class="field-label">Include section status</legend>
+              <div class="filter-grid filter-grid-3" id="rg-statuses">
+                <label class="check"><input type="checkbox" value="Open" checked /><span class="check-mark"></span><span class="check-text">Open</span></label>
+                <label class="check"><input type="checkbox" value="Reserved" checked /><span class="check-mark"></span><span class="check-text">Reserved</span></label>
+                <label class="check"><input type="checkbox" value="Cancel" checked /><span class="check-mark"></span><span class="check-text">Cancel</span></label>
+                <label class="check"><input type="checkbox" value="Freshman" checked /><span class="check-mark"></span><span class="check-text">Freshman</span></label>
+                <label class="check"><input type="checkbox" value="Closed" checked /><span class="check-mark"></span><span class="check-text">Closed</span></label>
+              </div>
+            </fieldset>
+
+            <fieldset class="field">
+              <legend class="field-label">Classes only on</legend>
+              <div class="day-grid" id="rg-days">
+                <label class="day"><input type="checkbox" value="Sunday" checked /><span class="day-box"><span class="day-short">Sun</span><span class="day-long">Sunday</span></span></label>
+                <label class="day"><input type="checkbox" value="Monday" checked /><span class="day-box"><span class="day-short">Mon</span><span class="day-long">Monday</span></span></label>
+                <label class="day"><input type="checkbox" value="Tuesday" checked /><span class="day-box"><span class="day-short">Tue</span><span class="day-long">Tuesday</span></span></label>
+                <label class="day"><input type="checkbox" value="Wednesday" checked /><span class="day-box"><span class="day-short">Wed</span><span class="day-long">Wednesday</span></span></label>
+                <label class="day"><input type="checkbox" value="Thursday" checked /><span class="day-box"><span class="day-short">Thu</span><span class="day-long">Thursday</span></span></label>
+                <label class="day"><input type="checkbox" value="Friday" /><span class="day-box"><span class="day-short">Fri</span><span class="day-long">Friday</span></span></label>
+                <label class="day"><input type="checkbox" value="Saturday" /><span class="day-box"><span class="day-short">Sat</span><span class="day-long">Saturday</span></span></label>
+              </div>
+            </fieldset>
+
+            <fieldset class="field">
+              <legend class="field-label">Sort by gaps?</legend>
+              <div class="filter-grid filter-grid-2" id="rg-sortby">
+                <label class="radio"><input type="radio" name="rg-sort" value="minimize" /><span class="radio-mark"></span><span class="radio-text"><strong>Minimize gaps</strong><span class="radio-sub">Tight schedule, fewer holes</span></span></label>
+                <label class="radio"><input type="radio" name="rg-sort" value="none" checked /><span class="radio-mark"></span><span class="radio-text"><strong>No preference</strong><span class="radio-sub">Rank by off-days first</span></span></label>
+              </div>
+            </fieldset>
+          </div>
+        </section>
+
+        <!-- ACTION BAR -->
+        <section class="block block-action">
+          <div class="action-bar">
+            <button class="btn btn-primary btn-lg" id="rg-generate" type="button">
+              <span class="btn-label">Generate routines</span>
+              <span class="btn-arrow" aria-hidden="true">→</span>
+            </button>
+            <button class="btn btn-ghost" id="rg-clear" type="button">Reset</button>
+            <span class="action-count" id="rg-result-count"></span>
+          </div>
+        </section>
+
+        <!-- RESULTS -->
+        <section class="block" id="rg-results-section" hidden>
+          <header class="block-head">
+            <span class="block-index">03</span>
+            <h2 class="block-title"><em>Routines.</em></h2>
+            <p class="block-sub" id="rg-results-hint">Ranked by your sort preference.</p>
+          </header>
+          <div class="results" id="rg-results"></div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="rg.js"></script>
+</body>
+</html>
