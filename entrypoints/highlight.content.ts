@@ -223,6 +223,10 @@ function normalizeHighlights(raw: unknown): NormalizedState {
   if (h && Array.isArray(h.groups) && h.groups.length > 0) {
     for (const g of h.groups) {
       if (!g || !Array.isArray(g.classIds)) continue;
+      // Per-pin enabled: a pin flagged enabled:false is "paused" — the pin
+      // stays in storage for the popup to list, but its class IDs are not
+      // painted. Absent (pre-v1.4.17) defaults to on.
+      if (g.enabled === false) continue;
       const color: HighlightColor = (HIGHLIGHT_COLORS as string[]).includes(g.color)
         ? (g.color as HighlightColor)
         : 'amber';

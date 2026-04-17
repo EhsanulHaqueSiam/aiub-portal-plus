@@ -175,10 +175,13 @@ function Generator({ data }: { data: ReturnType<typeof useRoutineData> }) {
 
   // Persist highlights whenever the pin set changes. Gated on lastResult so
   // an initial render (before routines are generated) doesn't clobber
-  // stored groups from a previous session.
+  // stored groups from a previous session. Per-pin `enabled` is carried
+  // forward from existing storage — so a popup-side pause survives the
+  // next Generate-or-Pin action on this tab.
   useEffect(() => {
     if (!lastResult) return;
     const sortedPicks = Array.from(viewedRoutineIndices).sort((a, b) => a - b);
+    const existingGroups = data.highlights?.groups ?? [];
     const groups = sortedPicks.flatMap((idx, pos) => {
       const routine = lastResult.routines[idx];
       if (!routine) return [];
@@ -186,12 +189,23 @@ function Generator({ data }: { data: ReturnType<typeof useRoutineData> }) {
         .map((s) => String(s.classId ?? s.section ?? '').trim())
         .filter(Boolean);
       if (classIds.length === 0) return [];
-      return [{ classIds, color: HIGHLIGHT_COLORS[pos % HIGHLIGHT_COLORS.length] }];
+      // Match by class-ID set to find any prior per-pin enabled state.
+      const idSet = new Set(classIds);
+      const prior = existingGroups.find((g) => {
+        if (!Array.isArray(g.classIds) || g.classIds.length !== idSet.size) return false;
+        for (const id of g.classIds) if (!idSet.has(String(id).trim())) return false;
+        return true;
+      });
+      return [{
+        classIds,
+        color: HIGHLIGHT_COLORS[pos % HIGHLIGHT_COLORS.length],
+        enabled: prior?.enabled ?? true,
+      }];
     });
     const courseTitles: string[] = [];
     for (const sel of selections.values()) courseTitles.push(sel.title);
     writeHighlights({ groups, courseTitles, enabled: highlightsEnabled });
-  }, [viewedRoutineIndices, lastResult, highlightsEnabled, selections]);
+  }, [viewedRoutineIndices, lastResult, highlightsEnabled, selections, data.highlights]);
 
   return (
     <>
@@ -883,7 +897,11 @@ function WeeklyGrid({ routine, pinColor }: { routine: Routine; pinColor: Highlig
             {WEEK_DAYS.map((d) => {
               const slotAt = (occMap.get(d) ?? []).find((e) => e.slot._start <= t && t < e.slot._end);
               if (!slotAt) return <div key={d + '-' + t} className="border-t border-l border-line-soft min-h-[26px]" />;
-              const isFirstRow = slotAt.slot._start === t;
+              // Classes often start off the 30-min grid (e.g. 12:40 PM). The
+              // first painted row is whichever row contains (t, t+30) that
+              // first overlaps the slot — which, under the coverage rule above,
+              // is the row where the slot started within the last 30 minutes.
+              const isFirstRow = slotAt.slot._start > t - 30;
               const cellTitle = titleBySection.get(slotAt.section) ?? '';
               const secLabel = slotAt.section.section ?? slotAt.section.classId ?? '';
               return (

@@ -309,6 +309,50 @@
   background: #fee2e2;
 }
 
+/* Per-pin toggle — temporary pause without deleting the pin. Keeps the pin
+   in the list (greyed out) so the user can flip it back on later. */
+.popup-pinned-item.is-paused .popup-pinned-label { color: var(--p-muted); text-decoration: line-through; }
+.popup-pinned-item.is-paused .popup-pinned-count { opacity: 0.6; }
+.popup-pinned-item-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.popup-pinned-item-toggle input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  pointer-events: none;
+}
+.popup-pinned-item-toggle-track {
+  position: relative;
+  width: 28px;
+  height: 16px;
+  border-radius: 999px;
+  background: #cbd5e1;
+  transition: background 0.15s;
+}
+.popup-pinned-item-toggle-track::before {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  top: 2px;
+  left: 2px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(11, 30, 91, 0.2);
+  transition: transform 0.15s;
+}
+.popup-pinned-item-toggle input:checked ~ .popup-pinned-item-toggle-track {
+  background: linear-gradient(135deg, var(--p-royal), var(--p-royal-2));
+}
+.popup-pinned-item-toggle input:checked ~ .popup-pinned-item-toggle-track::before {
+  transform: translateX(12px);
+}
+
 /* Features */
 .popup-features {
   padding: 14px 20px;

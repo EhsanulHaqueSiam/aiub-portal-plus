@@ -76,6 +76,10 @@ export const HIGHLIGHT_COLORS: HighlightColor[] = ['amber', 'royal', 'emerald', 
 export type HighlightGroup = {
   classIds: string[];
   color: HighlightColor;
+  /* Per-pin on/off without deleting. Temporarily hides this pin's paint
+     while keeping its identity (class IDs + color) in storage. Defaults to
+     true when absent — older groups from pre-v1.4.17 are treated as on. */
+  enabled?: boolean;
 };
 
 export type Highlights = {

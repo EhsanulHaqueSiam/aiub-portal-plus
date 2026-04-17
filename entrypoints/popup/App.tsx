@@ -103,6 +103,18 @@ function App() {
     });
   };
 
+  const handleTogglePin = (idx: number) => {
+    const nextGroups = pinGroups.map((g, i) => (
+      i === idx ? { ...g, enabled: g.enabled === false ? true : false } : g
+    ));
+    writeHighlights({
+      ...(highlights ?? {}),
+      groups: nextGroups,
+      classIds: [],
+      enabled: pinsEnabled,
+    });
+  };
+
   const handleClearAll = () => {
     writeHighlights({
       ...(highlights ?? {}),
@@ -202,17 +214,27 @@ function App() {
                   const color: HighlightColor = (POPUP_SWATCH as Record<string, string>)[g.color]
                     ? (g.color as HighlightColor)
                     : 'amber';
+                  const on = g.enabled !== false;
                   return (
-                    <li key={i} className="popup-pinned-item">
+                    <li key={i} className={`popup-pinned-item${on ? '' : ' is-paused'}`}>
                       <span
                         className="popup-pinned-swatch"
-                        style={{ background: POPUP_SWATCH[color] }}
+                        style={{ background: on ? POPUP_SWATCH[color] : '#cbd5e1' }}
                         aria-hidden
                       />
                       <span className="popup-pinned-label">Pin {i + 1}</span>
                       <span className="popup-pinned-count">
                         {g.classIds.length} class ID{g.classIds.length === 1 ? '' : 's'}
                       </span>
+                      <label className="popup-pinned-item-toggle" title={on ? 'Pause this pin' : 'Resume this pin'}>
+                        <input
+                          type="checkbox"
+                          checked={on}
+                          onChange={() => handleTogglePin(i)}
+                          aria-label={on ? `Pause pin ${i + 1}` : `Resume pin ${i + 1}`}
+                        />
+                        <span className="popup-pinned-item-toggle-track" aria-hidden />
+                      </label>
                       <button
                         type="button"
                         className="popup-pinned-remove"
