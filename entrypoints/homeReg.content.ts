@@ -64,4 +64,39 @@ function enhance() {
       }
     }
   });
+
+  /* Flatten the registered-course list into a clean grid parent. AIUB
+     renders its own Bootstrap .row > .col-md-* scaffolding (plus the
+     occasional empty placeholder col / whitespace / clearfix pseudo),
+     which fights CSS Grid and leaves holes — typically the top-left
+     slot. Scan for every col that actually holds a course card, wipe
+     the list, and re-append only those. No phantom children possible. */
+  flattenCourseList(mainContent);
+}
+
+function flattenCourseList(mainContent: HTMLElement) {
+  /* Don't reuse .StudentCourseList as the grid parent — it carries
+     whatever CSS AIUB attached (pseudo-elements, inherited padding from
+     .panel-body, its own tag semantics). Build a brand-new wrapper with
+     a known-good class, move only the card-bearing cols into it, and
+     replace the old list with it. Nothing else can sneak in. */
+  const list = mainContent.querySelector<HTMLElement>('.StudentCourseList');
+  if (!list || list.dataset.reghomeFlattened === '1') return;
+
+  const cardCols = Array.from(
+    list.querySelectorAll<HTMLElement>('[class*="col-"]'),
+  ).filter((col) => col.querySelector('.panel.panel-primary'));
+
+  if (cardCols.length === 0) return;
+
+  const grid = document.createElement('div');
+  /* Deliberately do NOT carry the .StudentCourseList class over — AIUB
+     attaches its own CSS (including a ::before pseudo-element that
+     generates a phantom grid cell) to that class. A brand-new class
+     means no inherited AIUB rules. */
+  grid.className = 'reghome-card-grid';
+  grid.dataset.reghomeFlattened = '1';
+  cardCols.forEach((c) => grid.appendChild(c));
+
+  list.replaceWith(grid);
 }

@@ -77,23 +77,35 @@
 }
 
 /* -------------------------------------------------------------------------
-   Course grid — Bootstrap 3 ships .row > .col-md-4 floats which leave
-   ragged gaps whenever a card title wraps to two lines. Replace the row
-   with a CSS grid that auto-fills uniform columns and stretches every
-   card in a row to the tallest sibling — no gaps, no holes.
+   Course grid — homeReg.content.ts builds a brand-new <div class="reghome-
+   card-grid"> and moves every card-bearing .col-md-* into it, replacing
+   the original .StudentCourseList wholesale. Using a fresh class (not
+   the inherited .StudentCourseList) means no AIUB-side CSS pseudo-
+   elements attach to the grid parent — the top-left phantom slot the
+   previous attempts hit was caused by exactly that inheritance.
    ------------------------------------------------------------------------- */
-.StudentCourseList .row {
+.reghome-card-grid {
   display: grid !important;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
   gap: var(--p-s-2) !important;
-  margin: 0 !important;
 }
-.StudentCourseList .row > [class*="col-"] {
+/* Safety net: if any AIUB rule still targets our grid via .panel or a
+   parent selector and generates a pseudo, suppress it. */
+.reghome-card-grid::before,
+.reghome-card-grid::after { content: none !important; display: none !important; }
+.reghome-card-grid > [class*="col-"] {
   width: 100% !important;
   max-width: 100% !important;
+  min-width: 0 !important;
   float: none !important;
   padding: 0 !important;
+  margin: 0 !important;
   display: flex !important;
+}
+/* Collapse any col wrapper that doesn't actually contain a course card
+   (empty placeholder, spacer, or a panel we've hidden). */
+.reghome-card-grid > [class*="col-"]:not(:has(.panel)) {
+  display: none !important;
 }
 
 /* -------------------------------------------------------------------------
@@ -101,7 +113,7 @@
    instead a hover lift + left-aligned code in mono + status pill on the
    right. The card frame is a full thin blue border, not accent.
    ------------------------------------------------------------------------- */
-.StudentCourseList .panel.panel-primary {
+.reghome-card-grid .panel.panel-primary {
   border: 1px solid var(--p-line) !important;
   border-radius: var(--p-r-sm) !important;
   overflow: hidden !important;
@@ -116,16 +128,16 @@
               box-shadow var(--p-dur-2) var(--p-ease),
               transform var(--p-dur-1) var(--p-ease);
 }
-.StudentCourseList .panel.panel-primary > .panel-body { flex: 1 1 auto; }
-.StudentCourseList .panel.panel-primary:hover {
+.reghome-card-grid .panel.panel-primary > .panel-body { flex: 1 1 auto; }
+.reghome-card-grid .panel.panel-primary:hover {
   border-color: var(--p-royal-200) !important;
   box-shadow: var(--p-sh-2) !important;
   transform: translateY(-1px);
 }
 
-.StudentCourseList .panel-primary > .panel-heading { display: none !important; }
+.reghome-card-grid .panel-primary > .panel-heading { display: none !important; }
 
-.StudentCourseList .panel-primary > .panel-body {
+.reghome-card-grid .panel-primary > .panel-body {
   background: #fff !important;
   color: var(--p-text) !important;
   height: auto !important;
@@ -140,7 +152,7 @@
 
 /* Course code — rendered as a label-info by the portal. Make it the mono
    anchor of the row. */
-.StudentCourseList .panel-primary > .panel-body .label-info {
+.reghome-card-grid .panel-primary > .panel-body .label-info {
   background: var(--p-royal-50) !important;
   color: var(--p-royal-700) !important;
   font: 600 var(--p-fs-xs)/1 var(--p-font-mono) !important;
@@ -154,7 +166,7 @@
 
 /* Section status — maps to the shared pill vocabulary.
    label-success = registered (ok tone), label-danger = dropped/failed. */
-.StudentCourseList .panel-primary > .panel-body .label-success {
+.reghome-card-grid .panel-primary > .panel-body .label-success {
   background: var(--p-ok-soft) !important;
   color: oklch(0.33 0.12 150) !important;
   font: 700 var(--p-fs-xs)/1 var(--p-font-body) !important;
@@ -165,7 +177,7 @@
   display: inline-block;
   margin: 0 !important;
 }
-.StudentCourseList .panel-primary > .panel-body .label-danger {
+.reghome-card-grid .panel-primary > .panel-body .label-danger {
   background: var(--p-err-soft) !important;
   color: oklch(0.34 0.16 25) !important;
   font: 700 var(--p-fs-xs)/1 var(--p-font-body) !important;
@@ -177,7 +189,7 @@
   margin: 0 !important;
 }
 
-.StudentCourseList .panel-footer {
+.reghome-card-grid .panel-footer {
   background: var(--p-surface-soft) !important;
   border-top: 1px solid var(--p-line-soft) !important;
   padding: 10px 18px !important;
@@ -189,19 +201,19 @@
   color: var(--p-muted);
 }
 
-.StudentCourseList .panel-footer .fa {
+.reghome-card-grid .panel-footer .fa {
   color: var(--p-mute-soft) !important;
   flex-shrink: 0;
 }
 
-.StudentCourseList .panel-footer a {
+.reghome-card-grid .panel-footer a {
   color: var(--p-royal-600) !important;
   font: 600 var(--p-fs-xs)/1 var(--p-font-body) !important;
   text-decoration: none !important;
   margin: 0 !important;
   transition: color var(--p-dur-1) var(--p-ease);
 }
-.StudentCourseList .panel-footer a:hover { color: var(--p-royal-700) !important; text-decoration: underline; }
+.reghome-card-grid .panel-footer a:hover { color: var(--p-royal-700) !important; text-decoration: underline; }
 
 /* -------------------------------------------------------------------------
    Responsive
@@ -215,7 +227,7 @@
     max-width: none;
     width: 100% !important;
   }
-  .StudentCourseList .panel-primary > .panel-body {
+  .reghome-card-grid .panel-primary > .panel-body {
     flex-direction: column !important;
     align-items: flex-start !important;
   }
