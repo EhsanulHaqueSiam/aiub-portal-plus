@@ -150,9 +150,17 @@
           });
           courses = parseRowElements(els);
           hidden.forEach(function (el) { el.style.display = 'none'; });
-          console.log('[AIUB Filter] rows.all → parsed ' + courses.length + '/' + (expectedTotal ?? '?'));
+          console.log('[AIUB Filter] rows.all → parsed ' + courses.length + '/' + (expectedTotal ?? '?') + ' (refs: ' + els.length + ')');
           if (isComplete(courses.length)) return courses;
-          console.warn('[AIUB Filter] rows.all parse incomplete, falling back to paging expand');
+          // If we iterated every ref FooTable knows about but parseRowElements
+          // filtered some out (header rows, non-numeric classId, filler rows),
+          // the expand fallback won't rescue us — the same filter applies
+          // there. Accept what we have rather than trigger a redundant redraw.
+          if (expectedTotal != null && els.length >= expectedTotal) {
+            console.log('[AIUB Filter] all row refs collected; ' + (expectedTotal - courses.length) + ' filtered as non-data — accepting ' + courses.length);
+            return courses;
+          }
+          console.warn('[AIUB Filter] rows.all parse incomplete (refs=' + els.length + ', expected=' + expectedTotal + '), falling back to paging expand');
         }
       } catch (e) {
         console.warn('[AIUB Filter] rows.all failed:', e);
