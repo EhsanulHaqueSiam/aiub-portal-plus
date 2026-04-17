@@ -16,6 +16,7 @@ export default defineConfig({
           'Academic/*',
           'Grade/*',
           'RoutineGenerator/*',
+          'CGPAPlanner/*',
           'offered-filter.js',
           'offered-filter.css',
           'aiub.jpg',

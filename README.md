@@ -24,6 +24,18 @@ Opens once you've visited your Grade Report pages. Computes 9 charts from your o
 
 ![Grade Analytics Dashboard](docs/screenshots/graphs-dashboard.png)
 
+### CGPA Planner
+Set a target CGPA and see exactly what it takes to get there. The planner reads your cached Grade Report data and shows:
+
+- **Snapshot** — current CGPA, credits completed / 148 (BSc CSE minimum), academic standing (Dean's list · Very good · Good · Passing · Probation)
+- **Target setter** — input your goal CGPA (default 3.90, presets for 3.50 / 3.75 / 3.90 / 4.00). Computes required average GPA on remaining credits and a feasibility verdict (Comfortable · Achievable · Stretch · Near-perfect · Not reachable)
+- **Ongoing courses matrix** — every ongoing course × every possible grade (A+ through F) laid out as a table. Click a cell to pick that grade; the summary live-updates your projected CGPA. One-click "All A+", "All A", "All B+", or clear
+- **Remaining credits slider** — drag to see where different averages across not-attempted courses land you, and the gap vs. your target
+- **Insights panel** — 8 quick reads from your own data: trajectory vs target, impact of a single A+ or C, lowest affordable average, semesters to graduation, biggest retake lift, Dean's list pathway, absolute CGPA ceiling
+- **Trajectory chart** — your actual CGPA per semester plus the projected path to your target, with a target reference line
+
+![CGPA Planner](docs/screenshots/cgpa-planner.png)
+
 ### Section highlighting on Offered Courses & Registration
 Pick classes in the Routine Generator, and those exact Class IDs get highlighted when you open the Offered Courses page or the Registration page. No more cross-referencing between tabs.
 

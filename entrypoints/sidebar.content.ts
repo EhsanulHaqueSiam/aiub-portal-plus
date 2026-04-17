@@ -99,6 +99,13 @@ function injectExtraNavItems(sidebar: HTMLElement) {
     }
   }
 
+  if (!sidebar.querySelector('.aiub-cgpa-nav-item')) {
+    const cgpaUrl = browser.runtime.getURL('/CGPAPlanner/index.html');
+    if (cgpaUrl) {
+      insertAfterLast(buildNavLink('aiub-cgpa-nav-item', cgpaUrl, 'glyphicon-dashboard', 'CGPA Planner'));
+    }
+  }
+
   if (!sidebar.querySelector('.aiub-routine-nav-item')) {
     const routineUrl = browser.runtime.getURL('/RoutineGenerator/index.html');
     if (routineUrl) {

@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CGPA Planner · AIUB Portal+</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400;1,9..144,600&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="../Shared/portal-app-shell.css">
+  <link rel="stylesheet" href="cgpa.css">
+</head>
+<body>
+  <!-- PORTAL NAVBAR -->
+  <header class="portal-navbar">
+    <div class="portal-navbar-inner">
+      <a class="portal-brand" href="https://portal.aiub.edu/Student" target="_self" rel="noopener">
+        <span class="portal-brand-logo" aria-hidden="true"></span>
+        <span class="portal-brand-label">AIUB Portal<span class="portal-brand-plus">+</span></span>
+      </a>
+      <nav class="portal-navlinks" aria-label="Portal sections">
+        <a href="https://portal.aiub.edu/Student/Course" target="_self" rel="noopener">
+          <span class="glyphicon">&#8801;</span> Courses &amp; Results
+        </a>
+        <a href="https://portal.aiub.edu/Student/Registration" target="_self" rel="noopener">
+          <span class="glyphicon">&#9889;</span> Registration
+        </a>
+        <a href="https://portal.aiub.edu/Student/GradeReport/ByCurriculum" target="_self" rel="noopener">
+          <span class="glyphicon">&#10022;</span> Grade Report
+        </a>
+      </nav>
+      <div class="portal-navright">
+        <span class="portal-welcome">
+          Welcome <span class="portal-welcome-name" id="portal-welcome-name">student</span>
+        </span>
+        <a class="portal-iconbtn" href="https://portal.aiub.edu/Student" target="_self" rel="noopener" title="Portal home" aria-label="Portal home">&#127968;</a>
+        <a class="portal-iconbtn portal-iconbtn-danger" href="https://portal.aiub.edu/Login/Logout" title="Log out" aria-label="Log out">&#8618;</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="portal-layout">
+    <aside class="portal-sidebar" aria-label="Navigation">
+      <div class="nav-profile-block">
+        <div class="nav-profile-name" id="portal-profile-name">Student</div>
+        <div class="nav-profile-id" id="portal-profile-id"></div>
+      </div>
+
+      <div class="nav-panel-group">
+        <section class="nav-panel">
+          <div class="nav-panel-head">
+            <span class="glyphicon">&#128202;</span> Academics
+            <span class="nav-chevron">&#9662;</span>
+          </div>
+          <div class="nav-panel-body">
+            <a class="nav-link" href="https://portal.aiub.edu/Student/Course" target="_self">Courses &amp; Results</a>
+            <a class="nav-link" href="https://portal.aiub.edu/Student/Registration" target="_self">Registration</a>
+            <a class="nav-link" href="https://portal.aiub.edu/Student/Adrop/DropApplication" target="_self">Drop Application</a>
+            <a class="nav-link" href="https://portal.aiub.edu/Student/Section/Offered" target="_self">Offered Courses</a>
+            <a class="nav-link" href="https://portal.aiub.edu/Student/Curriculum" target="_self">My Curriculum</a>
+            <a class="nav-link" href="https://portal.aiub.edu/Student/Accounts" target="_self">Financials</a>
+          </div>
+        </section>
+
+        <section class="nav-panel">
+          <div class="nav-panel-head">
+            <span class="glyphicon">&#10022;</span> Grade Reports
+            <span class="nav-chevron">&#9662;</span>
+          </div>
+          <div class="nav-panel-body">
+            <a class="nav-link" href="https://portal.aiub.edu/Student/GradeReport/ByCurriculum" target="_self">By Curriculum</a>
+            <a class="nav-link" href="https://portal.aiub.edu/Student/GradeReport/BySemester" target="_self">By Semester</a>
+          </div>
+        </section>
+
+        <section class="nav-panel">
+          <div class="nav-panel-head">
+            <span class="glyphicon">&#9881;</span> Tools
+            <span class="nav-chevron">&#9662;</span>
+          </div>
+          <div class="nav-panel-body">
+            <a class="nav-link" href="../Grade/Graphs.html">Graphs</a>
+            <a class="nav-link active" href="index.html" aria-current="page">CGPA Planner</a>
+            <a class="nav-link" href="../RoutineGenerator/index.html">Routine Generator</a>
+          </div>
+        </section>
+      </div>
+
+      <footer class="portal-sidebar-foot">
+        <span class="foot-badge">Unofficial extension</span>
+        <p>Open your Grade Report (Curriculum + Semester) to sync the data that powers this planner.</p>
+      </footer>
+    </aside>
+
+    <main class="portal-main">
+      <section class="planner-hero">
+        <div class="planner-hero-copy">
+          <p class="planner-kicker">AIUB Portal Plus</p>
+          <h1>CGPA <em>Planner</em></h1>
+          <p class="planner-sub">
+            Set a target. See what each ongoing course needs to get you there, what average you need across future
+            semesters, and how every remaining grade changes your graduation CGPA — all computed from your own
+            Grade Report data, right here in your browser.
+          </p>
+        </div>
+        <div class="planner-hero-badge">
+          <span class="planner-hero-label">Current CGPA</span>
+          <span class="planner-hero-value" id="heroCgpa">—</span>
+          <span class="planner-hero-sub" id="heroCredits">— credits completed</span>
+        </div>
+      </section>
+
+      <section class="empty-banner" id="emptyState" hidden>
+        <div class="empty-banner-copy">
+          <h2>No grade data synced yet</h2>
+          <p>
+            Open your Grade Report pages once — <a href="https://portal.aiub.edu/Student/GradeReport/ByCurriculum">By Curriculum</a>
+            and <a href="https://portal.aiub.edu/Student/GradeReport/BySemester">By Semester</a> — and come back. The
+            planner reads the cached data; nothing leaves your browser.
+          </p>
+        </div>
+      </section>
+
+      <div id="planner" hidden>
+        <!-- SNAPSHOT GRID -->
+        <section class="snapshot-grid">
+          <article class="snap-card">
+            <span class="snap-key">Graduation progress</span>
+            <span class="snap-val" id="snapProgress">—</span>
+            <div class="snap-bar"><div class="snap-bar-fill" id="progressBar"></div></div>
+            <span class="snap-hint" id="snapProgressHint">— of 148 credits needed for BSc CSE</span>
+          </article>
+          <article class="snap-card">
+            <span class="snap-key">Credits breakdown</span>
+            <div class="snap-bar snap-bar-tri" id="breakdownBar">
+              <div class="snap-seg snap-seg-done" id="segDone"></div>
+              <div class="snap-seg snap-seg-ong" id="segOng"></div>
+              <div class="snap-seg snap-seg-rem" id="segRem"></div>
+            </div>
+            <ul class="snap-legend">
+              <li><span class="dot dot-done"></span> Completed <b id="creditsDone">0</b></li>
+              <li><span class="dot dot-ong"></span> Ongoing <b id="creditsOng">0</b></li>
+              <li><span class="dot dot-rem"></span> Remaining <b id="creditsRem">0</b></li>
+            </ul>
+          </article>
+          <article class="snap-card">
+            <span class="snap-key">Academic standing</span>
+            <span class="snap-val" id="snapStanding">—</span>
+            <span class="snap-hint" id="snapStandingHint">—</span>
+          </article>
+        </section>
+
+        <!-- TARGET SETTER -->
+        <section class="block">
+          <header class="block-head">
+            <span class="block-index">01</span>
+            <h2 class="block-title"><em>Target.</em></h2>
+            <p class="block-sub">Where do you want your final CGPA to land?</p>
+          </header>
+
+          <div class="target-card">
+            <div class="target-input-row">
+              <label class="target-label" for="targetCgpa">Target CGPA</label>
+              <div class="target-input-wrap">
+                <input type="number" id="targetCgpa" class="target-input" min="0" max="4" step="0.01" value="3.90">
+                <div class="target-presets">
+                  <button type="button" data-preset="3.50" class="preset-pill">3.50</button>
+                  <button type="button" data-preset="3.75" class="preset-pill">3.75</button>
+                  <button type="button" data-preset="3.90" class="preset-pill">3.90</button>
+                  <button type="button" data-preset="4.00" class="preset-pill">4.00</button>
+                </div>
+              </div>
+            </div>
+            <div class="target-verdict" id="targetVerdict">
+              <div class="verdict-headline" id="verdictHeadline">Enter a target to compute the path.</div>
+              <div class="verdict-grid">
+                <div>
+                  <span class="verdict-k">Required average on remaining</span>
+                  <span class="verdict-v" id="requiredAvg">—</span>
+                </div>
+                <div>
+                  <span class="verdict-k">If you stop now</span>
+                  <span class="verdict-v" id="stopNowCgpa">—</span>
+                </div>
+                <div>
+                  <span class="verdict-k">Feasibility</span>
+                  <span class="verdict-v" id="feasibilityChip"><span class="pill pill-muted">—</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ONGOING COURSES MATRIX -->
+        <section class="block" id="ongoingBlock" hidden>
+          <header class="block-head">
+            <span class="block-index">02</span>
+            <h2 class="block-title"><em>Ongoing courses.</em></h2>
+            <p class="block-sub">Pick a projected grade for each — the table shows how that choice moves your CGPA.</p>
+          </header>
+
+          <div class="ongoing-card">
+            <div class="ongoing-table-wrap">
+              <table class="ongoing-table" id="ongoingTable">
+                <thead>
+                  <tr>
+                    <th class="col-course">Course</th>
+                    <th class="col-credit">Cr</th>
+                    <th class="col-grade-matrix" colspan="9">Projected CGPA at each grade</th>
+                  </tr>
+                  <tr class="matrix-head">
+                    <th></th><th></th>
+                    <th>A+<span>4.00</span></th>
+                    <th>A<span>3.75</span></th>
+                    <th>B+<span>3.50</span></th>
+                    <th>B<span>3.25</span></th>
+                    <th>C+<span>3.00</span></th>
+                    <th>C<span>2.75</span></th>
+                    <th>D+<span>2.50</span></th>
+                    <th>D<span>2.25</span></th>
+                    <th>F<span>0.00</span></th>
+                  </tr>
+                </thead>
+                <tbody id="ongoingBody"></tbody>
+              </table>
+            </div>
+            <div class="ongoing-summary">
+              <div class="ongoing-sum-row">
+                <span class="ongoing-sum-k">With your current picks</span>
+                <span class="ongoing-sum-v" id="pickedCgpa">—</span>
+                <span class="ongoing-sum-hint" id="pickedDelta">—</span>
+              </div>
+              <div class="ongoing-sum-actions">
+                <button type="button" class="mini-btn" data-pick-all="A+">All A+</button>
+                <button type="button" class="mini-btn" data-pick-all="A">All A</button>
+                <button type="button" class="mini-btn" data-pick-all="B+">All B+</button>
+                <button type="button" class="mini-btn" data-pick-all="clear">Clear</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- REMAINING SEMESTERS SENSITIVITY -->
+        <section class="block" id="remainingBlock" hidden>
+          <header class="block-head">
+            <span class="block-index">03</span>
+            <h2 class="block-title"><em>Remaining credits.</em></h2>
+            <p class="block-sub">Drag the slider to see where different averages across your not-attempted courses land you.</p>
+          </header>
+
+          <div class="remaining-card">
+            <div class="remaining-slider-row">
+              <label class="slider-k" for="remainingSlider">Average GPA you assume you'll get</label>
+              <div class="slider-wrap">
+                <input type="range" id="remainingSlider" min="0" max="4" step="0.05" value="3.75" class="slider">
+                <output id="remainingSliderOut" class="slider-out">3.75</output>
+              </div>
+            </div>
+            <div class="remaining-result-grid">
+              <div>
+                <span class="k">Projected graduation CGPA</span>
+                <span class="v" id="remainingCgpa">—</span>
+              </div>
+              <div>
+                <span class="k">Credits in play</span>
+                <span class="v" id="remainingCredits">—</span>
+              </div>
+              <div>
+                <span class="k">Gap vs. target</span>
+                <span class="v" id="remainingGap">—</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- INSIGHTS -->
+        <section class="block">
+          <header class="block-head">
+            <span class="block-index">04</span>
+            <h2 class="block-title"><em>Insights.</em></h2>
+            <p class="block-sub">Quick reads from your actual data.</p>
+          </header>
+          <div class="insights-grid" id="insightsGrid"></div>
+        </section>
+
+        <!-- TRAJECTORY -->
+        <section class="block">
+          <header class="block-head">
+            <span class="block-index">05</span>
+            <h2 class="block-title"><em>Trajectory.</em></h2>
+            <p class="block-sub">Your semester-by-semester CGPA, with projected path to target.</p>
+          </header>
+          <article class="chart-card">
+            <div id="trajectoryChartWrap">
+              <canvas id="trajectoryChart"></canvas>
+            </div>
+          </article>
+        </section>
+      </div>
+
+      <p class="planner-foot">
+        AIUB CSE curriculum requires <strong>148 credits</strong> to graduate. This planner uses AIUB's standard grade
+        scale (A+ 4.00 · A 3.75 · B+ 3.50 · B 3.25 · C+ 3.00 · C 2.75 · D+ 2.50 · D 2.25 · F 0.00).
+        Elective credits beyond the core curriculum don't count toward the 148.
+      </p>
+    </main>
+  </div>
+
+  <script src="../Grade/chart.umd.js"></script>
+  <script src="cgpa.js"></script>
+  <script src="../Grade/shell-profile.js"></script>
+</body>
+</html>
