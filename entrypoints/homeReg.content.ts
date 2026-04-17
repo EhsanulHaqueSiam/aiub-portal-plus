@@ -65,32 +65,25 @@ function enhance() {
     }
   });
 
-  /* Flatten the registered-course list into a clean grid parent. AIUB
-     populates .StudentCourseList via AJAX AFTER document_idle fires, so
-     we can't rely on it being in the DOM when our script runs. Poll
-     briefly, then observe for late mutations; on first success, the
-     observer disconnects itself. */
+  /* Flatten the registered-course list into a clean grid parent. Two
+     async moments matter:
+     1. The initial AJAX load — AIUB populates .StudentCourseList AFTER
+        document_idle fires, so the first call here may find nothing.
+     2. Semester-dropdown changes — AIUB re-fetches the list and swaps
+        it in, wiping out our previous grid. We need to re-flatten.
+     A persistent MutationObserver handles both: it stays alive for the
+     page's lifetime and re-attempts flattening on every mutation.
+     flattenCourseList early-returns when the grid already exists, so
+     the observer is cheap at steady state. */
   scheduleFlatten(mainContent);
 }
 
 function scheduleFlatten(mainContent: HTMLElement) {
-  if (flattenCourseList(mainContent)) return;
-
-  let tries = 0;
-  const pollId = window.setInterval(() => {
-    if (flattenCourseList(mainContent) || ++tries >= 25) {
-      window.clearInterval(pollId);
-      observer.disconnect();
-    }
-  }, 200);
-
-  const observer = new MutationObserver(() => {
-    if (flattenCourseList(mainContent)) {
-      observer.disconnect();
-      window.clearInterval(pollId);
-    }
-  });
-  observer.observe(mainContent, { childList: true, subtree: true });
+  flattenCourseList(mainContent);
+  new MutationObserver(() => flattenCourseList(mainContent)).observe(
+    mainContent,
+    { childList: true, subtree: true },
+  );
 }
 
 function flattenCourseList(mainContent: HTMLElement): boolean {
