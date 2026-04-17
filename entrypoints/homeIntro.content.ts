@@ -1,4 +1,4 @@
-import { extensionEnabled } from '@/utils/storage';
+import { extensionEnabled, teamsCredsDismissed } from '@/utils/storage';
 import { loadCSS } from '@/utils/portal';
 
 declare global {
@@ -63,4 +63,55 @@ function enhance() {
     const panel = regBtn.closest('.panel');
     panel?.classList.add('intro-actions');
   }
+
+  enhanceTeamsCredentials(mainContent);
+}
+
+/**
+ * The portal's Teams one-time-password card is high-value on the first
+ * login of a semester and noise on every visit after. Let students collapse
+ * it. A small "Show Teams password" link stays rendered in place so the
+ * info is never lost — just hidden by default once dismissed. State is
+ * persisted in local storage so returning visitors don't see it again.
+ */
+function enhanceTeamsCredentials(mainContent: HTMLElement) {
+  const alert = Array.from(
+    mainContent.querySelectorAll<HTMLElement>('.alert-success'),
+  ).find((el) => el.querySelector('.table-bordered'));
+  if (!alert) return;
+
+  alert.classList.add('intro-teams-card');
+
+  const dismiss = document.createElement('button');
+  dismiss.type = 'button';
+  dismiss.className = 'intro-teams-dismiss';
+  dismiss.setAttribute('aria-label', 'Hide Teams credentials');
+  dismiss.title = 'Hide Teams credentials';
+  dismiss.textContent = '\u00D7';
+  alert.appendChild(dismiss);
+
+  const reopen = document.createElement('button');
+  reopen.type = 'button';
+  reopen.className = 'intro-teams-reopen';
+  reopen.textContent = 'Show Teams password';
+  alert.insertAdjacentElement('afterend', reopen);
+
+  teamsCredsDismissed.getValue().then((hidden) => {
+    if (hidden) {
+      alert.classList.add('is-dismissed');
+      reopen.classList.add('is-visible');
+    }
+  });
+
+  dismiss.addEventListener('click', () => {
+    alert.classList.add('is-dismissed');
+    reopen.classList.add('is-visible');
+    teamsCredsDismissed.setValue(true);
+  });
+
+  reopen.addEventListener('click', () => {
+    alert.classList.remove('is-dismissed');
+    reopen.classList.remove('is-visible');
+    teamsCredsDismissed.setValue(false);
+  });
 }

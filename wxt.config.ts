@@ -24,6 +24,13 @@ export default defineConfig({
           'offered-filter.js',
           'offered-filter.css',
           'aiub.jpg',
+          // Standalone extension pages linked from the sidebar. MV3 requires
+          // each chrome-extension:// HTML that the portal navigates to be
+          // listed here; otherwise Chromium blocks the click with
+          // ERR_BLOCKED_BY_CLIENT.
+          'graphs.html',
+          'cgpa-planner.html',
+          'routine-generator.html',
         ],
         matches: ['https://portal.aiub.edu/*'],
       },

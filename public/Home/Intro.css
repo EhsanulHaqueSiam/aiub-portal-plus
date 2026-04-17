@@ -26,100 +26,98 @@
    Greeting banner — navy ink gradient + two ambient-light radials.
    Editorial italic display, tabular clock, gold-dot live indicator.
    ------------------------------------------------------------------------- */
+/* Compact utility strip. The greeting is a polite lead-in, not the hero —
+   the Class Schedule below is. Height ~54px, greeting + date inline on the
+   left, clock inline on the right. No dominating ambient glow. */
 .intro-banner {
   background: var(--p-grad-ink);
-  border-radius: var(--p-r-lg);
-  padding: 30px 34px;
-  margin-bottom: var(--p-s-5);
-  display: grid;
-  grid-template-columns: 1.6fr auto;
+  border-radius: var(--p-r-md);
+  padding: 12px 20px;
+  margin-bottom: var(--p-s-3);
+  display: flex;
   align-items: center;
-  gap: var(--p-s-5);
+  justify-content: space-between;
+  gap: var(--p-s-4);
   position: relative;
   overflow: hidden;
   isolation: isolate;
   color: #fff;
-  box-shadow: var(--p-sh-3);
+  box-shadow: var(--p-sh-2);
   animation: p-rise var(--p-dur-enter) var(--p-ease) both;
 }
-.intro-banner::before,
-.intro-banner::after {
+.intro-banner::before {
   content: '';
   position: absolute;
+  right: -80px; top: -60px;
+  width: 220px; height: 180px;
+  background: radial-gradient(circle, oklch(0.72 0.15 250 / 0.22), transparent 65%);
   border-radius: 50%;
   pointer-events: none;
   z-index: -1;
 }
-.intro-banner::before {
-  right: -80px; top: -120px;
-  width: 340px; height: 340px;
-  background: radial-gradient(circle, oklch(0.72 0.15 250 / 0.35), transparent 60%);
-}
-.intro-banner::after {
-  left: -60px; bottom: -80px;
-  width: 260px; height: 260px;
-  background: radial-gradient(circle, oklch(0.76 0.15 230 / 0.22), transparent 65%);
-}
 
 .intro-banner-left {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 220px;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
 }
 
 .intro-greeting {
   margin: 0;
-  font: 400 clamp(28px, 3.6vw, 42px)/1.02 var(--p-font-display);
+  font: 400 clamp(18px, 2vw, 22px)/1 var(--p-font-display);
   font-style: italic;
   color: #fff;
   letter-spacing: -0.01em;
-  text-shadow: 0 2px 10px rgba(10, 24, 56, 0.35);
 }
 
 .intro-date {
-  font: 500 var(--p-fs-sm)/1.3 var(--p-font-body);
-  color: rgba(255, 255, 255, 0.82);
+  font: 500 var(--p-fs-sm)/1 var(--p-font-body);
+  color: rgba(255, 255, 255, 0.75);
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   letter-spacing: 0.01em;
 }
 .intro-date::before {
   content: '';
   display: inline-block;
-  width: 7px; height: 7px;
+  width: 5px; height: 5px;
   border-radius: 50%;
   background: var(--p-gold);
   box-shadow: 0 0 0 0 oklch(0.83 0.15 84 / 0.6);
   animation: p-pulse 1.8s infinite;
 }
 
-/* Live clock — glass-inset panel, anchored right. Time is the hero. */
+/* Live clock — inline on the right. Reads as time, not hero number.
+   CURRENT TIME label is implicit; the tabular glyph shape is unambiguous. */
 .intro-banner-badge {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: var(--p-r-md);
-  padding: 16px 24px;
-  text-align: right;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
   flex-shrink: 0;
-  min-width: 160px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 .intro-banner-badge-label {
-  display: block;
-  font: 700 var(--p-fs-xs)/1 var(--p-font-body);
-  color: rgba(255, 255, 255, 0.70);
+  display: inline;
+  font: 700 10px/1 var(--p-font-body);
+  color: rgba(255, 255, 255, 0.55);
   text-transform: uppercase;
   letter-spacing: var(--p-tracking-eyebrow);
-  margin-bottom: 6px;
+  margin: 0;
 }
 .intro-banner-badge-value {
-  display: block;
-  font: 400 var(--p-fs-3xl)/1 var(--p-font-display);
+  display: inline;
+  font: 500 18px/1 var(--p-font-body);
   font-variant-numeric: tabular-nums;
   color: #fff;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 /* -------------------------------------------------------------------------
@@ -131,7 +129,7 @@
   position: relative;
   border: 1px solid transparent !important;
   border-radius: var(--p-r-md) !important;
-  padding: 18px 22px 18px 46px !important;
+  padding: 14px 20px 14px 40px !important;
   margin: 0 0 var(--p-s-3) !important;
   font: 500 var(--p-fs-base)/var(--p-lh-body) var(--p-font-body) !important;
   box-shadow: var(--p-sh-1) !important;
@@ -140,12 +138,12 @@
 #main-content .alert::before {
   content: '';
   position: absolute;
-  left: 20px; top: 22px;
-  width: 10px; height: 10px;
+  left: 18px; top: 19px;
+  width: 8px; height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
-#main-content .alert strong { font-weight: 700; }
+#main-content .alert strong { font-weight: 600; }
 #main-content .alert a {
   color: inherit;
   text-decoration: underline;
@@ -185,6 +183,83 @@
 #main-content .alert a { color: inherit; }
 
 /* -------------------------------------------------------------------------
+   Teams credentials — dismiss + reopen controls. The card is high-value on
+   first login each semester and low-value every visit after. Dismissing it
+   collapses the whole alert; a small dashed "Show Teams password" button
+   stays in place so the info is never lost, just one click away.
+   ------------------------------------------------------------------------- */
+.intro-teams-card { padding-right: 48px !important; }
+.intro-teams-card.is-dismissed { display: none !important; }
+
+.intro-teams-dismiss {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid oklch(0.82 0.09 150 / 0.55);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.65);
+  color: oklch(0.40 0.12 150);
+  font: 500 17px/1 var(--p-font-body);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background var(--p-dur-2) var(--p-ease),
+    color var(--p-dur-2) var(--p-ease),
+    border-color var(--p-dur-2) var(--p-ease),
+    transform var(--p-dur-1) var(--p-ease);
+}
+.intro-teams-dismiss:hover {
+  background: #fff;
+  color: oklch(0.34 0.16 25);
+  border-color: oklch(0.75 0.12 25 / 0.5);
+  transform: scale(1.05);
+}
+.intro-teams-dismiss:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px oklch(0.70 0.12 150 / 0.25);
+}
+
+.intro-teams-reopen {
+  display: none;
+  padding: 7px 14px 7px 12px;
+  margin: 0 0 var(--p-s-3);
+  background: transparent;
+  border: 1px dashed oklch(0.80 0.10 150 / 0.55);
+  border-radius: var(--p-r-sm);
+  color: oklch(0.38 0.12 150);
+  font: 500 var(--p-fs-sm)/1 var(--p-font-body);
+  cursor: pointer;
+  align-items: center;
+  gap: 6px;
+  transition:
+    background var(--p-dur-2) var(--p-ease),
+    border-color var(--p-dur-2) var(--p-ease),
+    color var(--p-dur-2) var(--p-ease);
+}
+.intro-teams-reopen::before {
+  content: '+';
+  font: 600 15px/1 var(--p-font-body);
+  color: oklch(0.50 0.14 150);
+  margin-right: 2px;
+}
+.intro-teams-reopen.is-visible { display: inline-flex; }
+.intro-teams-reopen:hover {
+  background: var(--p-ok-soft);
+  border-color: oklch(0.68 0.13 150);
+  border-style: solid;
+  color: oklch(0.30 0.13 150);
+}
+.intro-teams-reopen:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px oklch(0.70 0.12 150 / 0.25);
+}
+
+/* -------------------------------------------------------------------------
    Teams credentials card — this is THE most-copied surface on the Home
    page. Students pull their Microsoft Teams one-time password from here
    every semester. Treat the values as the hero: mono display face,
@@ -195,27 +270,27 @@
   border-radius: var(--p-r-sm) !important;
   overflow: hidden !important;
   border: 1px solid oklch(0.85 0.10 150) !important;
-  background: rgba(255, 255, 255, 0.55);
-  margin-top: 12px;
+  background: rgba(255, 255, 255, 0.62);
+  margin-top: 10px;
 }
 #main-content .alert-success .table-bordered td {
   border-color: oklch(0.88 0.08 150) !important;
-  padding: 10px 14px !important;
+  padding: 11px 16px !important;
   vertical-align: middle !important;
 }
 #main-content .alert-success .table-bordered td:first-child {
-  font: 700 var(--p-fs-xs)/1 var(--p-font-body) !important;
-  letter-spacing: var(--p-tracking-eyebrow);
+  font: 700 var(--p-fs-sm)/1 var(--p-font-body) !important;
+  letter-spacing: var(--p-tracking-wide);
   text-transform: uppercase;
-  color: oklch(0.42 0.12 150) !important;
+  color: oklch(0.40 0.12 150) !important;
   width: 1%; white-space: nowrap;
 }
-#main-content .alert-success .table-bordered td:nth-child(2) { width: 1%; white-space: nowrap; color: oklch(0.50 0.08 150); }
+#main-content .alert-success .table-bordered td:nth-child(2) { width: 1%; white-space: nowrap; color: oklch(0.55 0.08 150); }
 #main-content .alert-success .table-bordered td:last-child {
-  font: 500 var(--p-fs-md)/1 var(--p-font-mono) !important;
+  font: 500 14.5px/1 var(--p-font-mono) !important;
   font-variant-numeric: tabular-nums;
-  color: oklch(0.24 0.10 150) !important;
-  letter-spacing: 0.02em;
+  color: oklch(0.22 0.10 150) !important;
+  letter-spacing: 0.01em;
   user-select: all;  /* one-click-to-select; students copy this constantly */
 }
 
@@ -230,10 +305,10 @@
   border: none !important;
   border-radius: var(--p-r-sm) !important;
   color: #fff !important;
-  font: 700 var(--p-fs-sm)/1 var(--p-font-body) !important;
-  letter-spacing: 0.02em;
+  font: 600 var(--p-fs-sm)/1 var(--p-font-body) !important;
+  letter-spacing: 0.01em;
   text-decoration: none !important;
-  padding: 10px 18px !important;
+  padding: 9px 16px !important;
   box-shadow: var(--p-sh-2) !important;
   transition: transform var(--p-dur-2) var(--p-ease), box-shadow var(--p-dur-2) var(--p-ease), filter var(--p-dur-2) var(--p-ease);
 }
@@ -251,11 +326,18 @@
    - Identity / Vaccine (info) = secondary
    - Any `default` = tertiary, ghost
    ------------------------------------------------------------------------- */
+/* The action row ranks the three buttons by real weight:
+   - btn-danger (Go to Registration) = primary CTA during an open window.
+     Filled red gradient, larger, arrow icon — reads as "the action to take."
+   - btn-info (Submit Identity / Vaccine Info) = background chores. Demoted
+     to ghost buttons so they don't steal weight from registration.
+   - btn-default = tertiary ghost.
+   One red signal + two quiet ghosts, instead of three equal pills. */
 .intro-actions {
   border: none !important;
   box-shadow: none !important;
   background: transparent !important;
-  margin-bottom: var(--p-s-6) !important;
+  margin-bottom: var(--p-s-5) !important;
 }
 .intro-actions > .panel-body { padding: 0 !important; }
 .intro-actions .text-center {
@@ -263,63 +345,88 @@
   gap: 10px !important;
   flex-wrap: wrap !important;
   justify-content: flex-start !important;
+  align-items: center !important;
 }
 .intro-actions .btn {
   border-radius: var(--p-r-sm) !important;
-  font: 700 var(--p-fs-sm)/1 var(--p-font-body) !important;
-  padding: 13px 22px !important;
-  border: none !important;
-  box-shadow: var(--p-sh-2) !important;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font: 600 var(--p-fs-sm)/1 var(--p-font-body) !important;
+  letter-spacing: 0.01em;
+  text-transform: none;
   position: relative;
   overflow: hidden;
   transition:
     transform var(--p-dur-2) var(--p-ease),
     box-shadow var(--p-dur-2) var(--p-ease),
-    filter var(--p-dur-2) var(--p-ease) !important;
+    filter var(--p-dur-2) var(--p-ease),
+    background var(--p-dur-2) var(--p-ease),
+    border-color var(--p-dur-2) var(--p-ease),
+    color var(--p-dur-2) var(--p-ease) !important;
 }
-.intro-actions .btn:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: var(--p-sh-3) !important;
-  filter: brightness(1.06);
-}
-.intro-actions .btn:active { transform: translateY(0) !important; }
 .intro-actions .btn:focus-visible {
   outline: none;
   box-shadow: var(--p-sh-glow), var(--p-sh-2) !important;
 }
+.intro-actions .btn:active { transform: translateY(0) !important; }
 
-/* Registration CTA — critical, warm red. */
+/* Registration CTA — critical red. Biggest, filled, with trailing arrow. */
 .intro-actions .btn-danger {
+  padding: 11px 22px !important;
+  font: 600 var(--p-fs-base)/1 var(--p-font-body) !important;
+  border: none !important;
   background: linear-gradient(135deg, oklch(0.45 0.18 25) 0%, oklch(0.55 0.21 25) 100%) !important;
   color: #fff !important;
+  box-shadow: var(--p-sh-2) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
 }
-/* Secondary action buttons — sapphire/sky. */
-.intro-actions .btn-info {
-  background: linear-gradient(135deg, oklch(0.50 0.15 235) 0%, oklch(0.65 0.14 230) 100%) !important;
-  color: #fff !important;
+.intro-actions .btn-danger::after {
+  content: '→';
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1;
+  transition: transform var(--p-dur-2) var(--p-ease);
 }
-/* Tertiary ghost — white with hover tint. */
+.intro-actions .btn-danger:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: var(--p-sh-3) !important;
+  filter: brightness(1.06);
+}
+.intro-actions .btn-danger:hover::after { transform: translateX(2px); }
+
+/* Secondary chores — ghost buttons, royal-tinted. Visually subordinate to
+   the red CTA; still tappable targets with a 36px-ish hit area. */
+.intro-actions .btn-info,
 .intro-actions .btn-default {
-  background: #fff !important;
-  color: var(--p-text) !important;
-  border: 1px solid var(--p-line) !important;
-  box-shadow: var(--p-sh-1) !important;
+  padding: 8px 14px !important;
+  font: 500 var(--p-fs-sm)/1 var(--p-font-body) !important;
+  background: transparent !important;
+  color: var(--p-royal-700) !important;
+  border: 1px solid var(--p-royal-100) !important;
+  box-shadow: none !important;
 }
+.intro-actions .btn-info:hover,
 .intro-actions .btn-default:hover {
   background: var(--p-royal-50) !important;
-  color: var(--p-royal-600) !important;
   border-color: var(--p-royal-200) !important;
+  color: var(--p-royal-700) !important;
+  transform: none !important;
 }
+.intro-actions .btn-default { color: var(--p-text-soft) !important; border-color: var(--p-line) !important; }
+.intro-actions .btn-default:hover { color: var(--p-royal-700) !important; }
 
 /* -------------------------------------------------------------------------
    Responsive
    ------------------------------------------------------------------------- */
 @media (max-width: 768px) {
-  .intro-banner { grid-template-columns: 1fr; padding: 22px 22px; }
-  .intro-banner-badge { justify-self: start; text-align: left; }
-  .intro-actions .text-center { flex-direction: column !important; }
-  .intro-actions .btn { width: 100% !important; text-align: center !important; }
+  .intro-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 14px 18px;
+    gap: 10px;
+  }
+  .intro-banner-badge { align-self: flex-start; }
+  .intro-actions .text-center { flex-direction: column !important; align-items: stretch !important; }
+  .intro-actions .btn { width: 100% !important; text-align: center !important; justify-content: center !important; }
   #main-content .alert { padding-left: 42px !important; }
 }

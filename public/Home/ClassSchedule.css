@@ -5,10 +5,14 @@
    state is signalled via full border tint + tone dot + status pill.
    ========================================================================= */
 
+/* This is the hero of the home page — bigger than the greeting banner on
+   purpose. Students come here to see today's classes, not to be greeted.
+   Generous bottom air (s-5) so the eye settles after the big hero before
+   hitting the day badges. */
 .sched-section-head {
-  margin: 0 0 var(--p-s-5);
-  padding: 0;
-  font: 400 clamp(26px, 3vw, 34px)/1.05 var(--p-font-display);
+  margin: var(--p-s-2) 0 var(--p-s-5);
+  padding: 0 0 0 16px;
+  font: 400 clamp(28px, 2.8vw, 34px)/1.08 var(--p-font-display);
   color: var(--p-royal-900);
   letter-spacing: -0.02em;
   display: flex;
@@ -16,12 +20,11 @@
   flex-wrap: wrap;
   gap: 10px;
   position: relative;
-  padding-left: 18px;
 }
 .sched-section-head::before {
   content: '';
   position: absolute;
-  left: 0; top: 8px; bottom: 10px;
+  left: 0; top: 6px; bottom: 8px;
   width: 4px;
   border-radius: 999px;
   background: var(--p-grad-royal);
@@ -35,7 +38,7 @@
 .sched-schedule-panel {
   border: none !important;
   box-shadow: none !important;
-  margin-bottom: var(--p-s-6) !important;
+  margin-bottom: var(--p-s-8) !important;
 }
 .sched-schedule-panel > .panel-heading { display: none !important; }
 .sched-schedule-panel > .panel-body {
@@ -50,7 +53,7 @@
   gap: 0;
 }
 
-.sched-day-group { margin-bottom: 28px; }
+.sched-day-group { margin-bottom: var(--p-s-8); }
 
 /* Strip Bootstrap column floats. */
 .sched-original-row { display: none !important; }
@@ -70,7 +73,7 @@
   display: flex;
   align-items: center;
   gap: var(--p-s-3);
-  padding: 0 0 12px 0;
+  padding: 0 0 10px 0;
   border-bottom: 1px solid var(--p-line);
   margin-bottom: var(--p-s-3);
 }
@@ -80,9 +83,9 @@
 .sched-day-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font: 700 var(--p-fs-xs)/1 var(--p-font-body);
-  padding: 6px 14px;
+  gap: 7px;
+  font: 700 11px/1 var(--p-font-body);
+  padding: 6px 12px;
   border-radius: var(--p-r-pill);
   background: var(--p-royal-50);
   color: var(--p-royal-700);
@@ -121,13 +124,14 @@
 
 .sched-day-count {
   margin-left: auto;
-  font: 600 var(--p-fs-xs)/1 var(--p-font-mono);
+  font: 600 11px/1 var(--p-font-body);
   color: var(--p-muted);
   background: var(--p-line-soft);
-  padding: 5px 12px;
+  padding: 6px 12px;
   border-radius: var(--p-r-pill);
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
 }
 .sched-day-today   .sched-day-count { background: var(--p-royal-100); color: var(--p-royal-700); }
 .sched-day-tomorrow .sched-day-count { background: oklch(0.93 0.05 235); color: oklch(0.38 0.12 235); }
@@ -145,21 +149,35 @@
    ------------------------------------------------------------------------- */
 .sched-no-class {
   padding: 14px 18px;
-  font: 500 var(--p-fs-sm)/1.4 var(--p-font-body);
-  font-style: italic;
-  color: var(--p-muted);
+  font: 500 var(--p-fs-base)/1.4 var(--p-font-body);
+  color: var(--p-text-soft);
   display: flex;
   align-items: center;
   gap: var(--p-s-2);
   background: var(--p-surface-soft);
-  border: 1px solid var(--p-line);
+  border: 1px dashed var(--p-line);
   border-radius: var(--p-r-sm);
 }
 .sched-no-class::before {
   content: '○';
-  font-size: 14px;
+  font-size: 13px;
   color: var(--p-mute-soft);
   flex-shrink: 0;
+}
+
+/* Combined empty block (Today + Tomorrow both clear). This is usually the
+   ONLY content in the schedule section, so give it real presence — center
+   the line, lean on air, let it read as "you're genuinely clear" rather
+   than "data might be missing." */
+.sched-day-empty-combined .sched-no-class {
+  padding: var(--p-s-6) var(--p-s-5);
+  justify-content: center;
+  font-size: var(--p-fs-md);
+  color: var(--p-text);
+}
+.sched-day-empty-combined .sched-no-class::before {
+  font-size: 15px;
+  color: var(--p-royal-400);
 }
 
 /* -------------------------------------------------------------------------

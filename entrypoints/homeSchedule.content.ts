@@ -272,7 +272,11 @@ function enhanceSchedule(panel: HTMLElement) {
     if (entries.length === 0) {
       const noDiv = document.createElement('div');
       noDiv.className = 'sched-no-class';
-      noDiv.textContent = 'No classes scheduled for this day';
+      noDiv.textContent = isToday
+        ? 'No classes today.'
+        : isTomorrow
+          ? 'No classes tomorrow.'
+          : 'No classes scheduled.';
       group.appendChild(noDiv);
     } else {
       const wrap = document.createElement('div');
@@ -285,6 +289,42 @@ function enhanceSchedule(panel: HTMLElement) {
     row.classList.add('sched-original-row');
   });
 
+  collapseConsecutiveEmptyDays(panel);
+
   updateTimers();
   setInterval(updateTimers, 1000);
+}
+
+/**
+ * When Today and Tomorrow are both empty (common on Friday evenings and
+ * during inter-semester breaks), two identical "no classes" blocks waste
+ * real estate and read worse than a single friendly line. Merge them into
+ * one combined block on the Today group and drop the Tomorrow group.
+ */
+function collapseConsecutiveEmptyDays(panel: HTMLElement) {
+  const today = panel.querySelector<HTMLElement>('.sched-day-today');
+  const tomorrow = panel.querySelector<HTMLElement>('.sched-day-tomorrow');
+  if (!today || !tomorrow) return;
+  if (!today.querySelector('.sched-no-class') || !tomorrow.querySelector('.sched-no-class')) {
+    return;
+  }
+
+  tomorrow.remove();
+  today.classList.add('sched-day-empty-combined');
+
+  const badge = today.querySelector<HTMLElement>('.sched-day-badge');
+  if (badge) {
+    const dot = badge.querySelector('.sched-day-dot');
+    badge.textContent = '';
+    if (dot) badge.appendChild(dot);
+    badge.appendChild(document.createTextNode('Today & Tomorrow'));
+  }
+
+  const count = today.querySelector<HTMLElement>('.sched-day-count');
+  if (count) count.textContent = 'Clear';
+
+  today.querySelector<HTMLElement>('.sched-day-date-full')?.remove();
+
+  const msg = today.querySelector<HTMLElement>('.sched-no-class');
+  if (msg) msg.textContent = 'No classes today or tomorrow — enjoy the break.';
 }
