@@ -93,7 +93,7 @@ function injectExtraNavItems(sidebar: HTMLElement) {
   };
 
   if (!sidebar.querySelector('.aiub-graph-nav-item')) {
-    const graphUrl = browser.runtime.getURL('/Grade/Graphs.html');
+    const graphUrl = browser.runtime.getURL('/graphs.html');
     if (graphUrl) {
       insertAfterLast(buildNavLink('aiub-graph-nav-item', graphUrl, 'glyphicon-stats', 'Graph'));
     }

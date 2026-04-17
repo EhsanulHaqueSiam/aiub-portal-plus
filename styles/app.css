@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/* Self-hosted fonts via @fontsource — removes the last third-party network
+   dependency. Only weights actually used in the UI are imported. */
+@import "@fontsource/geist/400.css";
+@import "@fontsource/geist/500.css";
+@import "@fontsource/geist/600.css";
+@import "@fontsource/geist/700.css";
+@import "@fontsource/geist-mono/400.css";
+@import "@fontsource/geist-mono/500.css";
+@import "@fontsource/fraunces/400.css";
+@import "@fontsource/fraunces/400-italic.css";
+@import "@fontsource/fraunces/600.css";
+
 /* Design tokens shared across the extension's standalone pages.
    Tailwind v4 @theme directive registers these as `bg-navy`, `text-royal`, etc. */
 @theme {

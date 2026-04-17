@@ -338,7 +338,7 @@ function persistCurriculumGraphData(
 
 function getGraphPageUrl(): string {
   try {
-    return browser.runtime.getURL('/Grade/Graphs.html');
+    return browser.runtime.getURL('/graphs.html');
   } catch {
     return '';
   }

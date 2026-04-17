@@ -39,6 +39,9 @@ export type Curriculum = {
   stateCounts?: { completed: number; ongoing: number; withdrawn: number; notAttempted: number };
   semesterProgress?: Array<{ label: string; total: number; attempted: number; completed: number }>;
   prerequisite?: { lockedCredits: number; unlockedCredits: number; lockedCourses: number; unlockedCourses: number };
+  gradeDistribution?: Record<string, number>;
+  electiveCreditsExcluded?: number;
+  capturedAt?: string;
   courseStates?: CurriculumCourseState[];
   updatedAt?: string;
 };

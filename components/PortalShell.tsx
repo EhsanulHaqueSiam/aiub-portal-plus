@@ -32,7 +32,7 @@ const gradeReports = [
 
 export function PortalShell({ active, student, children }: Props) {
   const tools: Array<{ id: ToolId; href: string; label: string }> = [
-    { id: 'graphs',           href: runtimeURL('/Grade/Graphs.html'),             label: 'Graphs' },
+    { id: 'graphs',           href: runtimeURL('/graphs.html'),                   label: 'Graphs' },
     { id: 'cgpa-planner',     href: runtimeURL('/cgpa-planner.html'),             label: 'CGPA Planner' },
     { id: 'routine-generator',href: runtimeURL('/RoutineGenerator/index.html'),   label: 'Routine Generator' },
   ];
