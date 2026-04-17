@@ -281,6 +281,89 @@ function DataStat({ label, value, tone }: { label: string; value: string; tone?:
   );
 }
 
+// ------- eligible-courses rail -------
+// Rendered unconditionally once offered data is cached, so the feature is
+// discoverable even before the user runs a full sync. The body switches on
+// the eligibility reason so the empty state points at exactly what's missing.
+function EligibleBlock({ eligibility, eligibleOffered, offeredReady, selections, onAdd }: {
+  eligibility: ReturnType<typeof computeEligibleCourses>;
+  eligibleOffered: Array<{ course: CurriculumCourse; bucket: CourseBucket }>;
+  offeredReady: boolean;
+  selections: Map<string, Selection>;
+  onAdd: (b: CourseBucket) => void;
+}) {
+  const wrap = 'rounded-xl border border-royal-100 bg-royal-50/60 p-3.5';
+  const head = (title: string, note: string, count?: number) => (
+    <div className="flex items-baseline gap-2 flex-wrap mb-2">
+      <strong className="text-[12.5px] font-bold text-royal-600">{title}</strong>
+      <em className="text-[11.5px] text-muted not-italic">— {note}</em>
+      {count != null && (
+        <span className="ml-auto text-[11.5px] tabular-nums text-muted">{count}</span>
+      )}
+    </div>
+  );
+  const muted = (msg: string) => (
+    <p className="m-0 text-[11.5px] leading-relaxed text-muted">{msg}</p>
+  );
+
+  if (!offeredReady) {
+    return (
+      <div className={wrap}>
+        {head('Eligible for you', 'appears after sync')}
+        {muted('Click "Sync now" above to cache this semester\'s Offered Courses — eligible courses you can take (prerequisites satisfied) will surface here as one-click chips.')}
+      </div>
+    );
+  }
+
+  if (eligibility.reason === 'no-curriculum') {
+    return (
+      <div className={wrap}>
+        {head('Eligible for you', 'curriculum missing')}
+        {muted('Your curriculum (with prerequisites) hasn\'t been captured yet. Hit "Refresh curriculum" in the Data card above to enable the shortcut.')}
+      </div>
+    );
+  }
+
+  if (eligibility.reason === 'no-grades') {
+    return (
+      <div className={wrap}>
+        {head('Eligible for you', 'grades missing')}
+        {muted('We need your completed courses to compute eligibility. Run a full "Sync now" above — it reads your Grade Report by Curriculum to figure out which prerequisites are satisfied.')}
+      </div>
+    );
+  }
+
+  if (eligibleOffered.length === 0) {
+    return (
+      <div className={wrap}>
+        {head('Eligible for you', 'no matches this semester', 0)}
+        {muted(`You have ${eligibility.list.length} course${eligibility.list.length === 1 ? '' : 's'} with prerequisites satisfied, but none are in the current Offered list. Search above to add any course manually — the generator doesn't enforce prerequisites.`)}
+      </div>
+    );
+  }
+
+  return (
+    <div className={wrap}>
+      {head('Eligible for you', 'prerequisites satisfied · offered this semester', eligibleOffered.length)}
+      <div className="flex flex-wrap gap-2">
+        {eligibleOffered.map(({ bucket }) => (
+          <button key={bucket.title} type="button"
+                  onClick={() => onAdd(bucket)}
+                  disabled={selections.has(bucket.title)}
+                  title={bucket.courseCode ? `${bucket.title} · ${bucket.courseCode}` : bucket.title}
+                  className="rounded-full border border-royal-200 bg-white px-3 py-1 text-[11.5px] font-semibold text-ink-2 hover:bg-royal-600 hover:text-white hover:border-royal-600 disabled:opacity-40 disabled:cursor-not-allowed">
+            {bucket.title}
+          </button>
+        ))}
+      </div>
+      <p className="mt-2 text-[11.5px] text-muted leading-relaxed">
+        Faculty approved a course you don't technically qualify for? Search above and add it anyway — the
+        generator doesn't enforce prerequisites, only the eligibility shortcut does.
+      </p>
+    </div>
+  );
+}
+
 // ------- courses picker -------
 function CoursesBlock({ buckets, selections, setSelections, data }: {
   buckets: Map<string, CourseBucket>;
@@ -374,29 +457,13 @@ function CoursesBlock({ buckets, selections, setSelections, data }: {
           )}
         </div>
 
-        {eligibleOffered.length > 0 && (
-          <div className="rounded-xl border border-royal-100 bg-royal-50/60 p-3.5">
-            <div className="flex items-baseline gap-2 flex-wrap mb-2">
-              <strong className="text-[12.5px] font-bold text-royal-600">Eligible for you</strong>
-              <em className="text-[11.5px] text-muted not-italic">— prerequisites satisfied · offered this semester</em>
-              <span className="ml-auto text-[11.5px] tabular-nums text-muted">{eligibleOffered.length}</span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {eligibleOffered.map(({ bucket }) => (
-                <button key={bucket.title} type="button"
-                        onClick={() => addSelection(bucket)}
-                        disabled={selections.has(bucket.title)}
-                        className="rounded-full border border-royal-200 bg-white px-3 py-1 text-[11.5px] font-semibold text-ink-2 hover:bg-royal-600 hover:text-white hover:border-royal-600 disabled:opacity-40 disabled:cursor-not-allowed">
-                  {bucket.title}
-                </button>
-              ))}
-            </div>
-            <p className="mt-2 text-[11.5px] text-muted leading-relaxed">
-              Faculty approved a course you don't technically qualify for? Search above and add it anyway — the
-              generator doesn't enforce prerequisites, only the eligibility shortcut does.
-            </p>
-          </div>
-        )}
+        <EligibleBlock
+          eligibility={eligibility}
+          eligibleOffered={eligibleOffered}
+          offeredReady={buckets.size > 0}
+          selections={selections}
+          onAdd={addSelection}
+        />
 
         <div className="min-h-[48px] rounded-xl border border-dashed border-line bg-paper-soft p-3.5">
           {selections.size === 0 ? (
