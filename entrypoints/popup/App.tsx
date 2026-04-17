@@ -173,57 +173,70 @@ function App() {
         <span>{statusMessages[status]}</span>
       </div>
 
-      {enabled && pinGroups.length > 0 && (
+      {enabled && (
         <div className="popup-pinned">
           <div className="popup-pinned-header">
-            <div className="popup-pinned-title">Pinned routines</div>
-            <div className="popup-pinned-actions">
-              <button
-                type="button"
-                className={`popup-pinned-btn${pinsEnabled ? '' : ' is-paused'}`}
-                onClick={handleTogglePins}
-                aria-pressed={!pinsEnabled}
-              >
-                {pinsEnabled ? 'Pause' : 'Resume'}
-              </button>
-              <button
-                type="button"
-                className="popup-pinned-btn"
-                onClick={handleClearAll}
-              >
-                Clear all
-              </button>
-            </div>
+            <div className="popup-pinned-title">Pinned routine highlights</div>
+            <label className="popup-pinned-master" title={pinsEnabled ? 'Turn highlights off' : 'Turn highlights on'}>
+              <span className="popup-pinned-master-label">{pinsEnabled ? 'On' : 'Off'}</span>
+              <input
+                type="checkbox"
+                checked={pinsEnabled}
+                onChange={handleTogglePins}
+                disabled={pinGroups.length === 0 && pinsEnabled}
+              />
+              <span className="popup-pinned-master-track" aria-hidden />
+            </label>
           </div>
-          <ul className="popup-pinned-list">
-            {pinGroups.map((g, i) => {
-              const color: HighlightColor = (POPUP_SWATCH as Record<string, string>)[g.color]
-                ? (g.color as HighlightColor)
-                : 'amber';
-              return (
-                <li key={i} className="popup-pinned-item">
-                  <span
-                    className="popup-pinned-swatch"
-                    style={{ background: POPUP_SWATCH[color] }}
-                    aria-hidden
-                  />
-                  <span className="popup-pinned-label">Pin {i + 1}</span>
-                  <span className="popup-pinned-count">
-                    {g.classIds.length} class ID{g.classIds.length === 1 ? '' : 's'}
-                  </span>
-                  <button
-                    type="button"
-                    className="popup-pinned-remove"
-                    onClick={() => handleUnpin(i)}
-                    aria-label={`Unpin routine ${i + 1}`}
-                    title="Unpin"
-                  >
-                    ×
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+
+          {pinGroups.length === 0 ? (
+            <div className="popup-pinned-empty">
+              No routines pinned yet. Open the Routine Generator and click
+              <strong> Pin</strong> on any routine to highlight its class IDs
+              here and on the portal.
+            </div>
+          ) : (
+            <>
+              <ul className="popup-pinned-list">
+                {pinGroups.map((g, i) => {
+                  const color: HighlightColor = (POPUP_SWATCH as Record<string, string>)[g.color]
+                    ? (g.color as HighlightColor)
+                    : 'amber';
+                  return (
+                    <li key={i} className="popup-pinned-item">
+                      <span
+                        className="popup-pinned-swatch"
+                        style={{ background: POPUP_SWATCH[color] }}
+                        aria-hidden
+                      />
+                      <span className="popup-pinned-label">Pin {i + 1}</span>
+                      <span className="popup-pinned-count">
+                        {g.classIds.length} class ID{g.classIds.length === 1 ? '' : 's'}
+                      </span>
+                      <button
+                        type="button"
+                        className="popup-pinned-remove"
+                        onClick={() => handleUnpin(i)}
+                        aria-label={`Unpin routine ${i + 1}`}
+                        title="Unpin"
+                      >
+                        ×
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+              <div className="popup-pinned-footer">
+                <button
+                  type="button"
+                  className="popup-pinned-btn"
+                  onClick={handleClearAll}
+                >
+                  Clear all pins
+                </button>
+              </div>
+            </>
+          )}
         </div>
       )}
 

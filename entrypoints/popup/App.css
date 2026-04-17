@@ -166,10 +166,68 @@
   letter-spacing: 0.18em;
   color: var(--p-royal);
 }
-.popup-pinned-actions {
-  display: flex;
-  gap: 6px;
+.popup-pinned-master {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
 }
+.popup-pinned-master-label {
+  font: 700 10px/1 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--p-muted);
+  min-width: 18px;
+  text-align: right;
+}
+.popup-pinned-master input { position: absolute; opacity: 0; inset: 0; pointer-events: none; }
+.popup-pinned-master-track {
+  position: relative;
+  width: 34px;
+  height: 18px;
+  border-radius: 999px;
+  background: #cbd5e1;
+  transition: background 0.15s;
+}
+.popup-pinned-master-track::before {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  top: 2px;
+  left: 2px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(11, 30, 91, 0.25);
+  transition: transform 0.15s;
+}
+.popup-pinned-master input:checked ~ .popup-pinned-master-track {
+  background: linear-gradient(135deg, var(--p-royal), var(--p-royal-2));
+}
+.popup-pinned-master input:checked ~ .popup-pinned-master-track::before {
+  transform: translateX(16px);
+}
+.popup-pinned-master input:disabled ~ .popup-pinned-master-track { opacity: 0.4; }
+
+.popup-pinned-empty {
+  padding: 12px 14px;
+  border: 1px dashed var(--p-line);
+  border-radius: 8px;
+  background: var(--p-sky-softer);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--p-muted);
+}
+.popup-pinned-empty strong { color: var(--p-royal); font-weight: 700; }
+
+.popup-pinned-footer {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .popup-pinned-btn {
   font: 700 10px/1 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   letter-spacing: 0.12em;

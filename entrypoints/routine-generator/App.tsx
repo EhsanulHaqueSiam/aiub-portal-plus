@@ -16,16 +16,23 @@ const MAX_SEARCH_RESULTS = 40;
 const RESULTS_PAGE = 5;
 
 /* Swatch tokens for the Routine Generator's pinned-routine indicator.
-   Matches the HIGHLIGHT_COLORS palette keys in lib/offered.ts. The
-   Offered Courses page has its own CSS for the actual row highlight
-   (see highlight.content.ts). Keep the two palettes visually aligned. */
-const PIN_SWATCH: Record<HighlightColor, { border: string; ring: string; dot: string }> = {
-  amber:   { border: '#d97706', ring: 'rgba(217,119,6,0.22)',  dot: '#fbbf24' },
-  royal:   { border: '#1d4ed8', ring: 'rgba(29,78,216,0.22)',  dot: '#60a5fa' },
-  emerald: { border: '#059669', ring: 'rgba(5,150,105,0.22)',  dot: '#34d399' },
-  rose:    { border: '#be185d', ring: 'rgba(190,24,93,0.22)',  dot: '#fb7185' },
-  violet:  { border: '#6d28d9', ring: 'rgba(109,40,217,0.22)', dot: '#a78bfa' },
+   Matches the HIGHLIGHT_COLORS palette keys in lib/offered.ts and the
+   PALETTE map in highlight.content.ts — cellBg/cellFg here render the
+   weekly-grid cells in the same colors that appear on the Offered
+   Courses page, so the student's pin reads as one visual thread. */
+const PIN_SWATCH: Record<HighlightColor, {
+  border: string; ring: string; dot: string; cellBg: string; cellFg: string;
+}> = {
+  amber:   { border: '#d97706', ring: 'rgba(217,119,6,0.22)',  dot: '#fbbf24', cellBg: '#fbbf24', cellFg: '#78350f' },
+  royal:   { border: '#1d4ed8', ring: 'rgba(29,78,216,0.22)',  dot: '#60a5fa', cellBg: '#60a5fa', cellFg: '#0a1838' },
+  emerald: { border: '#059669', ring: 'rgba(5,150,105,0.22)',  dot: '#34d399', cellBg: '#34d399', cellFg: '#064e3b' },
+  rose:    { border: '#be185d', ring: 'rgba(190,24,93,0.22)',  dot: '#fb7185', cellBg: '#fb7185', cellFg: '#881337' },
+  violet:  { border: '#6d28d9', ring: 'rgba(109,40,217,0.22)', dot: '#a78bfa', cellBg: '#a78bfa', cellFg: '#2e1065' },
 };
+
+/* Default cell colors when the routine isn't pinned. */
+const DEFAULT_CELL_BG = '#1d4ed8';
+const DEFAULT_CELL_FG = '#ffffff';
 
 // ------- bucketing offered courses by title -------
 type CourseBucket = { title: string; sections: Section[]; courseCode?: string };
@@ -777,14 +784,14 @@ function RoutineCard({ routine, idx, pinColor, onToggleView }: {
   onToggleView: () => void;
 }) {
   const gapHours = (routine.totalGap / 60).toFixed(1);
-  const active = pinColor !== null;
+  const pinned = pinColor !== null;
   const swatch = pinColor ? PIN_SWATCH[pinColor] : null;
   const articleStyle = swatch
     ? { borderColor: swatch.border, boxShadow: `0 0 0 3px ${swatch.ring}, 0 8px 22px -14px rgba(11,30,91,.18)` }
     : undefined;
   const buttonStyle = swatch ? { background: swatch.border, color: '#fff' } : undefined;
   return (
-    <article className={`rounded-xl border bg-white shadow-card overflow-hidden transition-shadow ${active ? '' : 'border-line'}`}
+    <article className={`rounded-xl border bg-white shadow-card overflow-hidden transition-shadow ${pinned ? '' : 'border-line'}`}
              style={articleStyle}>
       <header className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-line-soft bg-paper-soft">
         <span className="rounded-md bg-navy-900 px-2.5 py-1 text-[11px] font-bold text-gold-400 font-mono">#{String(idx + 1).padStart(2, '0')}</span>
@@ -796,29 +803,36 @@ function RoutineCard({ routine, idx, pinColor, onToggleView }: {
           {routine.offDays} off-day{routine.offDays === 1 ? '' : 's'} · {gapHours}h total gap · starts {fmtClockTime(routine.earliestStart)}
         </span>
         <button type="button" onClick={onToggleView}
-                className={`ml-auto inline-flex items-center rounded-md px-3 py-1.5 min-h-[44px] text-[11.5px] font-semibold ${active ? '' : 'bg-white border border-line text-ink-2 hover:bg-royal-50'}`}
+                className={`ml-auto inline-flex items-center rounded-md px-3 py-1.5 min-h-[44px] text-[11.5px] font-semibold ${pinned ? '' : 'bg-white border border-line text-ink-2 hover:bg-royal-50'}`}
                 style={buttonStyle}
-                aria-pressed={active}>
-          {active ? 'Unpin' : 'Pin & view'}
+                aria-pressed={pinned}>
+          {pinned ? 'Unpin' : 'Pin'}
         </button>
       </header>
 
       <div className="flex flex-wrap gap-2 p-4">
-        {routine.sections.map((s, i) => <CoursePill key={i} section={s} />)}
+        {routine.sections.map((s, i) => (
+          <CoursePill key={i} section={s} title={routine.titles[i] ?? ''} />
+        ))}
       </div>
 
-      {active && <WeeklyGrid sections={routine.sections} />}
+      <WeeklyGrid routine={routine} pinColor={pinColor} />
     </article>
   );
 }
 
-function CoursePill({ section }: { section: Section }) {
+function CoursePill({ section, title }: { section: Section; title: string }) {
   return (
     <div className="rounded-lg border border-line-soft bg-paper-soft px-3 py-2 text-[12px]">
-      <div className="font-bold text-ink-2 flex items-center gap-2">
-        <span className="font-mono text-[10.5px] text-muted-2">{section.classId ?? section.section ?? '—'}</span>
-        <span className="text-[11.5px] font-semibold">{section.section ?? ''}</span>
+      <div className="flex items-baseline gap-2">
+        <span className="font-mono text-[10.5px] text-muted-2">{section.classId ?? '—'}</span>
+        {section.section && (
+          <span className="text-[11.5px] font-semibold text-ink-2">{section.section}</span>
+        )}
       </div>
+      {title && (
+        <div className="mt-0.5 text-[11.5px] font-semibold text-ink leading-tight">{title}</div>
+      )}
       <ul className="mt-1 m-0 p-0 list-none text-[11px] text-ink-3">
         {(section._parsedSlots ?? []).map((slot, i) => (
           <li key={i}>{slot.day} · {slot.start}–{slot.end}{slot.room ? ` · ${slot.room}` : ''}</li>
@@ -828,7 +842,16 @@ function CoursePill({ section }: { section: Section }) {
   );
 }
 
-function WeeklyGrid({ sections }: { sections: Section[] }) {
+function WeeklyGrid({ routine, pinColor }: { routine: Routine; pinColor: HighlightColor | null }) {
+  const sections = routine.sections;
+  const swatch = pinColor ? PIN_SWATCH[pinColor] : null;
+  const cellBg = swatch?.cellBg ?? DEFAULT_CELL_BG;
+  const cellFg = swatch?.cellFg ?? DEFAULT_CELL_FG;
+
+  // sections[i] ↔ routine.titles[i] — both parallel to backtracking order.
+  const titleBySection = new Map<Section, string>();
+  sections.forEach((s, i) => titleBySection.set(s, routine.titles[i] ?? ''));
+
   // Collect min/max time for the grid window.
   let minStart = 8 * 60, maxEnd = 18 * 60;
   for (const s of sections) for (const slot of s._parsedSlots ?? []) {
@@ -860,11 +883,24 @@ function WeeklyGrid({ sections }: { sections: Section[] }) {
             {WEEK_DAYS.map((d) => {
               const slotAt = (occMap.get(d) ?? []).find((e) => e.slot._start <= t && t < e.slot._end);
               if (!slotAt) return <div key={d + '-' + t} className="border-t border-l border-line-soft min-h-[26px]" />;
+              const isFirstRow = slotAt.slot._start === t;
+              const cellTitle = titleBySection.get(slotAt.section) ?? '';
+              const secLabel = slotAt.section.section ?? slotAt.section.classId ?? '';
               return (
                 <div key={d + '-' + t}
-                     className="border-t border-l border-line-soft min-h-[26px] bg-royal-600/90 text-white px-2 py-0.5 text-[10px] font-semibold"
-                     title={`${slotAt.section.section ?? slotAt.section.classId} · ${slotAt.slot.start}–${slotAt.slot.end}`}>
-                  {slotAt.slot._start === t && (slotAt.section.section ?? slotAt.section.classId)}
+                     className="border-t border-l border-line-soft min-h-[26px] px-2 py-0.5 text-[10px] font-semibold overflow-hidden"
+                     style={{ background: cellBg, color: cellFg }}
+                     title={`${cellTitle ? cellTitle + ' · ' : ''}${secLabel} · ${slotAt.slot.start}–${slotAt.slot.end}`}>
+                  {isFirstRow && (
+                    <>
+                      <div className="font-bold text-[11px] leading-tight">{secLabel}</div>
+                      {cellTitle && (
+                        <div className="text-[9.5px] leading-tight opacity-90 overflow-hidden text-ellipsis whitespace-nowrap">
+                          {cellTitle}
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               );
             })}

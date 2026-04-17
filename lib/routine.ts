@@ -70,6 +70,10 @@ export type Selection = {
 
 export type Routine = {
   sections: Section[];
+  /* Parallel to sections[] — titles[i] is the course name of sections[i].
+     Populated at generation time from Selection.title so the UI can render
+     "00740 · Circuit Analysis" without looking the section back up. */
+  titles: string[];
   offDays: number;
   totalGap: number;
   earliestStart: number;
@@ -208,8 +212,10 @@ export function generateRoutines(selections: Selection[], filters: Filters): Gen
     }
   })(0, []);
 
+  const candidateTitles = courseCandidates.map((c) => c.title);
   const ranked: Routine[] = routines.map((r) => ({
     sections: r,
+    titles: candidateTitles,
     offDays: countOffDays(r),
     totalGap: totalGapMinutes(r),
     earliestStart: earliestStartOf(r),
