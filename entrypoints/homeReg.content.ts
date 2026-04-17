@@ -66,28 +66,49 @@ function enhance() {
   });
 
   /* Flatten the registered-course list into a clean grid parent. AIUB
-     renders its own Bootstrap .row > .col-md-* scaffolding (plus the
-     occasional empty placeholder col / whitespace / clearfix pseudo),
-     which fights CSS Grid and leaves holes — typically the top-left
-     slot. Scan for every col that actually holds a course card, wipe
-     the list, and re-append only those. No phantom children possible. */
-  flattenCourseList(mainContent);
+     populates .StudentCourseList via AJAX AFTER document_idle fires, so
+     we can't rely on it being in the DOM when our script runs. Poll
+     briefly, then observe for late mutations; on first success, the
+     observer disconnects itself. */
+  scheduleFlatten(mainContent);
 }
 
-function flattenCourseList(mainContent: HTMLElement) {
+function scheduleFlatten(mainContent: HTMLElement) {
+  if (flattenCourseList(mainContent)) return;
+
+  let tries = 0;
+  const pollId = window.setInterval(() => {
+    if (flattenCourseList(mainContent) || ++tries >= 25) {
+      window.clearInterval(pollId);
+      observer.disconnect();
+    }
+  }, 200);
+
+  const observer = new MutationObserver(() => {
+    if (flattenCourseList(mainContent)) {
+      observer.disconnect();
+      window.clearInterval(pollId);
+    }
+  });
+  observer.observe(mainContent, { childList: true, subtree: true });
+}
+
+function flattenCourseList(mainContent: HTMLElement): boolean {
   /* Don't reuse .StudentCourseList as the grid parent — it carries
      whatever CSS AIUB attached (pseudo-elements, inherited padding from
      .panel-body, its own tag semantics). Build a brand-new wrapper with
      a known-good class, move only the card-bearing cols into it, and
      replace the old list with it. Nothing else can sneak in. */
+  if (document.querySelector('.reghome-card-grid')) return true;
+
   const list = mainContent.querySelector<HTMLElement>('.StudentCourseList');
-  if (!list || list.dataset.reghomeFlattened === '1') return;
+  if (!list || list.dataset.reghomeFlattened === '1') return false;
 
   const cardCols = Array.from(
     list.querySelectorAll<HTMLElement>('[class*="col-"]'),
   ).filter((col) => col.querySelector('.panel.panel-primary'));
 
-  if (cardCols.length === 0) return;
+  if (cardCols.length === 0) return false;
 
   const grid = document.createElement('div');
   /* Deliberately do NOT carry the .StudentCourseList class over — AIUB
@@ -99,4 +120,5 @@ function flattenCourseList(mainContent: HTMLElement) {
   cardCols.forEach((c) => grid.appendChild(c));
 
   list.replaceWith(grid);
+  return true;
 }
