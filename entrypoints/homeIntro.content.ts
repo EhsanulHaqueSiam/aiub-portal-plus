@@ -42,7 +42,23 @@ function enhance() {
 
   loadCSS('intro-style', 'Home/Intro.css');
 
-  const regBtn = mainContent.querySelector('.text-center .btn-danger');
+  // Portal surfaces a red "Go to Registration" button on the home page only
+  // during an active registration window (~6/year). We persist that signal
+  // so the Routine Generator can warn the user: during registration, seat
+  // counts and section statuses change minute-to-minute, so cached offered
+  // data gets stale fast.
+  const regBtn = mainContent.querySelector<HTMLAnchorElement | HTMLButtonElement>(
+    '.text-center .btn-danger',
+  );
+  const isRegOpen = !!regBtn && /regist/i.test(regBtn.textContent ?? '');
+  browser.storage.local.set({
+    aiubRegistrationStatus: {
+      active: isRegOpen,
+      buttonText: regBtn?.textContent?.trim() ?? '',
+      detectedAt: new Date().toISOString(),
+    },
+  });
+
   if (regBtn) {
     const panel = regBtn.closest('.panel');
     panel?.classList.add('intro-actions');

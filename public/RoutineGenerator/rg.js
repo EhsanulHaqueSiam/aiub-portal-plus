@@ -85,6 +85,8 @@
   }
 
   // ------- Data -------
+  let _registrationStatus = null; // { active, detectedAt, buttonText } from homeIntro.content.ts
+
   async function loadAllData() {
     try {
       const res = await storageGet({
@@ -92,6 +94,7 @@
         aiubCurriculum: null,
         aiubGraphData: null,
         aiubStudent: null,
+        aiubRegistrationStatus: null,
       });
       if (res && res.aiubOfferedCourses && Array.isArray(res.aiubOfferedCourses.courses)) {
         courseData = res.aiubOfferedCourses;
@@ -106,7 +109,20 @@
         _semesterData = res.aiubGraphData.semester;
       }
       if (res && res.aiubStudent) renderStudentIdentity(res.aiubStudent);
+      if (res && res.aiubRegistrationStatus) _registrationStatus = res.aiubRegistrationStatus;
     } catch (_) { /* ignore */ }
+  }
+
+  function renderRegistrationBanner() {
+    const banner = document.getElementById('rg-reg-banner');
+    if (!banner) return;
+    // Stale detection after 7d — if the user hasn't visited /Student since the
+    // last registration window closed, don't keep nagging them.
+    const STALE_MS = 7 * 24 * 60 * 60 * 1000;
+    const st = _registrationStatus;
+    const age = st && st.detectedAt ? Date.now() - new Date(st.detectedAt).getTime() : Infinity;
+    const show = !!(st && st.active && age < STALE_MS);
+    banner.hidden = !show;
   }
 
   function renderStudentIdentity(student) {
@@ -842,6 +858,7 @@
 
   async function triggerSync(opts) {
     const forceCurriculum = !!(opts && opts.forceCurriculum);
+    const offeredOnly = !!(opts && opts.offeredOnly);
     const btn = document.getElementById('rg-sync');
     const hint = document.getElementById('rg-sync-hint');
     const label = btn.querySelector('.btn-label');
@@ -849,6 +866,7 @@
     btn.dataset.busy = '1';
     btn.disabled = true;
 
+    const totalSteps = offeredOnly ? 1 : 4;
     const setStep = (n, total, msg) => {
       label.textContent = 'Syncing ' + n + '/' + total + '…';
       hint.textContent = msg;
@@ -866,7 +884,7 @@
       // the full list with partial:false. We must wait for partial:false —
       // accepting the first partial:true write captures just page one, which
       // is why "none are offered this semester" shows up for real courses.
-      setStep(1, 4, 'Reading this semester\'s offered courses…');
+      setStep(1, totalSteps, 'Reading this semester\'s offered courses…');
       await runOneSyncStep(
         'offered',
         ['aiubOfferedCourses'],
@@ -876,6 +894,12 @@
         },
         60000,
       );
+
+      if (offeredOnly) {
+        label.textContent = 'Offered re-synced';
+        hint.textContent = 'Seat counts + statuses refreshed. Generate when ready.';
+        return;
+      }
 
       // STEP 2: My Curriculum (course list + prerequisites). Curriculum rarely
       // changes, so skip the re-scrape when we already have a reasonably
@@ -889,9 +913,9 @@
       const curFresh = curCached && curAge < CURRICULUM_TTL_MS && !forceCurriculum;
 
       if (curFresh) {
-        setStep(2, 4, 'Curriculum cached — skipping (use "Refresh curriculum" to force).');
+        setStep(2, totalSteps, 'Curriculum cached — skipping (use "Refresh curriculum" to force).');
       } else {
-        setStep(2, 4, 'Capturing your curriculum + prerequisites…');
+        setStep(2, totalSteps, 'Capturing your curriculum + prerequisites…');
         await runOneSyncStep(
           'curriculum',
           ['aiubCurriculumSyncDone', 'aiubCurriculum'],
@@ -906,7 +930,7 @@
       // STEP 3: Grade Report → By Curriculum (completed courses, code-exact).
       // This is the authoritative source for eligibility since it uses the
       // same course codes as the Curriculum page.
-      setStep(3, 4, 'Reading your completed courses (by curriculum)…');
+      setStep(3, totalSteps, 'Reading your completed courses (by curriculum)…');
       await runOneSyncStep(
         'gradeByCurriculum',
         ['aiubGraphData'],
@@ -919,7 +943,7 @@
 
       // STEP 4: Grade Report → By Semester (supplementary — fills in names and
       // SGPA trend for graphs even when codes alone would be enough).
-      setStep(4, 4, 'Reading your completed courses (by semester)…');
+      setStep(4, totalSteps, 'Reading your completed courses (by semester)…');
       await runOneSyncStep(
         'gradeBySemester',
         ['aiubGraphData'],
@@ -1004,6 +1028,12 @@
     if (refreshCurriculumBtn) {
       refreshCurriculumBtn.addEventListener('click', () => triggerSync({ forceCurriculum: true }));
     }
+    // Inline "re-sync offered" on the registration-active banner — skips
+    // curriculum and grade steps, so refreshes are cheap during registration.
+    const regSyncBtn = document.getElementById('rg-reg-banner-sync');
+    if (regSyncBtn) {
+      regSyncBtn.addEventListener('click', () => triggerSync({ offeredOnly: true }));
+    }
 
     // Live updates when any of our three cached datasets changes.
     if (api.storage && api.storage.onChanged) {
@@ -1037,6 +1067,10 @@
         if (changes.aiubStudent) {
           renderStudentIdentity(changes.aiubStudent.newValue);
         }
+        if (changes.aiubRegistrationStatus) {
+          _registrationStatus = changes.aiubRegistrationStatus.newValue;
+          renderRegistrationBanner();
+        }
         if (dirty) renderEligible();
       });
     }
@@ -1054,6 +1088,7 @@
     groupCourses();
     renderDataStatus();
     renderEligible();
+    renderRegistrationBanner();
     // Reveal the page only after everything is wired, eliminating any
     // flash of unstyled or half-wired content.
     document.body.classList.add('rg-ready');

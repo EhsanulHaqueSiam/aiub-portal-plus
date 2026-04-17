@@ -157,6 +157,19 @@
           </header>
 
           <div class="data-card" id="rg-data-card">
+            <div class="reg-banner" id="rg-reg-banner" hidden>
+              <span class="reg-banner-dot" aria-hidden="true"></span>
+              <div class="reg-banner-body">
+                <strong>Registration is open.</strong>
+                <span class="reg-banner-text">
+                  Seat counts and section statuses change minute-to-minute right
+                  now — re-sync just before you generate.
+                </span>
+              </div>
+              <button class="btn btn-primary btn-sm" id="rg-reg-banner-sync" type="button">
+                <span class="btn-label">Re-sync offered</span>
+              </button>
+            </div>
             <div class="data-row">
               <div class="data-stat">
                 <span class="stat-key">Sections cached</span>
@@ -229,6 +242,11 @@
                 <span class="eligible-count" id="rg-eligible-count">—</span>
               </div>
               <div class="eligible-chips" id="rg-eligible-chips"></div>
+              <p class="eligible-foot">
+                Faculty approved a course you don't technically qualify for?
+                Search above and add it anyway — the generator doesn't enforce
+                prerequisites, only the eligibility shortcut does.
+              </p>
             </div>
 
             <div class="chips" id="rg-selected" aria-label="Selected courses">
