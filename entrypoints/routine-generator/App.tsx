@@ -135,6 +135,14 @@ function Generator({ data }: { data: ReturnType<typeof useRoutineData> }) {
   const [highlightsEnabled, setHighlightsEnabled] = useState<boolean>(!!data.highlights?.enabled);
   const [viewedRoutineIndices, setViewedRoutineIndices] = useState<Set<number>>(new Set());
 
+  // Ref mirror of data.highlights so the persist effect below can read the
+  // latest stored groups (to carry per-pin enabled flags forward) without
+  // depending on data.highlights — which would make it fire on external
+  // writes (pill toggle, popup) and echo back a stale highlightsEnabled,
+  // causing the pill to flicker on/off rapidly as both tabs fight.
+  const highlightsRef = useRef(data.highlights);
+  highlightsRef.current = data.highlights;
+
   useEffect(() => {
     setHighlightsEnabled(!!data.highlights?.enabled);
   }, [data.highlights?.enabled]);
@@ -181,7 +189,7 @@ function Generator({ data }: { data: ReturnType<typeof useRoutineData> }) {
   useEffect(() => {
     if (!lastResult) return;
     const sortedPicks = Array.from(viewedRoutineIndices).sort((a, b) => a - b);
-    const existingGroups = data.highlights?.groups ?? [];
+    const existingGroups = highlightsRef.current?.groups ?? [];
     const groups = sortedPicks.flatMap((idx, pos) => {
       const routine = lastResult.routines[idx];
       if (!routine) return [];
@@ -205,7 +213,7 @@ function Generator({ data }: { data: ReturnType<typeof useRoutineData> }) {
     const courseTitles: string[] = [];
     for (const sel of selections.values()) courseTitles.push(sel.title);
     writeHighlights({ groups, courseTitles, enabled: highlightsEnabled });
-  }, [viewedRoutineIndices, lastResult, highlightsEnabled, selections, data.highlights]);
+  }, [viewedRoutineIndices, lastResult, highlightsEnabled, selections]);
 
   return (
     <>
