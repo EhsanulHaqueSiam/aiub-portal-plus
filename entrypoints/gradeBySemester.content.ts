@@ -332,17 +332,24 @@ function semesterHTML(sem: Semester): string {
 
   const rowsHTML = sem.courses
     .map(
-      (c) =>
-        `<tr class="sgr-row-${c.state}">
+      (c) => {
+        // `prn === 'Y'` is how the portal marks a re-attempted course —
+        // the schedule row is this semester's retake of a prior W/UW/F.
+        // Surface it visibly next to the course name so the student (and
+        // anyone else reading the transcript) can see the retake without
+        // cross-referencing an earlier semester's row.
+        const retake = c.prn === 'Y' ? '<span class="sgr-retake" title="Re-attempted course">Retake</span>' : '';
+        return `<tr class="sgr-row-${c.state}${c.prn === 'Y' ? ' sgr-row-retake' : ''}">
           <td class="sgr-code">${escHtml(c.classId)}</td>
-          <td class="sgr-name">${escHtml(c.name)}</td>
+          <td class="sgr-name">${escHtml(c.name)}${retake}</td>
           <td class="tc">${escHtml(c.credits.replace(/[()]/g, ''))}</td>
           <td class="tc">${miniGrade(c.mtg)}</td>
           <td class="tc">${miniGrade(c.ftg)}</td>
           <td class="tc">${gradePill(c.fg)}</td>
           <td class="tc sgr-num">${escHtml(c.tgp || '—')}</td>
           <td class="tc">${statusBadge(c.state)}</td>
-        </tr>`,
+        </tr>`;
+      },
     )
     .join('');
 

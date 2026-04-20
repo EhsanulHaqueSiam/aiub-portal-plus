@@ -325,6 +325,37 @@
   user-select: all;  /* one-click-to-select; students copy this constantly */
 }
 
+/* Teams credentials screenshot block — on some account states the portal
+   renders the "How to log in" walkthrough as a Bootstrap .thumbnail card
+   (image + caption) rather than a plain table. The native thumbnail
+   frame is a pale grey 4px border that reads as unstyled against the
+   green alert tint, so replace it with the same soft-green glass
+   surface we use for the credentials table. */
+#main-content .alert-success .thumbnail {
+  border: 1px solid oklch(0.85 0.10 150) !important;
+  border-radius: var(--p-r-sm) !important;
+  background: rgba(255, 255, 255, 0.62) !important;
+  padding: 10px !important;
+  box-shadow: none !important;
+  margin: 10px 0 0 !important;
+}
+#main-content .alert-success .thumbnail img {
+  border-radius: var(--p-r-xs) !important;
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+#main-content .alert-success .thumbnail .caption {
+  padding: 10px 4px 2px !important;
+  font: 500 var(--p-fs-sm)/var(--p-lh-body) var(--p-font-body) !important;
+  color: oklch(0.34 0.10 150) !important;
+}
+#main-content .alert-success .thumbnail .caption strong,
+#main-content .alert-success .thumbnail .caption b {
+  font-weight: 700 !important;
+  color: oklch(0.28 0.12 150) !important;
+}
+
 /* Download button inside the credentials card — the only button in this
    alert, and it needs to read as an action, not part of the prose. */
 #main-content .alert-success a.btn-primary,

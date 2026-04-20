@@ -13,9 +13,36 @@ const AIUB_DROP_CSS = `
 .drop-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 2px solid #f1f5f9; }
 .drop-header-title { font-size: 16px; font-weight: 700; color: #0f172a; margin: 0; padding: 0; }
 .drop-header-title span { color: #dc2626; }
-.drop-refund-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 10px; font-size: 12px; font-weight: 600; background: #fef9c3; border: 1px solid #fde047; color: #854d0e; }
-.drop-refund-pct { font-size: 20px; font-weight: 800; color: #dc2626; line-height: 1; }
-.drop-refund-pct.good { color: #059669; }
+/* Refund panel — the portal ships the current refund % inside a warning
+   alert that's hidden above. We surface it as a right-aligned info chip
+   in the header with three states: good (>= 50%, green), partial (1-49,
+   amber), none (0, red). The eligibility micro-copy explains what the
+   % means so the student doesn't have to infer it from the hidden
+   alert. */
+.drop-refund-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #fef9c3;
+  border: 1px solid #fde047;
+  color: #854d0e;
+  transition: background .15s, border-color .15s;
+}
+.drop-refund-badge.good { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+.drop-refund-badge.partial { background: #fef9c3; border-color: #fde047; color: #854d0e; }
+.drop-refund-badge.none { background: #fee2e2; border-color: #fecaca; color: #991b1b; }
+
+.drop-refund-body { display: flex; flex-direction: column; gap: 2px; line-height: 1.1; }
+.drop-refund-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; opacity: .75; }
+.drop-refund-state { font-size: 11px; font-weight: 600; opacity: .85; }
+.drop-refund-pct { font-size: 24px; font-weight: 800; line-height: 1; color: #dc2626; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.drop-refund-badge.good .drop-refund-pct { color: #059669; }
+.drop-refund-badge.partial .drop-refund-pct { color: #b45309; }
+.drop-refund-badge.none .drop-refund-pct { color: #dc2626; }
 
 [data-target="#Rules"] .label.label-info { font-size: 12px !important; padding: 5px 16px !important; border-radius: 6px !important; background: #eff6ff !important; color: #1d4ed8 !important; border: 1px solid #bfdbfe !important; font-weight: 600 !important; cursor: pointer; letter-spacing: 0 !important; }
 
@@ -76,7 +103,22 @@ function insertHeader() {
   }
 
   const pctNum = parseFloat(pct);
-  const isGood = pctNum > 0;
+  // Three tones, matching .drop-refund-badge.good/.partial/.none. 50% is
+  // the conventional cut-off on AIUB's refund schedule between "mostly
+  // recoverable" and "partial". The exact threshold is cosmetic — the
+  // portal's own percentage is the source of truth for what's refunded.
+  let tone: 'good' | 'partial' | 'none';
+  let state: string;
+  if (pctNum >= 50) {
+    tone = 'good';
+    state = 'Eligible';
+  } else if (pctNum > 0) {
+    tone = 'partial';
+    state = 'Partial refund';
+  } else {
+    tone = 'none';
+    state = 'No refund';
+  }
 
   const target =
     document.querySelector('[ng-controller="DropApplicationController2"]') ??
@@ -88,9 +130,12 @@ function insertHeader() {
 
   const html = `<div class="drop-header">
       <h2 class="drop-header-title">Drop <span>Application</span></h2>
-      <div class="drop-refund-badge">
-        Current Refund&nbsp;
-        <span class="drop-refund-pct${isGood ? ' good' : ''}">${escHtml(pct)}</span>
+      <div class="drop-refund-badge ${tone}">
+        <span class="drop-refund-pct">${escHtml(pct)}</span>
+        <span class="drop-refund-body">
+          <span class="drop-refund-label">Current Refund</span>
+          <span class="drop-refund-state">${escHtml(state)}</span>
+        </span>
       </div>
     </div>`;
 

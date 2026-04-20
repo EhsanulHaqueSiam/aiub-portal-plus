@@ -1,5 +1,5 @@
 import { extensionEnabled } from '@/utils/storage';
-import { escHtml, loadCSS, replaceChildrenHTML } from '@/utils/portal';
+import { escHtml, loadCSS, parseHTML, replaceChildrenHTML } from '@/utils/portal';
 
 declare global {
   interface Window {
@@ -372,6 +372,180 @@ function infoHTML(items: InfoItem[], printHref: string | null): string {
     <div class="cgr-info">${cells}</div>`;
 }
 
+/**
+ * Search box rendered above the "Not Attempted" section. Indexes every
+ * course on the report — done, ongoing, withdrawn, not-attempted, and
+ * electives — so a student can type a code or name and see its status,
+ * lock state, and (for not-attempted) what else needs completing before
+ * it unlocks. The results panel is hidden until the query is non-empty,
+ * so at rest the search box is a single compact row.
+ *
+ * All results are rendered client-side from the rows already on the
+ * page; no storage/network calls. Wired up by `initSearch` after the
+ * full DOM is mounted by replaceChildrenHTML.
+ */
+function searchHTML(): string {
+  return `
+    <div class="cgr-search-section">
+      <div class="cgr-search-head">
+        <label class="cgr-search-lbl" for="cgr-search-input">&#128269; Find a course</label>
+        <div class="cgr-search-wrap">
+          <input
+            id="cgr-search-input"
+            class="cgr-search-input"
+            type="search"
+            placeholder="Search by code or name (e.g. CSE 1111, Discrete Math)"
+            autocomplete="off"
+            spellcheck="false" />
+          <button type="button" class="cgr-search-clear" aria-label="Clear search" hidden>&times;</button>
+        </div>
+      </div>
+      <div class="cgr-search-results" hidden>
+        <div class="cgr-search-meta"></div>
+        <div class="cgr-tbl-wrap">
+          <table class="cgr-tbl cgr-search-tbl">
+            <thead><tr>
+              <th style="width:11%">Code</th>
+              <th>Course</th>
+              <th class="tc" style="width:10%">State</th>
+              <th class="tc" style="width:10%">Status</th>
+              <th style="width:26%">Need To Complete</th>
+              <th class="tc" style="width:8%">Grade</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="cgr-search-empty" hidden>No courses match your search.</div>
+      </div>
+    </div>`;
+}
+
+interface SearchableRow extends Row {
+  bucket: 'core' | 'elective';
+  semLabel: string;
+}
+
+function buildSearchIndex(semSections: SemSection[], electiveRows: Row[]): SearchableRow[] {
+  const out: SearchableRow[] = [];
+  semSections.forEach((sec) => {
+    sec.rows.forEach((r) => out.push({ ...r, bucket: 'core', semLabel: sec.label }));
+  });
+  electiveRows.forEach((r) => out.push({ ...r, bucket: 'elective', semLabel: 'Elective' }));
+  return out;
+}
+
+function stateLabel(state: RowState): { label: string; cls: string } {
+  if (state === 'done') return { label: 'Completed', cls: 'cgr-st-done' };
+  if (state === 'ong') return { label: 'Ongoing', cls: 'cgr-st-ong' };
+  if (state === 'wdn') return { label: 'Withdrawn', cls: 'cgr-st-wdn' };
+  return { label: 'Not Yet', cls: 'cgr-st-nd' };
+}
+
+/**
+ * Builds the <tr> fragment for a single search result. All user-derived
+ * strings go through escHtml; the output is fed to parseHTML so the
+ * DOMParser walks the markup (matches the rest of this file's pattern
+ * and keeps the hook-friendly content pipeline consistent).
+ */
+function renderSearchRow(r: SearchableRow): string {
+  const st = stateLabel(r.state);
+  let statusHTML = '—';
+  if (r.state === 'nd') {
+    const locked = r.locked ? 'is-locked' : 'is-unlocked';
+    const txt = r.locked ? 'Locked' : 'Unlocked';
+    statusHTML = `<span class="cgr-lock-badge ${locked}">${escHtml(txt)}</span>`;
+  }
+  const needCell = r.state === 'nd' ? (r.needToComplete ?? '-') : '—';
+  const lastGrade = r.grades.length ? r.grades[r.grades.length - 1].grade : '';
+  const gradeColor = GRADE_BG[lastGrade] || '#90a4ae';
+  const gradeHTML =
+    r.grades.length && lastGrade !== '-'
+      ? `<span class="cgr-gp" style="color:${gradeColor}">${escHtml(lastGrade)}</span>`
+      : `<span class="cgr-gp-nd">—</span>`;
+  const bucket = r.bucket === 'elective' ? ' · Elective' : '';
+  const semTag = r.semLabel
+    ? escHtml(`${r.semLabel}${bucket}`)
+    : escHtml(bucket.replace(' · ', ''));
+
+  return `
+    <tr>
+      <td class="cgr-code">${escHtml(r.code)}</td>
+      <td class="cgr-cn">
+        ${escHtml(r.name)}
+        ${semTag ? `<div class="cgr-search-sem">${semTag}</div>` : ''}
+      </td>
+      <td class="tc"><span class="cgr-state-pill ${st.cls}">${escHtml(st.label)}</span></td>
+      <td class="tc">${statusHTML}</td>
+      <td class="cgr-need">${escHtml(needCell)}</td>
+      <td class="tc">${gradeHTML}</td>
+    </tr>`;
+}
+
+function initSearch(container: HTMLElement, index: SearchableRow[]): void {
+  const input = container.querySelector<HTMLInputElement>('#cgr-search-input');
+  const clear = container.querySelector<HTMLButtonElement>('.cgr-search-clear');
+  const results = container.querySelector<HTMLElement>('.cgr-search-results');
+  const tbody = container.querySelector<HTMLTableSectionElement>('.cgr-search-tbl tbody');
+  const meta = container.querySelector<HTMLElement>('.cgr-search-meta');
+  const empty = container.querySelector<HTMLElement>('.cgr-search-empty');
+  if (!input || !clear || !results || !tbody || !meta || !empty) return;
+
+  let timer: number | null = null;
+  const run = () => {
+    const q = input.value.trim().toLowerCase();
+    if (!q) {
+      results.hidden = true;
+      clear.hidden = true;
+      return;
+    }
+    clear.hidden = false;
+    // Case-insensitive substring match on code OR name. Not fuzzy on
+    // purpose — a 4-char query like "1111" would otherwise pull every
+    // course whose 4-digit code contains those digits, making results
+    // noisy. Substring keeps intent predictable.
+    const matches = index.filter(
+      (r) => r.code.toLowerCase().includes(q) || r.name.toLowerCase().includes(q),
+    );
+
+    results.hidden = false;
+    meta.textContent = `${matches.length} match${matches.length === 1 ? '' : 'es'}`;
+
+    if (!matches.length) {
+      tbody.replaceChildren();
+      empty.hidden = false;
+      return;
+    }
+    empty.hidden = true;
+    // DOMParser drops stray <tr> at fragment root, so wrap rows in a
+    // full <table>/<tbody> to parse, then lift the <tr>s into the live
+    // tbody. Keeps content pipeline consistent with replaceChildrenHTML
+    // used elsewhere in this file.
+    const rowsHTML = matches.map(renderSearchRow).join('');
+    const parsed = parseHTML(`<table><tbody>${rowsHTML}</tbody></table>`);
+    const parsedTbody = parsed.querySelector('tbody');
+    tbody.replaceChildren();
+    if (parsedTbody) {
+      Array.from(parsedTbody.children).forEach((tr) => tbody.appendChild(tr));
+    }
+  };
+
+  input.addEventListener('input', () => {
+    if (timer !== null) window.clearTimeout(timer);
+    timer = window.setTimeout(run, 120);
+  });
+  clear.addEventListener('click', () => {
+    input.value = '';
+    input.focus();
+    run();
+  });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && input.value) {
+      input.value = '';
+      run();
+    }
+  });
+}
+
 function notAttemptedHTML(semSections: SemSection[], electiveRows: Row[]): string {
   type Tab = { label: string; rows: Row[] };
   const tabs: Tab[] = [];
@@ -403,7 +577,7 @@ function notAttemptedHTML(semSections: SemSection[], electiveRows: Row[]): strin
           (r) =>
             `<tr>
               <td class="cgr-code">${escHtml(r.code)}</td>
-              <td class="cgr-cn">${escHtml(r.name)}</td>
+              <td class="cgr-cn">${escHtml(r.name)}${r.grades.length > 1 ? `<span class="cgr-retake" title="${escHtml(`Attempted ${r.grades.length} times`)}">Retake</span>` : ''}</td>
               <td class="cgr-pr">${escHtml(r.prerequisite || 'Nil')}</td>
               <td class="tc">
                 <span class="cgr-lock-badge ${r.locked ? 'is-locked' : 'is-unlocked'}">${escHtml(r.prerequisiteStatus ?? 'Unlocked')}</span>
@@ -449,7 +623,7 @@ function semTableHTML(sec: SemSection): string {
       (r) =>
         `<tr class="cgr-${r.state}">
           <td class="cgr-code">${escHtml(r.code)}</td>
-          <td class="cgr-cn">${escHtml(r.name)}</td>
+          <td class="cgr-cn">${escHtml(r.name)}${r.grades.length > 1 ? `<span class="cgr-retake" title="${escHtml(`Attempted ${r.grades.length} times`)}">Retake</span>` : ''}</td>
           <td class="cgr-pr">${escHtml(r.prerequisite || 'Nil')}</td>
           <td>${semLines(r.grades)}</td>
           <td class="tc">${gradePill(r.grades)}</td>
@@ -478,7 +652,7 @@ function electiveTableHTML(rows: Row[]): string {
       (r) =>
         `<tr class="cgr-${r.state}">
           <td class="cgr-code">${escHtml(r.code)}</td>
-          <td class="cgr-cn">${escHtml(r.name)}</td>
+          <td class="cgr-cn">${escHtml(r.name)}${r.grades.length > 1 ? `<span class="cgr-retake" title="${escHtml(`Attempted ${r.grades.length} times`)}">Retake</span>` : ''}</td>
           <td class="cgr-pr">${escHtml(r.prerequisite || 'Nil')}</td>
           <td>${semLines(r.grades)}</td>
           <td class="tc">${gradePill(r.grades)}</td>
@@ -586,8 +760,11 @@ function enhance() {
   addLockInfoToNotAttempted(semSections, electiveRows);
   persistCurriculumGraphData(infoItems ?? [], semSections, electiveRows);
 
+  const searchIndex = buildSearchIndex(semSections, electiveRows);
+
   let html = '';
   html += infoHTML(infoItems ?? [], printHref);
+  html += searchHTML();
   html += notAttemptedHTML(semSections, electiveRows);
   html += sectionHeadHTML('Core Curriculum', 'core');
   semSections.forEach((sec) => {
@@ -601,6 +778,7 @@ function enhance() {
 
   replaceChildrenHTML(gr, html);
   initTabs(gr);
+  initSearch(gr, searchIndex);
 }
 
 export default defineContentScript({

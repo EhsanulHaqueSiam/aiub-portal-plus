@@ -36,6 +36,49 @@
 }
 .reghome-section-head span { color: var(--p-royal-700); font-weight: 700; }
 
+/* Count chips — injected by homeReg.content.ts from the .StudentCourseList
+   cards. Sit between the title and the term-select so the header reads
+   left-to-right as: title · counts · spacer · term. Tone is semantic: the
+   total is royal (neutral context), active is ok-green, dropped is err-red.
+   Numbers go through textContent (see annotateCards), so no HTML ever
+   enters these nodes. */
+.reghome-section-head .reghome-counts {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-left: 2px;
+}
+.reghome-section-head .reghome-count {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--p-r-pill);
+  font: 700 var(--p-fs-xs)/1 var(--p-font-body);
+  letter-spacing: var(--p-tracking-wide);
+  text-transform: uppercase;
+  background: #fff;
+  border: 1px solid var(--p-royal-100);
+  color: var(--p-royal-700);
+}
+.reghome-section-head .reghome-count .reghome-count-n {
+  font: 800 var(--p-fs-sm)/1 var(--p-font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  color: inherit;
+}
+.reghome-section-head .reghome-count-active {
+  background: var(--p-ok-soft);
+  border-color: oklch(0.85 0.10 150);
+  color: oklch(0.33 0.12 150);
+}
+.reghome-section-head .reghome-count-dropped {
+  background: var(--p-err-soft);
+  border-color: oklch(0.86 0.09 25);
+  color: oklch(0.34 0.16 25);
+}
+
 /* -------------------------------------------------------------------------
    Panel shell — the native Bootstrap panel-heading is fully replaced by
    the section-head above. The semester dropdown is hoisted out of it by
@@ -135,6 +178,31 @@
   transform: translateY(-1px);
 }
 
+/* Dropped-card state — the portal shows a red `.label-danger` inside the
+   card body. homeReg.content.ts tags the card shell with .reghome-card-
+   dropped so we can strike through the course code, mute the background,
+   and suppress the hover lift. The course stays visible (it's still part
+   of the student's record), just deprioritized so active courses read
+   first in the grid. */
+.reghome-card-grid .panel.panel-primary.reghome-card-dropped {
+  background: var(--p-paper) !important;
+  border-color: oklch(0.88 0.07 25) !important;
+  opacity: 0.78;
+}
+.reghome-card-grid .panel.panel-primary.reghome-card-dropped:hover {
+  transform: none;
+  opacity: 1;
+  border-color: oklch(0.82 0.11 25) !important;
+}
+.reghome-card-grid .panel.panel-primary.reghome-card-dropped > .panel-body .label-info {
+  background: var(--p-err-soft) !important;
+  color: oklch(0.40 0.14 25) !important;
+  border-color: oklch(0.86 0.09 25) !important;
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: oklch(0.60 0.16 25 / 0.7);
+}
+
 .reghome-card-grid .panel-primary > .panel-heading { display: none !important; }
 
 .reghome-card-grid .panel-primary > .panel-body {
@@ -187,6 +255,83 @@
   padding: 4px 10px;
   display: inline-block;
   margin: 0 !important;
+}
+
+/* Result pill — homeReg.content.ts lifts the "Result: X" text node out
+   of the card's panel-body and replaces it with this two-part chip
+   (label + value). Tones map to grade outcomes: ok = passed, warn =
+   withdrawn, err = failed, muted = ongoing/current-semester. The mono
+   value glyph width keeps the pill stable across A/B+/F without shifting
+   card layout. */
+.reghome-card-grid .reghome-result {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 4px 3px 10px;
+  border-radius: var(--p-r-pill);
+  font: 600 var(--p-fs-xs)/1 var(--p-font-body);
+  letter-spacing: 0.01em;
+  margin: 0;
+  background: var(--p-surface);
+  border: 1px solid var(--p-line);
+  color: var(--p-text);
+  vertical-align: middle;
+}
+.reghome-card-grid .reghome-result-lbl {
+  font-weight: 700;
+  letter-spacing: var(--p-tracking-wide);
+  text-transform: uppercase;
+  font-size: 10px;
+  color: var(--p-muted);
+}
+.reghome-card-grid .reghome-result-val {
+  font: 700 11.5px/1 var(--p-font-mono);
+  font-variant-numeric: tabular-nums;
+  padding: 3px 8px;
+  border-radius: var(--p-r-pill);
+  background: var(--p-surface-tint);
+  color: inherit;
+  letter-spacing: 0;
+}
+.reghome-card-grid .reghome-result-ok {
+  background: var(--p-ok-soft);
+  border-color: oklch(0.85 0.10 150);
+  color: oklch(0.30 0.12 150);
+}
+.reghome-card-grid .reghome-result-ok .reghome-result-val {
+  background: #fff;
+  color: oklch(0.30 0.14 150);
+}
+.reghome-card-grid .reghome-result-warn {
+  background: var(--p-warn-soft);
+  border-color: oklch(0.85 0.13 84);
+  color: oklch(0.34 0.13 60);
+}
+.reghome-card-grid .reghome-result-warn .reghome-result-val {
+  background: #fff;
+  color: oklch(0.38 0.14 60);
+}
+.reghome-card-grid .reghome-result-err {
+  background: var(--p-err-soft);
+  border-color: oklch(0.86 0.09 25);
+  color: oklch(0.34 0.16 25);
+}
+.reghome-card-grid .reghome-result-err .reghome-result-val {
+  background: #fff;
+  color: oklch(0.38 0.18 25);
+}
+.reghome-card-grid .reghome-result-muted {
+  background: var(--p-surface-tint);
+  border-color: var(--p-line);
+  color: var(--p-muted);
+}
+.reghome-card-grid .reghome-result-muted .reghome-result-val {
+  background: #fff;
+  color: var(--p-text-soft);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 10px;
 }
 
 .reghome-card-grid .panel-footer {

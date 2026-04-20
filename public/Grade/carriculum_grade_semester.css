@@ -85,6 +85,29 @@ tr.sgr-row-wdn  .sgr-name { color: #94a3b8; text-decoration: line-through; }
 .sgr-mini { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; color: #059669; white-space: nowrap; }
 .sgr-mini-nd { color: #cbd5e1; font-size: 11px; }
 
+/* Retake badge — amber pill inline with the course name on rows where
+   `prn === 'Y'` (the portal's marker that this is a re-attempt of a
+   prior W/UW/F). Compact so it doesn't crowd long course names, but
+   tone-contrasts the green pass/red fail/purple ongoing status column
+   so a scan picks up "this was retaken" separately from the grade. */
+.sgr-retake {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #b45309;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  white-space: nowrap;
+  vertical-align: middle;
+  line-height: 1.2;
+}
+.sgr-row-retake .sgr-name { font-weight: 500; }
+
 .sgr-sts { display: inline-block; padding: 2px 8px; border-radius: 5px; font-size: 10px; font-weight: 700; white-space: nowrap; }
 .sgr-sts-ok   { background: #dcfce7; color: #166534; }
 .sgr-sts-ong  { background: #ede9fe; color: #5b21b6; }

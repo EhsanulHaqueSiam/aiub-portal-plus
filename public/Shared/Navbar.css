@@ -214,10 +214,78 @@ body:has(.topbar-container) > .container,
 }
 .navbar-right > li > a .fa { font-size: 15px !important; }
 
-/* Logout hover — red tint */
+/* Notification counter — the portal paints a bare red number next to the
+   bell, which against the navy ink navbar reads as stray glyphs, not a
+   count. Lift it to a pill: tight red disc, white border so it detaches
+   from the bell, tabular-nums so 1 and 8 don't shimmy. Anchored to the
+   bell's top-right via a negative translate; the bell button gets the
+   positioning context via relative layout. */
+#noti_Button { position: relative !important; }
+#noti_Counter,
+#noti_Button #noti_Counter {
+  position: absolute !important;
+  top: 8px !important;
+  right: 2px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  padding: 0 5px !important;
+  background: oklch(0.60 0.21 25) !important;
+  color: #fff !important;
+  font: 800 10px/18px var(--p-font-body) !important;
+  font-variant-numeric: tabular-nums !important;
+  text-align: center !important;
+  border-radius: var(--p-r-pill) !important;
+  border: 1.5px solid oklch(0.20 0.12 260) !important;
+  box-shadow: 0 2px 6px oklch(0.60 0.21 25 / 0.35) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: content-box !important;
+  pointer-events: none !important;
+  letter-spacing: 0 !important;
+  z-index: 2 !important;
+}
+#noti_Counter:empty,
+#noti_Counter[style*="display: none"] { display: none !important; }
+
+/* Logout — red icon always-on (not just hover). The bell/cog icons read
+   as white against the navy navbar; logout needs to read as a different
+   tone so the student never confuses "log out" with a benign action.
+   Painted at rest, deepened on hover. */
+.navbar-right > li > a[href="/Login/Logout"] {
+  color: oklch(0.72 0.15 25) !important;
+}
+.navbar-right > li > a[href="/Login/Logout"] .fa,
+.navbar-right > li > a[href="/Login/Logout"] .glyphicon {
+  color: oklch(0.72 0.15 25) !important;
+}
 .navbar-right > li > a[href="/Login/Logout"]:hover {
   background: rgba(239, 68, 68, 0.25) !important;
   color: #fecaca !important;
+}
+.navbar-right > li > a[href="/Login/Logout"]:hover .fa,
+.navbar-right > li > a[href="/Login/Logout"]:hover .glyphicon {
+  color: #fecaca !important;
+}
+
+/* Settings / cog dropdown-toggle — the portal wraps the icon in a
+   `<b class="caret">` sibling plus a `.hidden-*` text label. Against
+   the navy bar the caret renders as a tiny white triangle that reads
+   as an unstyled artifact, and the hidden label occupies layout width
+   inside the flex container. Suppress both so the cog stays a clean
+   icon-only button matching the bell and logout controls. */
+.navbar-right .dropdown-toggle .caret,
+.navbar-right > li > a .caret,
+.topbar-container .caret {
+  display: none !important;
+}
+.navbar-right > li > a > b:not(.fa):not(.glyphicon),
+.navbar-right > li > a > small,
+.navbar-right > li > a > .hidden-xs,
+.navbar-right > li > a > .hidden-sm,
+.navbar-right > li > a > .hidden-md,
+.navbar-right > li > a > .hidden-lg {
+  display: none !important;
 }
 
 #notifications {
@@ -278,9 +346,9 @@ body:has(.topbar-container) > .container,
 #notifications .ng-binding + br + small { color: #94a3b8 !important; }
 #notifications .seeAll {
   padding: 10px 16px !important;
-  border-top: 1px solid #f1f5f9 !important;
+  border-top: 1px solid var(--p-royal-100) !important;
   text-align: center !important;
-  background: #f8fafc !important;
+  background: linear-gradient(135deg, var(--p-royal-50) 0%, oklch(0.97 0.02 248) 100%) !important;
 }
 #notifications .seeAll a {
   color: #2563eb !important;
